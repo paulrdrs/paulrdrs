@@ -8,6 +8,8 @@
 - Styling uses Tailwind CSS.
 - Deployment target is Railway.
 - Railway deployment config is tracked in `railway.json`.
+- Railway CLI is installed locally via Homebrew, logged in, linked to project `paulrdrs.com`, production environment, service `paulrdrs`.
+- Railway CLI agent support is enabled locally without MCP support.
 - No Bun migration.
 - No CMS, database, dashboard, auth, analytics, or media storage implementation yet.
 
@@ -17,6 +19,8 @@
 - Use Railway Redis/KV for short-lived magic-link tokens and sessions.
 - Use Railway Storage Buckets for uploaded media.
 - Use `railway.json` for schema-validated Railway deploy configuration.
+- Use `railway run pnpm dev` for local development with Railway-provided environment variables when needed.
+- After database migrations exist, use `railway run pnpm db:migrate` for migration commands against the selected Railway environment.
 - Use Resend for magic-link emails.
 - Keep auth custom; do not add auth-specific libraries.
 - Grant admin access through an environment email allowlist.
@@ -57,7 +61,8 @@ Dashboard routes:
 | 1. Public Route Skeleton | Completed | Added public placeholder routes and converted top navigation to real `next/link` links. |
 | 2. App Shell Cleanup | Completed | Removed the global hero from the root layout, rendered it only on the homepage, and introduced a shared public page container. |
 | 3. Environment Schema Foundation | Completed | Added server-only env validation for Railway Postgres, Redis/KV, Resend, maintainer allowlist, sessions, site URL, and Railway Storage Buckets. |
-| 4. Database Layer | Pending | Resume here next; do not start without maintainer approval. |
+| 4. Database Layer | Completed | Added Drizzle/Postgres setup, CMS and analytics schema, migration scripts, and initial migration. |
+| 5. Markdown Rendering | Pending | Resume here next; do not start without maintainer approval. |
 
 ### 1. Public Route Skeleton
 
@@ -165,6 +170,17 @@ Implement:
 - Add migration scripts.
 - Use unique slugs for posts and category plus slug uniqueness for projects.
 
+Implementation notes:
+
+- Runtime DB dependencies: `drizzle-orm`, `postgres`.
+- Migration dependency: `drizzle-kit`.
+- Drizzle config: `drizzle.config.ts`.
+- Schema: `src/db/schema.ts`.
+- Server-only client: `src/db/client.ts`.
+- Generated migration: `drizzle/0000_narrow_spot.sql`.
+- Scripts: `pnpm db:generate`, `pnpm db:migrate`.
+- Postgres migrations should be run through Railway with `railway run pnpm db:migrate` once services/env vars are ready.
+
 Tests:
 
 - Typecheck schema definitions.
@@ -176,6 +192,8 @@ Completion criteria:
 
 - Drizzle config and initial migration exist.
 - Database schema covers planned CMS and analytics needs.
+
+Status: Completed.
 
 ### 5. Markdown Rendering
 
