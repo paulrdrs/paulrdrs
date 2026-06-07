@@ -32,11 +32,31 @@ describe("serverEnvsSchema", () => {
   const valid = {
     NODE_ENV: "development" as const,
     API_URL: "http://localhost:4000",
-    AUTH_SECRET_KEY: "supersecret"
+    ADMIN_EMAIL_ALLOWLIST: "admin@example.com, editor@example.com",
+    DATABASE_URL: "postgres://user:password@localhost:5432/paulrdrs",
+    RAILWAY_STORAGE_ACCESS_KEY_ID: "access-key-id",
+    RAILWAY_STORAGE_BUCKET: "media",
+    RAILWAY_STORAGE_ENDPOINT: "https://storage.railway.app",
+    RAILWAY_STORAGE_REGION: "auto",
+    RAILWAY_STORAGE_SECRET_ACCESS_KEY: "secret-access-key",
+    REDIS_URL: "redis://localhost:6379",
+    RESEND_API_KEY: "re_test_key",
+    RESEND_FROM_EMAIL: "Paulo <admin@example.com>",
+    SESSION_SECRET: "a-secret-that-is-at-least-32-chars",
+    SITE_URL: "https://paulrdrs.com"
   }
 
   it("parses valid input", () => {
-    expect(serverEnvsSchema.safeParse(valid).success).toBe(true)
+    const result = serverEnvsSchema.safeParse(valid)
+
+    expect(result.success).toBe(true)
+
+    if (result.success) {
+      expect(result.data.ADMIN_EMAIL_ALLOWLIST).toEqual([
+        "admin@example.com",
+        "editor@example.com"
+      ])
+    }
   })
 
   it("accepts production NODE_ENV", () => {
@@ -45,20 +65,42 @@ describe("serverEnvsSchema", () => {
     ).toBe(true)
   })
 
-  it("rejects an unknown NODE_ENV", () => {
+  it("accepts test NODE_ENV", () => {
     expect(
       serverEnvsSchema.safeParse({ ...valid, NODE_ENV: "test" }).success
+    ).toBe(true)
+  })
+
+  it("rejects an unknown NODE_ENV", () => {
+    expect(
+      serverEnvsSchema.safeParse({ ...valid, NODE_ENV: "staging" }).success
     ).toBe(false)
   })
 
-  it("rejects missing AUTH_SECRET_KEY", () => {
-    const { AUTH_SECRET_KEY: _, ...rest } = valid
+  it("rejects missing DATABASE_URL", () => {
+    const { DATABASE_URL: _, ...rest } = valid
     expect(serverEnvsSchema.safeParse(rest).success).toBe(false)
   })
 
   it("rejects a non-URL API_URL", () => {
     expect(
       serverEnvsSchema.safeParse({ ...valid, API_URL: "not-a-url" }).success
+    ).toBe(false)
+  })
+
+  it("rejects an invalid maintainer allowlist email", () => {
+    expect(
+      serverEnvsSchema.safeParse({
+        ...valid,
+        ADMIN_EMAIL_ALLOWLIST: "admin@example.com, not-an-email"
+      }).success
+    ).toBe(false)
+  })
+
+  it("rejects a short SESSION_SECRET", () => {
+    expect(
+      serverEnvsSchema.safeParse({ ...valid, SESSION_SECRET: "too-short" })
+        .success
     ).toBe(false)
   })
 })

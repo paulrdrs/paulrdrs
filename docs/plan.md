@@ -7,6 +7,7 @@
 - Tests stay on Vitest running on Node.
 - Styling uses Tailwind CSS.
 - Deployment target is Railway.
+- Railway deployment config is tracked in `railway.json`.
 - No Bun migration.
 - No CMS, database, dashboard, auth, analytics, or media storage implementation yet.
 
@@ -15,6 +16,7 @@
 - Use Railway Postgres for durable CMS content and internal analytics.
 - Use Railway Redis/KV for short-lived magic-link tokens and sessions.
 - Use Railway Storage Buckets for uploaded media.
+- Use `railway.json` for schema-validated Railway deploy configuration.
 - Use Resend for magic-link emails.
 - Keep auth custom; do not add auth-specific libraries.
 - Grant admin access through an environment email allowlist.
@@ -54,7 +56,8 @@ Dashboard routes:
 | --- | --- | --- |
 | 1. Public Route Skeleton | Completed | Added public placeholder routes and converted top navigation to real `next/link` links. |
 | 2. App Shell Cleanup | Completed | Removed the global hero from the root layout, rendered it only on the homepage, and introduced a shared public page container. |
-| 3. Environment Schema Foundation | Pending | Resume here next; do not start without maintainer approval. |
+| 3. Environment Schema Foundation | Completed | Added server-only env validation for Railway Postgres, Redis/KV, Resend, maintainer allowlist, sessions, site URL, and Railway Storage Buckets. |
+| 4. Database Layer | Pending | Resume here next; do not start without maintainer approval. |
 
 ### 1. Public Route Skeleton
 
@@ -121,6 +124,21 @@ Implement:
 - Keep client env minimal and do not expose secrets.
 - Update env schema tests.
 
+Server env keys:
+
+- `DATABASE_URL`
+- `REDIS_URL`
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
+- `ADMIN_EMAIL_ALLOWLIST`
+- `SESSION_SECRET`
+- `SITE_URL`
+- `RAILWAY_STORAGE_ENDPOINT`
+- `RAILWAY_STORAGE_BUCKET`
+- `RAILWAY_STORAGE_ACCESS_KEY_ID`
+- `RAILWAY_STORAGE_SECRET_ACCESS_KEY`
+- `RAILWAY_STORAGE_REGION`
+
 Tests:
 
 - Unit tests for valid and invalid env parsing.
@@ -131,6 +149,8 @@ Completion criteria:
 
 - Required production env vars are validated.
 - Secrets remain server-only.
+
+Status: Completed.
 
 ### 4. Database Layer
 
@@ -415,6 +435,7 @@ Implement:
 - Document required env vars.
 - Ensure `next build` works with Railway-provided envs.
 - Add migration command guidance for deploys.
+- Extend `railway.json` with a pre-deploy migration command after database migrations exist.
 - Confirm cookies use secure settings in production.
 
 Tests:
