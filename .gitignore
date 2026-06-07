@@ -73,4 +73,3 @@ lerna-debug.log*
 *.tar.gz
 *.tgz
 *.log
-*.bun
