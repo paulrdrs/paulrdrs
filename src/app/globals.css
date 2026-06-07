@@ -1,19 +1,32 @@
 @import "tailwindcss";
 
-@theme inline {
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-jetbrains-mono);
+@theme {
+  --font-sans: var(--font-geist);
+  --font-mono: var(--font-inconsolata);
 }
 
 @layer base {
   body {
-    @apply font-sans antialiased
-      bg-neutral-100 dark:bg-neutral-900
-      text-neutral-800 dark:text-neutral-100
-      flex flex-col items-center
-      w-full overscroll-none;
+    @apply font-sans antialiased bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200;
   }
 }
 
+@layer utilities {
+  .nav-text-link {
+    @apply cursor-pointer uppercase hover:underline decoration-2 decoration-yellow-400;
+  }
+}
 
+body {
+  -webkit-tap-highlight-color: transparent;
+}
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

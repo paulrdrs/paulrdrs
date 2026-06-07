@@ -22,14 +22,12 @@ dist-ssr
 # misc
 .DS_Store
 *.pem
+*.http
 
-# cloudflare
-.wrangler
-cloudflare.d.ts
-
-# local env files
+# env files
 .env
 .env*.local
+.env.production
 .dev.vars
 
 # temp directory
@@ -51,6 +49,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo

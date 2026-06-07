@@ -1,5 +1,4 @@
-onlyBuiltDependencies:
-  - '@biomejs/biome'
-  - esbuild
-  - sharp
-  - workerd
+allowBuilds:
+  sharp: true
+minimumReleaseAgeExclude:
+  - '@types/react@19.2.17'

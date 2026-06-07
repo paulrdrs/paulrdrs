@@ -1,31 +1,48 @@
-import type { ReactNode } from "react"
 import type { Metadata } from "next"
-import { Inter, JetBrains_Mono } from "next/font/google"
+import { Geist, /* Geist_Mono, */ Inconsolata } from "next/font/google"
 import "./globals.css"
+import { Hero } from "@/components/Hero"
+import { TopNavBar } from "@/components/TopNavBar"
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter"
+const inconsolata = Inconsolata({
+  variable: "--font-inconsolata",
+  subsets: ["latin"]
 })
 
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono"
+const geist = Geist({
+  variable: "--font-geist",
+  subsets: ["latin"]
 })
+
+/* const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"]
+}) */
 
 export const metadata: Metadata = {
-  title: "Paulo Rodrigues | paulrdrs.com"
+  title: "paulrdrs",
+  description: "paulrdrs"
 }
 
 export default function RootLayout({
   children
 }: Readonly<{
-  children: ReactNode
+  children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${jetBrainsMono.variable}`}>
-        {children}
+    <html lang="en" className={`${geist.variable} ${inconsolata.variable}`}>
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml"></link>
+      </head>
+      <body className="flex min-h-screen flex-col items-center gap-4 scroll-smooth antialiased">
+        <TopNavBar />
+
+        <div className="mt-12 flex h-full w-full max-w-5xl flex-col">
+          <Hero />
+          {children}
+        </div>
+
+        <footer className="font-mono">{"paulrdrs.com"}</footer>
       </body>
     </html>
   )
