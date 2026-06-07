@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
-import { Geist, /* Geist_Mono, */ Inconsolata } from "next/font/google"
+import { Geist, Inconsolata } from "next/font/google"
 import "./globals.css"
-import { Hero } from "@/components/Hero"
 import { TopNavBar } from "@/components/TopNavBar"
 
 const inconsolata = Inconsolata({
@@ -13,11 +12,6 @@ const geist = Geist({
   variable: "--font-geist",
   subsets: ["latin"]
 })
-
-/* const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"]
-}) */
 
 export const metadata: Metadata = {
   title: "paulrdrs",
@@ -38,7 +32,6 @@ export default function RootLayout({
         <TopNavBar />
 
         <div className="mt-12 flex h-full w-full max-w-5xl flex-col">
-          <Hero />
           {children}
         </div>
 

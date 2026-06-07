@@ -21,6 +21,7 @@
 - Store and render Markdown only; do not execute CMS-authored MDX.
 - Keep `/store` as a blank/minimal route for now.
 - Track privacy-minimal analytics only.
+- Components should not accept raw style/class props. If a component needs visual variation, expose an explicit semantic prop such as `variant` or `size`.
 
 ## Route Plan
 
@@ -47,6 +48,14 @@ Dashboard routes:
 
 ## Task Graph
 
+## Progress Tracker
+
+| Task | Status | Notes |
+| --- | --- | --- |
+| 1. Public Route Skeleton | Completed | Added public placeholder routes and converted top navigation to real `next/link` links. |
+| 2. App Shell Cleanup | Completed | Removed the global hero from the root layout, rendered it only on the homepage, and introduced a shared public page container. |
+| 3. Environment Schema Foundation | Pending | Resume here next; do not start without maintainer approval. |
+
 ### 1. Public Route Skeleton
 
 Goal: Create the requested public route structure with minimal placeholder pages.
@@ -72,6 +81,8 @@ Completion criteria:
 - Navigation links point to real routes.
 - `/store` exists but remains intentionally minimal.
 
+Status: Completed.
+
 ### 2. App Shell Cleanup
 
 Goal: Make the layout ready for many pages without hardcoding hero/content globally.
@@ -83,7 +94,7 @@ Implement:
 - Move the global hero out of `src/app/layout.tsx`.
 - Render hero/content only where appropriate, starting with the homepage.
 - Keep top navigation and footer global.
-- Establish consistent public page container styles.
+- Establish consistent public page container styles with a shared `PageContainer`.
 
 Tests:
 
@@ -95,6 +106,8 @@ Completion criteria:
 
 - Every route has global nav/footer.
 - Public pages do not receive unwanted duplicated hero content.
+
+Status: Completed.
 
 ### 3. Environment Schema Foundation
 

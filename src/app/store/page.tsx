@@ -1,3 +1,5 @@
+import { PageContainer } from "@/components/PageContainer"
+
 export default function StorePage() {
-  return <main className="h-full w-full px-4 py-8" />
+  return <PageContainer />
 }
