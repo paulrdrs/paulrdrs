@@ -62,7 +62,8 @@ Dashboard routes:
 | 2. App Shell Cleanup | Completed | Removed the global hero from the root layout, rendered it only on the homepage, and introduced a shared public page container. |
 | 3. Environment Schema Foundation | Completed | Added server-only env validation for Railway Postgres, Redis/KV, Resend, maintainer allowlist, sessions, site URL, and Railway Storage Buckets. |
 | 4. Database Layer | Completed | Added Drizzle/Postgres setup, CMS and analytics schema, migration scripts, and initial migration. |
-| 5. Markdown Rendering | Pending | Resume here next; do not start without maintainer approval. |
+| 5. Markdown Rendering | Completed | Added safe Markdown rendering with GFM support plus slug and excerpt helpers. |
+| 6. Public Content Reads | Pending | Resume here next; do not start without maintainer approval. |
 
 ### 1. Public Route Skeleton
 
@@ -208,6 +209,14 @@ Implement:
 - Do not allow raw HTML or executable MDX.
 - Add shared slug and excerpt helpers.
 
+Implementation notes:
+
+- Dependencies: `react-markdown`, `remark-gfm`.
+- Renderer: `src/components/MarkdownContent.tsx`.
+- Helpers: `src/lib/content.ts`.
+- Raw HTML is not enabled; do not add `rehype-raw` for CMS-authored content.
+- Components should keep styling internal or expose semantic variants, not raw style/class props.
+
 Tests:
 
 - Unit tests for slug generation.
@@ -220,6 +229,8 @@ Completion criteria:
 
 - Markdown rendering is reusable by public pages and dashboard previews.
 - CMS-authored content cannot execute arbitrary code.
+
+Status: Completed.
 
 ### 6. Public Content Reads
 
