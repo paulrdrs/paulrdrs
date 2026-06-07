@@ -1,4 +1,9 @@
-import { clientEnvsSchema, serverEnvsSchema } from "./schemas"
+import {
+  authEnvsSchema,
+  clientEnvsSchema,
+  serverEnvsSchema,
+  storageEnvsSchema
+} from "./schemas"
 
 describe("clientEnvsSchema", () => {
   const valid = {
@@ -32,31 +37,11 @@ describe("serverEnvsSchema", () => {
   const valid = {
     NODE_ENV: "development" as const,
     API_URL: "http://localhost:4000",
-    ADMIN_EMAIL_ALLOWLIST: "admin@example.com, editor@example.com",
-    DATABASE_URL: "postgres://user:password@localhost:5432/paulrdrs",
-    RAILWAY_STORAGE_ACCESS_KEY_ID: "access-key-id",
-    RAILWAY_STORAGE_BUCKET: "media",
-    RAILWAY_STORAGE_ENDPOINT: "https://storage.railway.app",
-    RAILWAY_STORAGE_REGION: "auto",
-    RAILWAY_STORAGE_SECRET_ACCESS_KEY: "secret-access-key",
-    REDIS_URL: "redis://localhost:6379",
-    RESEND_API_KEY: "re_test_key",
-    RESEND_FROM_EMAIL: "Paulo <admin@example.com>",
-    SESSION_SECRET: "a-secret-that-is-at-least-32-chars",
-    SITE_URL: "https://paulrdrs.com"
+    DATABASE_URL: "postgres://user:password@localhost:5432/paulrdrs"
   }
 
   it("parses valid input", () => {
-    const result = serverEnvsSchema.safeParse(valid)
-
-    expect(result.success).toBe(true)
-
-    if (result.success) {
-      expect(result.data.ADMIN_EMAIL_ALLOWLIST).toEqual([
-        "admin@example.com",
-        "editor@example.com"
-      ])
-    }
+    expect(serverEnvsSchema.safeParse(valid).success).toBe(true)
   })
 
   it("accepts production NODE_ENV", () => {
@@ -87,10 +72,34 @@ describe("serverEnvsSchema", () => {
       serverEnvsSchema.safeParse({ ...valid, API_URL: "not-a-url" }).success
     ).toBe(false)
   })
+})
+
+describe("authEnvsSchema", () => {
+  const valid = {
+    ADMIN_EMAIL_ALLOWLIST: "admin@example.com, editor@example.com",
+    REDIS_URL: "redis://localhost:6379",
+    RESEND_API_KEY: "re_test_key",
+    RESEND_FROM_EMAIL: "Paulo <admin@example.com>",
+    SESSION_SECRET: "a-secret-that-is-at-least-32-chars",
+    SITE_URL: "https://paulrdrs.com"
+  }
+
+  it("parses valid input", () => {
+    const result = authEnvsSchema.safeParse(valid)
+
+    expect(result.success).toBe(true)
+
+    if (result.success) {
+      expect(result.data.ADMIN_EMAIL_ALLOWLIST).toEqual([
+        "admin@example.com",
+        "editor@example.com"
+      ])
+    }
+  })
 
   it("rejects an invalid maintainer allowlist email", () => {
     expect(
-      serverEnvsSchema.safeParse({
+      authEnvsSchema.safeParse({
         ...valid,
         ADMIN_EMAIL_ALLOWLIST: "admin@example.com, not-an-email"
       }).success
@@ -99,8 +108,31 @@ describe("serverEnvsSchema", () => {
 
   it("rejects a short SESSION_SECRET", () => {
     expect(
-      serverEnvsSchema.safeParse({ ...valid, SESSION_SECRET: "too-short" })
+      authEnvsSchema.safeParse({ ...valid, SESSION_SECRET: "too-short" })
         .success
+    ).toBe(false)
+  })
+})
+
+describe("storageEnvsSchema", () => {
+  const valid = {
+    RAILWAY_STORAGE_ACCESS_KEY_ID: "access-key-id",
+    RAILWAY_STORAGE_BUCKET: "media",
+    RAILWAY_STORAGE_ENDPOINT: "https://storage.railway.app",
+    RAILWAY_STORAGE_REGION: "auto",
+    RAILWAY_STORAGE_SECRET_ACCESS_KEY: "secret-access-key"
+  }
+
+  it("parses valid input", () => {
+    expect(storageEnvsSchema.safeParse(valid).success).toBe(true)
+  })
+
+  it("rejects a non-URL endpoint", () => {
+    expect(
+      storageEnvsSchema.safeParse({
+        ...valid,
+        RAILWAY_STORAGE_ENDPOINT: "not-a-url"
+      }).success
     ).toBe(false)
   })
 })

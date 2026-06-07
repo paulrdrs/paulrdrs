@@ -8,7 +8,7 @@
 - Styling uses Tailwind CSS.
 - Deployment target is Railway.
 - Railway deployment config is tracked in `railway.json`.
-- Railway CLI is installed locally via Homebrew, logged in, linked to project `paulrdrs.com`, production environment, service `paulrdrs`.
+- Railway CLI is installed locally via Homebrew, logged in, linked to project `paulrdrs.com`, production environment, service `web`.
 - Railway CLI agent support is enabled locally without MCP support.
 - No Bun migration.
 - No CMS, database, dashboard, auth, analytics, or media storage implementation yet.
@@ -20,7 +20,7 @@
 - Use Railway Storage Buckets for uploaded media.
 - Use `railway.json` for schema-validated Railway deploy configuration.
 - Use `railway run pnpm dev` for local development with Railway-provided environment variables when needed.
-- After database migrations exist, use `railway run pnpm db:migrate` for migration commands against the selected Railway environment.
+- For local Railway CLI migrations, use `railway run --service db sh -c 'DATABASE_URL="$DATABASE_PUBLIC_URL" pnpm db:migrate'` so Drizzle connects through the public Postgres proxy.
 - Use Resend for magic-link emails.
 - Keep auth custom; do not add auth-specific libraries.
 - Grant admin access through an environment email allowlist.
@@ -52,6 +52,13 @@ Dashboard routes:
 - `/dashboard/pages`
 - `/dashboard/media`
 
+## Railway Service Prerequisites
+
+- Task 6 Postgres prerequisite is satisfied: Railway `db` Postgres service exists and `DATABASE_URL` is available on the `web` service.
+- Before Task 7, create or attach Railway Redis/KV and configure Resend credentials for magic-link auth.
+- Before Task 11, create a Railway Storage Bucket and configure its S3-compatible credentials.
+- Remind the maintainer before starting each task that depends on a missing Railway service.
+
 ## Task Graph
 
 ## Progress Tracker
@@ -63,7 +70,8 @@ Dashboard routes:
 | 3. Environment Schema Foundation | Completed | Added server-only env validation for Railway Postgres, Redis/KV, Resend, maintainer allowlist, sessions, site URL, and Railway Storage Buckets. |
 | 4. Database Layer | Completed | Added Drizzle/Postgres setup, CMS and analytics schema, migration scripts, and initial migration. |
 | 5. Markdown Rendering | Completed | Added safe Markdown rendering with GFM support plus slug and excerpt helpers. |
-| 6. Public Content Reads | Pending | Resume here next; do not start without maintainer approval. |
+| 6. Public Content Reads | Completed | Public blog/project routes now read published content from Postgres and hide drafts by query. |
+| 7. Custom Magic-Link Auth | Pending | Resume here next after Redis/KV and Resend are configured. |
 
 ### 1. Public Route Skeleton
 
@@ -130,15 +138,21 @@ Implement:
 - Keep client env minimal and do not expose secrets.
 - Update env schema tests.
 
-Server env keys:
+Core server env keys:
 
 - `DATABASE_URL`
+
+Auth env keys, required starting Task 7:
+
 - `REDIS_URL`
 - `RESEND_API_KEY`
 - `RESEND_FROM_EMAIL`
 - `ADMIN_EMAIL_ALLOWLIST`
 - `SESSION_SECRET`
 - `SITE_URL`
+
+Storage env keys, required starting Task 11:
+
 - `RAILWAY_STORAGE_ENDPOINT`
 - `RAILWAY_STORAGE_BUCKET`
 - `RAILWAY_STORAGE_ACCESS_KEY_ID`
@@ -181,6 +195,7 @@ Implementation notes:
 - Generated migration: `drizzle/0000_narrow_spot.sql`.
 - Scripts: `pnpm db:generate`, `pnpm db:migrate`.
 - Postgres migrations should be run through Railway with `railway run pnpm db:migrate` once services/env vars are ready.
+- From local development, use the db service public proxy for migrations: `railway run --service db sh -c 'DATABASE_URL="$DATABASE_PUBLIC_URL" pnpm db:migrate'`.
 
 Tests:
 
@@ -248,6 +263,13 @@ Implement:
 - `/projects/[category]/[slug]` renders a published project or returns not found.
 - Keep drafts hidden publicly.
 
+Implementation notes:
+
+- Core server env validation now only requires `DATABASE_URL`; auth and storage envs are validated by separate feature schemas.
+- Public content query helpers live in `src/db/content.ts`.
+- Public list/detail routes are dynamic and query only `status = "published"` records.
+- The initial Railway Postgres migration was applied with `railway run --service db sh -c 'DATABASE_URL="$DATABASE_PUBLIC_URL" pnpm db:migrate'`.
+
 Tests:
 
 - Published content appears publicly.
@@ -260,6 +282,8 @@ Completion criteria:
 
 - Public content routes read from Postgres.
 - Draft visibility rules are enforced.
+
+Status: Completed.
 
 ### 7. Custom Magic-Link Auth
 
