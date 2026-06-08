@@ -64,6 +64,10 @@ describe("DashboardLayout", () => {
       "href",
       "/dashboard/media"
     )
+    expect(screen.getByRole("link", { name: "Passkeys" })).toHaveAttribute(
+      "href",
+      "/dashboard/passkeys"
+    )
     expect(screen.getByRole("button", { name: "Log out" })).toBeInTheDocument()
     expect(screen.getByText("Protected content")).toBeInTheDocument()
   })

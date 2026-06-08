@@ -1,5 +1,6 @@
 import { getTableName } from "drizzle-orm"
 import {
+  adminPasskeys,
   analyticsContentType,
   analyticsEvents,
   authSessions,
@@ -9,7 +10,8 @@ import {
   pages,
   posts,
   projectCategory,
-  projects
+  projects,
+  webauthnChallenges
 } from "./schema"
 
 describe("database schema", () => {
@@ -33,6 +35,8 @@ describe("database schema", () => {
       getTableName(mediaAssets),
       getTableName(analyticsEvents),
       getTableName(magicLinkTokens),
+      getTableName(adminPasskeys),
+      getTableName(webauthnChallenges),
       getTableName(authSessions)
     ]).toEqual([
       "posts",
@@ -41,6 +45,8 @@ describe("database schema", () => {
       "media_assets",
       "analytics_events",
       "magic_link_tokens",
+      "admin_passkeys",
+      "webauthn_challenges",
       "auth_sessions"
     ])
   })

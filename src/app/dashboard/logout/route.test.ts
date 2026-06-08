@@ -21,8 +21,7 @@ describe("logout route", () => {
     vi.clearAllMocks()
     getAuthEnvsMock.mockReturnValue({
       ADMIN_EMAIL_ALLOWLIST: ["admin@example.com"],
-      RESEND_API_KEY: "re_test_key",
-      RESEND_FROM_EMAIL: "Paulo <admin@example.com>",
+      PASSKEY_BOOTSTRAP_SECRET: "a-bootstrap-secret-at-least-32-chars",
       SESSION_SECRET: "a-secret-that-is-at-least-32-chars",
       SITE_URL: "https://paulrdrs.com"
     })

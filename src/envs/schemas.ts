@@ -1,25 +1,16 @@
 import { z } from "zod"
 
-const emailWithOptionalDisplayNameSchema = z.string().refine((value) => {
-  const displayNameEmail = value.match(/<([^<>]+)>$/)
-  return z.email().safeParse(displayNameEmail?.[1] ?? value).success
-}, "Invalid email address")
-
 export const clientEnvsSchema = z.object({
   AUTH_COOKIE_PREFIX: z.string(),
-  AUTH_SELECTED_ACCOUNT_COOKIE_NAME: z.string(),
-  API_URL: z.url()
+  AUTH_SELECTED_ACCOUNT_COOKIE_NAME: z.string()
 })
 
 export const serverEnvsSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]),
-  API_URL: z.url(),
   DATABASE_URL: z.url()
 })
 
 export const authEnvsSchema = z.object({
-  RESEND_API_KEY: z.string().min(1),
-  RESEND_FROM_EMAIL: emailWithOptionalDisplayNameSchema,
   ADMIN_EMAIL_ALLOWLIST: z
     .string()
     .transform((value) =>
@@ -29,6 +20,8 @@ export const authEnvsSchema = z.object({
         .filter(Boolean)
     )
     .pipe(z.array(z.email()).min(1)),
+  PASSKEY_BOOTSTRAP_SECRET: z.string().min(32),
+  PASSKEY_RP_ID: z.string().min(1).optional(),
   SESSION_SECRET: z.string().min(32),
   SITE_URL: z.url()
 })

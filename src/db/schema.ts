@@ -1,4 +1,5 @@
 import {
+  boolean,
   index,
   integer,
   jsonb,
@@ -183,6 +184,56 @@ export const magicLinkTokens = pgTable(
       table.createdAt
     ),
     index("magic_link_tokens_expires_at_idx").on(table.expiresAt)
+  ]
+)
+
+export const adminPasskeys = pgTable(
+  "admin_passkeys",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: varchar("email", { length: 320 }).notNull(),
+    credentialId: text("credential_id").notNull(),
+    credentialPublicKey: text("credential_public_key").notNull(),
+    counter: integer("counter").notNull().default(0),
+    transports: jsonb("transports").$type<string[]>().notNull().default([]),
+    credentialDeviceType: varchar("credential_device_type", { length: 32 }),
+    credentialBackedUp: boolean("credential_backed_up")
+      .notNull()
+      .default(false),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true })
+  },
+  (table) => [
+    uniqueIndex("admin_passkeys_credential_id_unique").on(table.credentialId),
+    index("admin_passkeys_email_idx").on(table.email)
+  ]
+)
+
+export const webauthnChallenges = pgTable(
+  "webauthn_challenges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    challenge: text("challenge").notNull(),
+    email: varchar("email", { length: 320 }),
+    type: varchar("type", { length: 32 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    uniqueIndex("webauthn_challenges_challenge_unique").on(table.challenge),
+    index("webauthn_challenges_lookup_idx").on(
+      table.challenge,
+      table.type,
+      table.expiresAt
+    )
   ]
 )
 

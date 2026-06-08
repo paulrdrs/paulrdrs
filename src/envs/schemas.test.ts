@@ -8,8 +8,7 @@ import {
 describe("clientEnvsSchema", () => {
   const valid = {
     AUTH_COOKIE_PREFIX: "auth.",
-    AUTH_SELECTED_ACCOUNT_COOKIE_NAME: "selected-account",
-    API_URL: "http://localhost:4000"
+    AUTH_SELECTED_ACCOUNT_COOKIE_NAME: "selected-account"
   }
 
   it("parses valid input", () => {
@@ -25,18 +24,11 @@ describe("clientEnvsSchema", () => {
     const { AUTH_SELECTED_ACCOUNT_COOKIE_NAME: _, ...rest } = valid
     expect(clientEnvsSchema.safeParse(rest).success).toBe(false)
   })
-
-  it("rejects a non-URL API_URL", () => {
-    expect(
-      clientEnvsSchema.safeParse({ ...valid, API_URL: "not-a-url" }).success
-    ).toBe(false)
-  })
 })
 
 describe("serverEnvsSchema", () => {
   const valid = {
     NODE_ENV: "development" as const,
-    API_URL: "http://localhost:4000",
     DATABASE_URL: "postgres://user:password@localhost:5432/paulrdrs"
   }
 
@@ -66,19 +58,12 @@ describe("serverEnvsSchema", () => {
     const { DATABASE_URL: _, ...rest } = valid
     expect(serverEnvsSchema.safeParse(rest).success).toBe(false)
   })
-
-  it("rejects a non-URL API_URL", () => {
-    expect(
-      serverEnvsSchema.safeParse({ ...valid, API_URL: "not-a-url" }).success
-    ).toBe(false)
-  })
 })
 
 describe("authEnvsSchema", () => {
   const valid = {
     ADMIN_EMAIL_ALLOWLIST: "admin@example.com, editor@example.com",
-    RESEND_API_KEY: "re_test_key",
-    RESEND_FROM_EMAIL: "Paulo <admin@example.com>",
+    PASSKEY_BOOTSTRAP_SECRET: "a-bootstrap-secret-at-least-32-chars",
     SESSION_SECRET: "a-secret-that-is-at-least-32-chars",
     SITE_URL: "https://paulrdrs.com"
   }
@@ -110,6 +95,22 @@ describe("authEnvsSchema", () => {
       authEnvsSchema.safeParse({ ...valid, SESSION_SECRET: "too-short" })
         .success
     ).toBe(false)
+  })
+
+  it("rejects a short PASSKEY_BOOTSTRAP_SECRET", () => {
+    expect(
+      authEnvsSchema.safeParse({
+        ...valid,
+        PASSKEY_BOOTSTRAP_SECRET: "too-short"
+      }).success
+    ).toBe(false)
+  })
+
+  it("accepts an optional passkey RP ID", () => {
+    expect(
+      authEnvsSchema.safeParse({ ...valid, PASSKEY_RP_ID: "paulrdrs.com" })
+        .success
+    ).toBe(true)
   })
 })
 

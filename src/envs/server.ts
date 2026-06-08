@@ -3,7 +3,6 @@ import { authEnvsSchema, serverEnvsSchema, storageEnvsSchema } from "./schemas"
 
 export const getServerEnvs = () =>
   serverEnvsSchema.parse({
-    API_URL: process.env.API_URL || "http://localhost:4000",
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV || "development"
   })
@@ -11,8 +10,8 @@ export const getServerEnvs = () =>
 export const getAuthEnvs = () =>
   authEnvsSchema.parse({
     ADMIN_EMAIL_ALLOWLIST: process.env.ADMIN_EMAIL_ALLOWLIST,
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
-    RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
+    PASSKEY_BOOTSTRAP_SECRET: process.env.PASSKEY_BOOTSTRAP_SECRET,
+    PASSKEY_RP_ID: process.env.PASSKEY_RP_ID,
     SESSION_SECRET: process.env.SESSION_SECRET,
     SITE_URL: process.env.SITE_URL
   })

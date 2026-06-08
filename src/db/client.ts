@@ -8,12 +8,32 @@ type DbClient = ReturnType<typeof drizzle<typeof schema>>
 
 let db: DbClient | undefined
 
-const getDatabaseUrl = () => {
+export const resolveDatabaseUrl = ({
+  databasePublicUrl,
+  databaseUrl,
+  nodeEnv
+}: {
+  databasePublicUrl?: string
+  databaseUrl?: string
+  nodeEnv?: string
+}) => {
+  const resolvedNodeEnv = nodeEnv || "development"
+
   return serverEnvsSchema.parse({
-    API_URL: process.env.API_URL || "http://localhost:4000",
-    DATABASE_URL: process.env.DATABASE_URL,
-    NODE_ENV: process.env.NODE_ENV || "development"
+    DATABASE_URL:
+      resolvedNodeEnv === "production"
+        ? databaseUrl
+        : databasePublicUrl || databaseUrl,
+    NODE_ENV: resolvedNodeEnv
   }).DATABASE_URL
+}
+
+const getDatabaseUrl = () => {
+  return resolveDatabaseUrl({
+    databasePublicUrl: process.env.DATABASE_PUBLIC_URL,
+    databaseUrl: process.env.DATABASE_URL,
+    nodeEnv: process.env.NODE_ENV
+  })
 }
 
 export const getDb = () => {

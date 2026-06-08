@@ -14,7 +14,8 @@ const dashboardLinks = [
   { href: "/dashboard/posts", label: "Posts" },
   { href: "/dashboard/projects", label: "Projects" },
   { href: "/dashboard/pages", label: "Pages" },
-  { href: "/dashboard/media", label: "Media" }
+  { href: "/dashboard/media", label: "Media" },
+  { href: "/dashboard/passkeys", label: "Passkeys" }
 ]
 
 export default async function DashboardLayout({

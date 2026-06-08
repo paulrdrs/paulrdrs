@@ -31,8 +31,7 @@ describe("analytics events route", () => {
     createAnalyticsEventMock.mockReset()
     getAuthEnvsMock.mockReturnValue({
       ADMIN_EMAIL_ALLOWLIST: ["admin@example.com"],
-      RESEND_API_KEY: "resend-key",
-      RESEND_FROM_EMAIL: "Paul <admin@example.com>",
+      PASSKEY_BOOTSTRAP_SECRET: "a-bootstrap-secret-at-least-32-chars",
       SESSION_SECRET: "0123456789abcdef0123456789abcdef",
       SITE_URL: "https://paulrdrs.com"
     })
