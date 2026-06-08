@@ -73,7 +73,8 @@ Dashboard routes:
 | 6. Public Content Reads | Completed | Public blog/project routes now read published content from Postgres and hide drafts by query. |
 | 7. Custom Magic-Link Auth | Completed | Added Postgres-backed magic-link tokens and sessions, Resend delivery, login/callback/logout routes, and auth tests. |
 | 8. Dashboard Shell + Protection | Completed | Added protected dashboard shell, navigation, empty admin sections, and session validation tests. |
-| 9. CMS CRUD: Posts and Projects | Pending | Resume here next after maintainer approval. |
+| 9. CMS CRUD: Posts and Projects | Completed | Added dashboard list/create/edit flows for posts and projects with Markdown previews and publish controls. |
+| 10. CMS CRUD: Pages | Pending | Resume here next after maintainer approval. |
 
 ### 1. Public Route Skeleton
 
@@ -379,6 +380,8 @@ Tests:
 Completion criteria:
 
 - Maintainers can manage posts and projects end to end.
+
+Status: Completed.
 
 ### 10. CMS CRUD: Pages
 
