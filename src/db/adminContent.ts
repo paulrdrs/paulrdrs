@@ -1,7 +1,12 @@
 import { desc, eq } from "drizzle-orm"
-import type { PostFormValues, ProjectFormValues } from "@/cms/contentForms"
+import type {
+  PageFormValues,
+  PostFormValues,
+  ProjectFormValues
+} from "@/cms/contentForms"
+import type { PageKey } from "@/cms/pages"
 import { getDb } from "./client"
-import { posts, projects } from "./schema"
+import { pages, posts, projects } from "./schema"
 
 export const getDashboardPosts = async () => {
   return getDb()
@@ -96,4 +101,45 @@ export const updateDashboardProject = async (
     .returning({ id: projects.id })
 
   return project
+}
+
+export const getDashboardPages = async () => {
+  return getDb()
+    .select({
+      createdAt: pages.createdAt,
+      id: pages.id,
+      key: pages.key,
+      publishedAt: pages.publishedAt,
+      status: pages.status,
+      title: pages.title,
+      updatedAt: pages.updatedAt
+    })
+    .from(pages)
+    .orderBy(desc(pages.updatedAt), desc(pages.createdAt))
+}
+
+export const getDashboardPage = async (key: PageKey) => {
+  const [page] = await getDb()
+    .select()
+    .from(pages)
+    .where(eq(pages.key, key))
+    .limit(1)
+
+  return page
+}
+
+export const upsertDashboardPage = async (
+  key: PageKey,
+  values: PageFormValues
+) => {
+  const [page] = await getDb()
+    .insert(pages)
+    .values({ ...values, key })
+    .onConflictDoUpdate({
+      set: { ...values, updatedAt: new Date() },
+      target: pages.key
+    })
+    .returning({ key: pages.key })
+
+  return page
 }

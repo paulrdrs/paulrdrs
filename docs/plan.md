@@ -74,7 +74,8 @@ Dashboard routes:
 | 7. Custom Magic-Link Auth | Completed | Added Postgres-backed magic-link tokens and sessions, Resend delivery, login/callback/logout routes, and auth tests. |
 | 8. Dashboard Shell + Protection | Completed | Added protected dashboard shell, navigation, empty admin sections, and session validation tests. |
 | 9. CMS CRUD: Posts and Projects | Completed | Added dashboard list/create/edit flows for posts and projects with Markdown previews and publish controls. |
-| 10. CMS CRUD: Pages | Pending | Resume here next after maintainer approval. |
+| 10. CMS CRUD: Pages | Completed | Added keyed page editing for home/contact and wired published CMS content into public home/contact routes with fallbacks. |
+| 11. Media Management | Pending | Resume here next after maintainer approval and Railway Storage Bucket setup. |
 
 ### 1. Public Route Skeleton
 
@@ -408,6 +409,8 @@ Tests:
 Completion criteria:
 
 - General site content can be managed from the dashboard.
+
+Status: Completed.
 
 ### 11. Media Management
 

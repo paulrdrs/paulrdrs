@@ -18,6 +18,13 @@ export type ProjectFormValues = PostFormValues & {
   category: ProjectCategory
 }
 
+export type PageFormValues = {
+  title: string
+  bodyMarkdown: string
+  status: ContentStatus
+  publishedAt: Date | null
+}
+
 const getString = (formData: FormData, key: string) =>
   String(formData.get(key) ?? "").trim()
 
@@ -77,5 +84,21 @@ export const parseProjectForm = (formData: FormData): ProjectFormValues => {
   return {
     ...postValues,
     category
+  }
+}
+
+export const parsePageForm = (formData: FormData): PageFormValues => {
+  const title = getString(formData, "title")
+  const status = getStatus(formData)
+
+  if (!title) {
+    throw new Error("Title is required")
+  }
+
+  return {
+    bodyMarkdown: getBodyMarkdown(formData),
+    publishedAt: getPublishedAt(formData, status),
+    status,
+    title
   }
 }

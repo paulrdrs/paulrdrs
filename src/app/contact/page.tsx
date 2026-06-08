@@ -1,10 +1,20 @@
+import { MarkdownContent } from "@/components/MarkdownContent"
 import { PageContainer } from "@/components/PageContainer"
+import { getPublishedPageByKey } from "@/db/content"
 
-export default function ContactPage() {
+export const dynamic = "force-dynamic"
+
+export default async function ContactPage() {
+  const contactPage = await getPublishedPageByKey("contact")
+
   return (
     <PageContainer>
-      <h1 className="font-black text-3xl">Contact</h1>
-      <p className="font-medium">Contact details will live here.</p>
+      <h1 className="font-black text-3xl">{contactPage?.title ?? "Contact"}</h1>
+      {contactPage ? (
+        <MarkdownContent markdown={contactPage.bodyMarkdown} />
+      ) : (
+        <p className="font-medium">Contact details will live here.</p>
+      )}
     </PageContainer>
   )
 }

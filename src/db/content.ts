@@ -1,7 +1,15 @@
 import { and, desc, eq } from "drizzle-orm"
 import { getDb } from "./client"
 import type { ProjectCategory } from "./contentTypes"
-import { posts, projects } from "./schema"
+import { pages, posts, projects } from "./schema"
+
+type PublishedPage = {
+  bodyMarkdown: string
+  id: string
+  key: string
+  publishedAt: Date | null
+  title: string
+}
 
 export const getPublishedPosts = async () => {
   return getDb()
@@ -83,4 +91,22 @@ export const getPublishedProjectBySlug = async (
     .limit(1)
 
   return project
+}
+
+export const getPublishedPageByKey = async (
+  key: string
+): Promise<PublishedPage | undefined> => {
+  const [page] = await getDb()
+    .select({
+      bodyMarkdown: pages.bodyMarkdown,
+      id: pages.id,
+      key: pages.key,
+      publishedAt: pages.publishedAt,
+      title: pages.title
+    })
+    .from(pages)
+    .where(and(eq(pages.key, key), eq(pages.status, "published")))
+    .limit(1)
+
+  return page
 }

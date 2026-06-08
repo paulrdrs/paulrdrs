@@ -1,4 +1,4 @@
-import { parsePostForm, parseProjectForm } from "./contentForms"
+import { parsePageForm, parsePostForm, parseProjectForm } from "./contentForms"
 
 const createFormData = (values: Record<string, string>) => {
   const formData = new FormData()
@@ -79,5 +79,22 @@ describe("content form parsing", () => {
         })
       )
     ).toThrow("Project category is required")
+  })
+
+  it("parses page values", () => {
+    const values = parsePageForm(
+      createFormData({
+        bodyMarkdown: "Contact **details**",
+        status: "published",
+        title: "Contact"
+      })
+    )
+
+    expect(values).toEqual({
+      bodyMarkdown: "Contact **details**",
+      publishedAt: expect.any(Date),
+      status: "published",
+      title: "Contact"
+    })
   })
 })
