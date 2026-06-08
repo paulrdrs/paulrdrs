@@ -32,6 +32,10 @@ Configure these variables on the `web` service:
 Do not configure the storage values only on the bucket resource. The `web`
 service reads them at runtime to upload media and proxy private objects.
 
+Do not add `DATABASE_PUBLIC_URL` to the production web service. It is only for
+local development and local migrations from a machine that cannot resolve the
+Railway private network hostname.
+
 ## Build And Migrations
 
 Railway uses `railway.json` for config-as-code:
@@ -41,39 +45,10 @@ Railway uses `railway.json` for config-as-code:
 - Start command: `pnpm start`.
 
 The pre-deploy command runs after the app image builds and before the new web
-deployment starts. Drizzle Kit prefers `DATABASE_PUBLIC_URL` when present, then
-falls back to `DATABASE_URL`. In Railway production, keep using the private
-`DATABASE_URL` on the `web` service. For local migrations from a Mac, put the
-public proxy URL in local `.env` as `DATABASE_PUBLIC_URL`.
+deployment starts. In Railway production, Drizzle uses the private
+`DATABASE_URL` on the `web` service.
 
 If the migration command exits non-zero, Railway stops the deployment.
-
-For local migrations after loading local `.env`:
-
-```sh
-pnpm db:migrate
-```
-
-For local migrations through the Railway CLI, use the public Postgres proxy:
-
-```sh
-railway run --service db pnpm db:migrate
-```
-
-For local development after loading local `.env`, `DATABASE_PUBLIC_URL` is used
-when present so your Mac can connect through the public proxy while Railway
-production keeps the private `DATABASE_URL`:
-
-```sh
-pnpm dev
-```
-
-For local development with Railway-provided variables, override the private
-runtime database URL with the public proxy:
-
-```sh
-railway run --service web sh -c 'DATABASE_URL="$DATABASE_PUBLIC_URL" pnpm dev'
-```
 
 ## Production Smoke Test
 
