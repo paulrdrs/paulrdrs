@@ -18,7 +18,6 @@ export const serverEnvsSchema = z.object({
 })
 
 export const authEnvsSchema = z.object({
-  REDIS_URL: z.url(),
   RESEND_API_KEY: z.string().min(1),
   RESEND_FROM_EMAIL: emailWithOptionalDisplayNameSchema,
   ADMIN_EMAIL_ALLOWLIST: z

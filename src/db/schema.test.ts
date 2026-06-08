@@ -2,7 +2,9 @@ import { getTableName } from "drizzle-orm"
 import {
   analyticsContentType,
   analyticsEvents,
+  authSessions,
   contentStatus,
+  magicLinkTokens,
   mediaAssets,
   pages,
   posts,
@@ -29,13 +31,17 @@ describe("database schema", () => {
       getTableName(projects),
       getTableName(pages),
       getTableName(mediaAssets),
-      getTableName(analyticsEvents)
+      getTableName(analyticsEvents),
+      getTableName(magicLinkTokens),
+      getTableName(authSessions)
     ]).toEqual([
       "posts",
       "projects",
       "pages",
       "media_assets",
-      "analytics_events"
+      "analytics_events",
+      "magic_link_tokens",
+      "auth_sessions"
     ])
   })
 })

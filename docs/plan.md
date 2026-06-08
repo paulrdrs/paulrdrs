@@ -11,12 +11,12 @@
 - Railway CLI is installed locally via Homebrew, logged in, linked to project `paulrdrs.com`, production environment, service `web`.
 - Railway CLI agent support is enabled locally without MCP support.
 - No Bun migration.
-- No CMS, database, dashboard, auth, analytics, or media storage implementation yet.
+- No dashboard CMS, analytics, or media storage implementation yet.
 
 ## Architecture Decisions
 
 - Use Railway Postgres for durable CMS content and internal analytics.
-- Use Railway Redis/KV for short-lived magic-link tokens and sessions.
+- Use Railway Postgres for short-lived magic-link tokens and sessions.
 - Use Railway Storage Buckets for uploaded media.
 - Use `railway.json` for schema-validated Railway deploy configuration.
 - Use `railway run pnpm dev` for local development with Railway-provided environment variables when needed.
@@ -55,7 +55,7 @@ Dashboard routes:
 ## Railway Service Prerequisites
 
 - Task 6 Postgres prerequisite is satisfied: Railway `db` Postgres service exists and `DATABASE_URL` is available on the `web` service.
-- Before Task 7, create or attach Railway Redis/KV and configure Resend credentials for magic-link auth.
+- Before Task 7, configure Resend credentials, `ADMIN_EMAIL_ALLOWLIST`, `SESSION_SECRET`, and `SITE_URL` for magic-link auth.
 - Before Task 11, create a Railway Storage Bucket and configure its S3-compatible credentials.
 - Remind the maintainer before starting each task that depends on a missing Railway service.
 
@@ -67,11 +67,12 @@ Dashboard routes:
 | --- | --- | --- |
 | 1. Public Route Skeleton | Completed | Added public placeholder routes and converted top navigation to real `next/link` links. |
 | 2. App Shell Cleanup | Completed | Removed the global hero from the root layout, rendered it only on the homepage, and introduced a shared public page container. |
-| 3. Environment Schema Foundation | Completed | Added server-only env validation for Railway Postgres, Redis/KV, Resend, maintainer allowlist, sessions, site URL, and Railway Storage Buckets. |
+| 3. Environment Schema Foundation | Completed | Added server-only env validation for Railway Postgres, Resend, maintainer allowlist, sessions, site URL, and Railway Storage Buckets. |
 | 4. Database Layer | Completed | Added Drizzle/Postgres setup, CMS and analytics schema, migration scripts, and initial migration. |
 | 5. Markdown Rendering | Completed | Added safe Markdown rendering with GFM support plus slug and excerpt helpers. |
 | 6. Public Content Reads | Completed | Public blog/project routes now read published content from Postgres and hide drafts by query. |
-| 7. Custom Magic-Link Auth | Pending | Resume here next after Redis/KV and Resend are configured. |
+| 7. Custom Magic-Link Auth | Completed | Added Postgres-backed magic-link tokens and sessions, Resend delivery, login/callback/logout routes, and auth tests. |
+| 8. Dashboard Shell + Protection | Pending | Resume here next after maintainer approval. |
 
 ### 1. Public Route Skeleton
 
@@ -134,7 +135,7 @@ Depends on: Task 1
 
 Implement:
 
-- Extend server env schema with database, Redis/KV, Resend, admin allowlist, session, site URL, and Railway bucket settings.
+- Extend server env schema with database, Resend, admin allowlist, session, site URL, and Railway bucket settings.
 - Keep client env minimal and do not expose secrets.
 - Update env schema tests.
 
@@ -144,7 +145,6 @@ Core server env keys:
 
 Auth env keys, required starting Task 7:
 
-- `REDIS_URL`
 - `RESEND_API_KEY`
 - `RESEND_FROM_EMAIL`
 - `ADMIN_EMAIL_ALLOWLIST`
@@ -296,11 +296,13 @@ Implement:
 - Add `/dashboard/login`.
 - Add magic-link request flow.
 - Only allow emails listed in `ADMIN_EMAIL_ALLOWLIST`.
-- Store one-time login tokens in Railway Redis/KV with a short TTL.
+- Store one-time login tokens in Postgres with an expiry timestamp and consumed timestamp.
 - Send login email through Resend.
 - Add `/dashboard/auth/callback` to exchange token for a session.
-- Store sessions in Redis/KV.
+- Store server-side sessions in Postgres with an expiry timestamp.
+- Add auth tables to the main Drizzle schema and cover them with normal Postgres migrations.
 - Set signed HTTP-only secure session cookie.
+- Validate sessions by reading Postgres.
 - Add logout.
 
 Tests:
@@ -317,6 +319,8 @@ Completion criteria:
 
 - Only maintainers can obtain sessions.
 - Sessions are validated server-side.
+
+Status: Completed.
 
 ### 8. Dashboard Shell + Protection
 
@@ -484,7 +488,7 @@ Depends on: Tasks 3, 4, 7, 11, and 12
 
 Implement:
 
-- Document required Railway services: Next app, Postgres, Redis/KV, and Storage Bucket.
+- Document required Railway services: Next app, Postgres, and Storage Bucket, plus Resend env vars.
 - Document required env vars.
 - Ensure `next build` works with Railway-provided envs.
 - Add migration command guidance for deploys.

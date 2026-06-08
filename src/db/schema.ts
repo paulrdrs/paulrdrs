@@ -163,3 +163,46 @@ export const analyticsEvents = pgTable(
     index("analytics_events_content_idx").on(table.contentType, table.contentId)
   ]
 )
+
+export const magicLinkTokens = pgTable(
+  "magic_link_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: varchar("email", { length: 320 }).notNull(),
+    tokenHash: varchar("token_hash", { length: 128 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    uniqueIndex("magic_link_tokens_token_hash_unique").on(table.tokenHash),
+    index("magic_link_tokens_email_created_at_idx").on(
+      table.email,
+      table.createdAt
+    ),
+    index("magic_link_tokens_expires_at_idx").on(table.expiresAt)
+  ]
+)
+
+export const authSessions = pgTable(
+  "auth_sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: varchar("email", { length: 320 }).notNull(),
+    tokenHash: varchar("token_hash", { length: 128 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    uniqueIndex("auth_sessions_token_hash_unique").on(table.tokenHash),
+    index("auth_sessions_email_idx").on(table.email),
+    index("auth_sessions_expires_at_idx").on(table.expiresAt)
+  ]
+)

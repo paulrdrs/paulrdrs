@@ -77,7 +77,6 @@ describe("serverEnvsSchema", () => {
 describe("authEnvsSchema", () => {
   const valid = {
     ADMIN_EMAIL_ALLOWLIST: "admin@example.com, editor@example.com",
-    REDIS_URL: "redis://localhost:6379",
     RESEND_API_KEY: "re_test_key",
     RESEND_FROM_EMAIL: "Paulo <admin@example.com>",
     SESSION_SECRET: "a-secret-that-is-at-least-32-chars",
