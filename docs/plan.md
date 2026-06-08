@@ -77,6 +77,7 @@ Dashboard routes:
 | 10. CMS CRUD: Pages | Completed | Added keyed page editing for home/contact and wired published CMS content into public home/contact routes with fallbacks. |
 | 11. Media Management | Completed | Added Railway Bucket-backed media uploads, metadata listing, public proxy route, and cover media selection for posts/projects. |
 | 12. Internal Analytics Events | Completed | Added privacy-minimal event normalization, recording endpoint, and public page instrumentation. |
+| 13. Dashboard Analytics | Completed | Added read-only dashboard analytics metrics, top content/path summaries, and daily views. |
 
 ### 1. Public Route Skeleton
 
@@ -493,6 +494,8 @@ Tests:
 Completion criteria:
 
 - Dashboard shows useful analytics summaries.
+
+Status: Completed.
 
 ### 14. Railway Deployment Hardening
 
