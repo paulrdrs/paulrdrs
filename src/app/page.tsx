@@ -1,3 +1,4 @@
+import { trackPageView } from "@/analytics/server"
 import { Hero } from "@/components/Hero"
 import { MarkdownContent } from "@/components/MarkdownContent"
 import { PageContainer } from "@/components/PageContainer"
@@ -7,6 +8,11 @@ export const dynamic = "force-dynamic"
 
 export default async function Home() {
   const homePage = await getPublishedPageByKey("home")
+  await trackPageView({
+    contentId: homePage?.id,
+    contentType: homePage ? "page" : null,
+    path: "/"
+  })
 
   return (
     <>

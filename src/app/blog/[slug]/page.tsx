@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import { trackPageView } from "@/analytics/server"
 import { MarkdownContent } from "@/components/MarkdownContent"
 import { PageContainer } from "@/components/PageContainer"
 import { getPublishedPostBySlug } from "@/db/content"
@@ -18,6 +19,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   if (!post) {
     notFound()
   }
+
+  await trackPageView({
+    contentId: post.id,
+    contentType: "post",
+    path: `/blog/${post.slug}`
+  })
 
   return (
     <PageContainer>

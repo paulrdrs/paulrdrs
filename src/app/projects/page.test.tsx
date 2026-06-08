@@ -1,14 +1,24 @@
 import { render, screen } from "@testing-library/react"
+import { trackPageView } from "@/analytics/server"
 import { getPublishedProjects } from "@/db/content"
 import ProjectsPage from "./page"
+
+vi.mock("@/analytics/server", () => ({
+  trackPageView: vi.fn()
+}))
 
 vi.mock("@/db/content", () => ({
   getPublishedProjects: vi.fn()
 }))
 
+const trackPageViewMock = vi.mocked(trackPageView)
 const getPublishedProjectsMock = vi.mocked(getPublishedProjects)
 
 describe("ProjectsPage", () => {
+  beforeEach(() => {
+    trackPageViewMock.mockReset()
+  })
+
   it("renders published projects returned by the content query", async () => {
     getPublishedProjectsMock.mockResolvedValue([
       {
@@ -24,6 +34,10 @@ describe("ProjectsPage", () => {
 
     render(await ProjectsPage())
 
+    expect(trackPageViewMock).toHaveBeenCalledWith({
+      contentType: "page",
+      path: "/projects"
+    })
     expect(
       screen.getByRole("heading", { name: "Projects" })
     ).toBeInTheDocument()

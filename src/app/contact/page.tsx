@@ -1,3 +1,4 @@
+import { trackPageView } from "@/analytics/server"
 import { MarkdownContent } from "@/components/MarkdownContent"
 import { PageContainer } from "@/components/PageContainer"
 import { getPublishedPageByKey } from "@/db/content"
@@ -6,6 +7,11 @@ export const dynamic = "force-dynamic"
 
 export default async function ContactPage() {
   const contactPage = await getPublishedPageByKey("contact")
+  await trackPageView({
+    contentId: contactPage?.id,
+    contentType: contactPage ? "page" : null,
+    path: "/contact"
+  })
 
   return (
     <PageContainer>

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import { trackPageView } from "@/analytics/server"
 import { MarkdownContent } from "@/components/MarkdownContent"
 import { PageContainer } from "@/components/PageContainer"
 import { getPublishedProjectBySlug } from "@/db/content"
@@ -25,6 +26,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   if (!project) {
     notFound()
   }
+
+  await trackPageView({
+    contentId: project.id,
+    contentType: "project",
+    path: `/projects/${project.category}/${project.slug}`
+  })
 
   return (
     <PageContainer>

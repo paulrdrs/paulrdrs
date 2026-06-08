@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { trackPageView } from "@/analytics/server"
 import { PageContainer } from "@/components/PageContainer"
 import { getPublishedProjects } from "@/db/content"
 
@@ -6,6 +7,7 @@ export const dynamic = "force-dynamic"
 
 export default async function PhotographyProjectsPage() {
   const projects = await getPublishedProjects("photography")
+  await trackPageView({ contentType: "page", path: "/projects/photography" })
 
   return (
     <PageContainer>

@@ -1,14 +1,24 @@
 import { render, screen } from "@testing-library/react"
+import { trackPageView } from "@/analytics/server"
 import { getPublishedPageByKey } from "@/db/content"
 import ContactPage from "./page"
+
+vi.mock("@/analytics/server", () => ({
+  trackPageView: vi.fn()
+}))
 
 vi.mock("@/db/content", () => ({
   getPublishedPageByKey: vi.fn()
 }))
 
+const trackPageViewMock = vi.mocked(trackPageView)
 const getPublishedPageByKeyMock = vi.mocked(getPublishedPageByKey)
 
 describe("ContactPage", () => {
+  beforeEach(() => {
+    trackPageViewMock.mockReset()
+  })
+
   it("renders published CMS contact content", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
       bodyMarkdown: "Email **hello@example.com**.",
@@ -21,6 +31,11 @@ describe("ContactPage", () => {
     render(await ContactPage())
 
     expect(getPublishedPageByKeyMock).toHaveBeenCalledWith("contact")
+    expect(trackPageViewMock).toHaveBeenCalledWith({
+      contentId: "page-id",
+      contentType: "page",
+      path: "/contact"
+    })
     expect(
       screen.getByRole("heading", { name: "Reach me" })
     ).toBeInTheDocument()
