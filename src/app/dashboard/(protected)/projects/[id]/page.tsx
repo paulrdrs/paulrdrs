@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { requireDashboardSession } from "@/auth/guards"
-import { getDashboardProject } from "@/db/adminContent"
+import { getDashboardMediaAssets, getDashboardProject } from "@/db/adminContent"
 import { ContentEditor } from "../../_components/ContentEditor"
 import { updateProjectAction } from "../actions"
 
@@ -16,7 +16,10 @@ export default async function EditProjectPage({
   await requireDashboardSession()
 
   const { id } = await params
-  const project = await getDashboardProject(id)
+  const [project, mediaAssets] = await Promise.all([
+    getDashboardProject(id),
+    getDashboardMediaAssets()
+  ])
 
   if (!project) {
     notFound()
@@ -29,6 +32,7 @@ export default async function EditProjectPage({
         action={updateProjectAction.bind(null, project.id)}
         content={project}
         kind="project"
+        mediaAssets={mediaAssets}
         submitLabel="Save project"
       />
     </>

@@ -6,7 +6,9 @@ import type {
 } from "@/cms/contentForms"
 import type { PageKey } from "@/cms/pages"
 import { getDb } from "./client"
-import { pages, posts, projects } from "./schema"
+import { mediaAssets, pages, posts, projects } from "./schema"
+
+export type DashboardMediaAsset = typeof mediaAssets.$inferSelect
 
 export const getDashboardPosts = async () => {
   return getDb()
@@ -142,4 +144,64 @@ export const upsertDashboardPage = async (
     .returning({ key: pages.key })
 
   return page
+}
+
+export const getDashboardMediaAssets = async () => {
+  return getDb()
+    .select({
+      altText: mediaAssets.altText,
+      attribution: mediaAssets.attribution,
+      createdAt: mediaAssets.createdAt,
+      filename: mediaAssets.filename,
+      height: mediaAssets.height,
+      id: mediaAssets.id,
+      mimeType: mediaAssets.mimeType,
+      objectKey: mediaAssets.objectKey,
+      sizeBytes: mediaAssets.sizeBytes,
+      width: mediaAssets.width
+    })
+    .from(mediaAssets)
+    .orderBy(desc(mediaAssets.createdAt))
+}
+
+export const getDashboardMediaAsset = async (
+  id: string
+): Promise<DashboardMediaAsset | undefined> => {
+  const [asset] = await getDb()
+    .select()
+    .from(mediaAssets)
+    .where(eq(mediaAssets.id, id))
+    .limit(1)
+
+  return asset
+}
+
+export const createDashboardMediaAsset = async ({
+  altText,
+  attribution,
+  filename,
+  mimeType,
+  objectKey,
+  sizeBytes
+}: {
+  altText: string | null
+  attribution: string | null
+  filename: string
+  mimeType: string
+  objectKey: string
+  sizeBytes: number
+}) => {
+  const [asset] = await getDb()
+    .insert(mediaAssets)
+    .values({
+      altText,
+      attribution,
+      filename,
+      mimeType,
+      objectKey,
+      sizeBytes
+    })
+    .returning({ id: mediaAssets.id })
+
+  return asset
 }

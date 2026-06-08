@@ -1,9 +1,11 @@
 import { requireDashboardSession } from "@/auth/guards"
+import { getDashboardMediaAssets } from "@/db/adminContent"
 import { ContentEditor } from "../../_components/ContentEditor"
 import { createProjectAction } from "../actions"
 
 export default async function NewProjectPage() {
   await requireDashboardSession()
+  const mediaAssets = await getDashboardMediaAssets()
 
   return (
     <>
@@ -11,6 +13,7 @@ export default async function NewProjectPage() {
       <ContentEditor
         action={createProjectAction}
         kind="project"
+        mediaAssets={mediaAssets}
         submitLabel="Create project"
       />
     </>

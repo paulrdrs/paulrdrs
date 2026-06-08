@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { requireDashboardSession } from "@/auth/guards"
-import { getDashboardPost } from "@/db/adminContent"
+import { getDashboardMediaAssets, getDashboardPost } from "@/db/adminContent"
 import { ContentEditor } from "../../_components/ContentEditor"
 import { updatePostAction } from "../actions"
 
@@ -14,7 +14,10 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
   await requireDashboardSession()
 
   const { id } = await params
-  const post = await getDashboardPost(id)
+  const [post, mediaAssets] = await Promise.all([
+    getDashboardPost(id),
+    getDashboardMediaAssets()
+  ])
 
   if (!post) {
     notFound()
@@ -27,6 +30,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
         action={updatePostAction.bind(null, post.id)}
         content={post}
         kind="post"
+        mediaAssets={mediaAssets}
         submitLabel="Save post"
       />
     </>

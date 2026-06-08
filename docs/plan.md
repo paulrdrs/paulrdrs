@@ -75,7 +75,8 @@ Dashboard routes:
 | 8. Dashboard Shell + Protection | Completed | Added protected dashboard shell, navigation, empty admin sections, and session validation tests. |
 | 9. CMS CRUD: Posts and Projects | Completed | Added dashboard list/create/edit flows for posts and projects with Markdown previews and publish controls. |
 | 10. CMS CRUD: Pages | Completed | Added keyed page editing for home/contact and wired published CMS content into public home/contact routes with fallbacks. |
-| 11. Media Management | Pending | Resume here next after maintainer approval and Railway Storage Bucket setup. |
+| 11. Media Management | Completed | Added Railway Bucket-backed media uploads, metadata listing, public proxy route, and cover media selection for posts/projects. |
+| 12. Internal Analytics Events | Pending | Resume here next after maintainer approval. |
 
 ### 1. Public Route Skeleton
 
@@ -439,6 +440,8 @@ Tests:
 Completion criteria:
 
 - Maintainers can upload and reuse media assets.
+
+Status: Completed.
 
 ### 12. Internal Analytics Events
 

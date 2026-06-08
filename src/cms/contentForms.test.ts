@@ -25,6 +25,7 @@ describe("content form parsing", () => {
 
     expect(values).toEqual({
       bodyMarkdown: "# Hello",
+      coverMediaId: null,
       excerpt: null,
       publishedAt: null,
       seoDescription: null,
@@ -48,6 +49,7 @@ describe("content form parsing", () => {
 
     expect(values.status).toBe("published")
     expect(values.slug).toBe("custom-post")
+    expect(values.coverMediaId).toBeNull()
     expect(values.publishedAt?.getFullYear()).toBe(2026)
     expect(values.publishedAt?.getMonth()).toBe(5)
     expect(values.publishedAt?.getDate()).toBe(8)

@@ -8,9 +8,16 @@ type BaseContent = {
   excerpt?: string | null
   bodyMarkdown?: string
   status?: ContentStatus
+  coverMediaId?: string | null
   publishedAt?: Date | null
   seoTitle?: string | null
   seoDescription?: string | null
+}
+
+type MediaOption = {
+  altText: string | null
+  filename: string
+  id: string
 }
 
 type ContentEditorProps = {
@@ -19,6 +26,7 @@ type ContentEditorProps = {
     category?: ProjectCategory
   }
   kind: "post" | "project"
+  mediaAssets?: MediaOption[]
   submitLabel: string
 }
 
@@ -34,6 +42,7 @@ export const ContentEditor = ({
   action,
   content,
   kind,
+  mediaAssets = [],
   submitLabel
 }: ContentEditorProps) => {
   const bodyMarkdown = content?.bodyMarkdown ?? ""
@@ -88,6 +97,26 @@ export const ContentEditor = ({
             </select>
           </label>
         ) : null}
+
+        <label
+          className="flex flex-col gap-2 font-mono text-sm"
+          htmlFor="coverMediaId"
+        >
+          Cover media
+          <select
+            className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+            defaultValue={content?.coverMediaId ?? ""}
+            id="coverMediaId"
+            name="coverMediaId"
+          >
+            <option value="">none</option>
+            {mediaAssets.map((asset) => (
+              <option key={asset.id} value={asset.id}>
+                {asset.filename}
+              </option>
+            ))}
+          </select>
+        </label>
 
         <label
           className="flex flex-col gap-2 font-mono text-sm"

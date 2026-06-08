@@ -9,6 +9,7 @@ export type PostFormValues = {
   excerpt: string | null
   bodyMarkdown: string
   status: ContentStatus
+  coverMediaId: string | null
   publishedAt: Date | null
   seoTitle: string | null
   seoDescription: string | null
@@ -63,6 +64,7 @@ export const parsePostForm = (formData: FormData): PostFormValues => {
 
   return {
     bodyMarkdown: getBodyMarkdown(formData),
+    coverMediaId: getNullableString(formData, "coverMediaId"),
     excerpt: getNullableString(formData, "excerpt"),
     publishedAt: getPublishedAt(formData, status),
     seoDescription: getNullableString(formData, "seoDescription"),
