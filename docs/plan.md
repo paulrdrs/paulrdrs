@@ -19,6 +19,8 @@
 - Use Railway Postgres for short-lived magic-link tokens and sessions.
 - Use Railway Storage Buckets for uploaded media.
 - Use `railway.json` for schema-validated Railway deploy configuration.
+- Use `STORAGE_*` environment variables on the `web` service for Railway bucket
+  S3-compatible credentials.
 - Use `railway run pnpm dev` for local development with Railway-provided environment variables when needed.
 - For local Railway CLI migrations, use `railway run --service db sh -c 'DATABASE_URL="$DATABASE_PUBLIC_URL" pnpm db:migrate'` so Drizzle connects through the public Postgres proxy.
 - Use Resend for magic-link emails.
@@ -78,6 +80,7 @@ Dashboard routes:
 | 11. Media Management | Completed | Added Railway Bucket-backed media uploads, metadata listing, public proxy route, and cover media selection for posts/projects. |
 | 12. Internal Analytics Events | Completed | Added privacy-minimal event normalization, recording endpoint, and public page instrumentation. |
 | 13. Dashboard Analytics | Completed | Added read-only dashboard analytics metrics, top content/path summaries, and daily views. |
+| 14. Railway Deployment Hardening | Completed | Added deployment docs, pre-deploy migrations, env guidance, production cookie coverage, and smoke-test checklist. |
 
 ### 1. Public Route Skeleton
 
@@ -158,11 +161,11 @@ Auth env keys, required starting Task 7:
 
 Storage env keys, required starting Task 11:
 
-- `RAILWAY_STORAGE_ENDPOINT`
-- `RAILWAY_STORAGE_BUCKET`
-- `RAILWAY_STORAGE_ACCESS_KEY_ID`
-- `RAILWAY_STORAGE_SECRET_ACCESS_KEY`
-- `RAILWAY_STORAGE_REGION`
+- `STORAGE_ENDPOINT`
+- `STORAGE_BUCKET`
+- `STORAGE_ACCESS_KEY_ID`
+- `STORAGE_SECRET_ACCESS_KEY`
+- `STORAGE_REGION`
 
 Tests:
 
@@ -524,6 +527,8 @@ Completion criteria:
 
 - Deployment requirements are documented.
 - Production smoke-test path is clear.
+
+Status: Completed.
 
 ## Global Test Policy
 

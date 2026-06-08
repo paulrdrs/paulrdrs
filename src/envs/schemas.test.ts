@@ -115,11 +115,11 @@ describe("authEnvsSchema", () => {
 
 describe("storageEnvsSchema", () => {
   const valid = {
-    RAILWAY_STORAGE_ACCESS_KEY_ID: "access-key-id",
-    RAILWAY_STORAGE_BUCKET: "media",
-    RAILWAY_STORAGE_ENDPOINT: "https://storage.railway.app",
-    RAILWAY_STORAGE_REGION: "auto",
-    RAILWAY_STORAGE_SECRET_ACCESS_KEY: "secret-access-key"
+    STORAGE_ACCESS_KEY_ID: "access-key-id",
+    STORAGE_BUCKET: "media",
+    STORAGE_ENDPOINT: "https://storage.railway.app",
+    STORAGE_REGION: "auto",
+    STORAGE_SECRET_ACCESS_KEY: "secret-access-key"
   }
 
   it("parses valid input", () => {
@@ -130,7 +130,7 @@ describe("storageEnvsSchema", () => {
     expect(
       storageEnvsSchema.safeParse({
         ...valid,
-        RAILWAY_STORAGE_ENDPOINT: "not-a-url"
+        STORAGE_ENDPOINT: "not-a-url"
       }).success
     ).toBe(false)
   })

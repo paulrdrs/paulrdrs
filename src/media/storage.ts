@@ -14,11 +14,11 @@ const getClient = () => {
 
     client = new S3Client({
       credentials: {
-        accessKeyId: storageEnvs.RAILWAY_STORAGE_ACCESS_KEY_ID,
-        secretAccessKey: storageEnvs.RAILWAY_STORAGE_SECRET_ACCESS_KEY
+        accessKeyId: storageEnvs.STORAGE_ACCESS_KEY_ID,
+        secretAccessKey: storageEnvs.STORAGE_SECRET_ACCESS_KEY
       },
-      endpoint: storageEnvs.RAILWAY_STORAGE_ENDPOINT,
-      region: storageEnvs.RAILWAY_STORAGE_REGION
+      endpoint: storageEnvs.STORAGE_ENDPOINT,
+      region: storageEnvs.STORAGE_REGION
     })
   }
 
@@ -39,7 +39,7 @@ export const uploadMediaObject = async ({
   await getClient().send(
     new PutObjectCommand({
       Body: body,
-      Bucket: storageEnvs.RAILWAY_STORAGE_BUCKET,
+      Bucket: storageEnvs.STORAGE_BUCKET,
       ContentType: contentType,
       Key: objectKey
     })
@@ -51,7 +51,7 @@ export const getMediaObject = async (objectKey: string) => {
 
   return getClient().send(
     new GetObjectCommand({
-      Bucket: storageEnvs.RAILWAY_STORAGE_BUCKET,
+      Bucket: storageEnvs.STORAGE_BUCKET,
       Key: objectKey
     })
   )

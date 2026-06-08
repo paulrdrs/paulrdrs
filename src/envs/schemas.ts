@@ -34,9 +34,9 @@ export const authEnvsSchema = z.object({
 })
 
 export const storageEnvsSchema = z.object({
-  RAILWAY_STORAGE_ENDPOINT: z.url(),
-  RAILWAY_STORAGE_BUCKET: z.string().min(1),
-  RAILWAY_STORAGE_ACCESS_KEY_ID: z.string().min(1),
-  RAILWAY_STORAGE_SECRET_ACCESS_KEY: z.string().min(1),
-  RAILWAY_STORAGE_REGION: z.string().min(1)
+  STORAGE_ENDPOINT: z.url(),
+  STORAGE_BUCKET: z.string().min(1),
+  STORAGE_ACCESS_KEY_ID: z.string().min(1),
+  STORAGE_SECRET_ACCESS_KEY: z.string().min(1),
+  STORAGE_REGION: z.string().min(1)
 })
