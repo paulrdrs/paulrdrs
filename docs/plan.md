@@ -72,7 +72,8 @@ Dashboard routes:
 | 5. Markdown Rendering | Completed | Added safe Markdown rendering with GFM support plus slug and excerpt helpers. |
 | 6. Public Content Reads | Completed | Public blog/project routes now read published content from Postgres and hide drafts by query. |
 | 7. Custom Magic-Link Auth | Completed | Added Postgres-backed magic-link tokens and sessions, Resend delivery, login/callback/logout routes, and auth tests. |
-| 8. Dashboard Shell + Protection | Pending | Resume here next after maintainer approval. |
+| 8. Dashboard Shell + Protection | Completed | Added protected dashboard shell, navigation, empty admin sections, and session validation tests. |
+| 9. CMS CRUD: Posts and Projects | Pending | Resume here next after maintainer approval. |
 
 ### 1. Public Route Skeleton
 
@@ -347,6 +348,8 @@ Completion criteria:
 
 - Dashboard routes are protected.
 - Admin shell exists without CMS behavior yet.
+
+Status: Completed.
 
 ### 9. CMS CRUD: Posts and Projects
 
