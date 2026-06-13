@@ -7,7 +7,7 @@ type MarkdownContentProps = {
 
 export const MarkdownContent = ({ markdown }: MarkdownContentProps) => {
   return (
-    <article className="flex w-full flex-col gap-4">
+    <article className="markdown-content">
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
     </article>
   )
