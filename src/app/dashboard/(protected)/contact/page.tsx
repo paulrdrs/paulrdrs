@@ -1,32 +1,19 @@
-import { notFound } from "next/navigation"
 import { requireDashboardSession } from "@/auth/guards"
-import { isPageKey, pageLabels } from "@/cms/pages"
+import { pageLabels } from "@/cms/pages"
 import { getDashboardPage } from "@/db/adminContent"
-import { updatePageAction } from "../actions"
-import { PageEditor } from "../PageEditor"
+import { updatePageAction } from "../_actions/pages"
+import { PageEditor } from "../_components/PageEditor"
 
-type EditPageProps = {
-  params: Promise<{
-    key: string
-  }>
-}
-
-export default async function EditPage({ params }: EditPageProps) {
+export default async function DashboardContactPage() {
   await requireDashboardSession()
 
-  const { key } = await params
-
-  if (!isPageKey(key)) {
-    notFound()
-  }
-
-  const page = await getDashboardPage(key)
+  const page = await getDashboardPage("contact")
 
   return (
     <>
-      <h2 className="font-black text-2xl">Edit {pageLabels[key]}</h2>
+      <h2 className="font-black text-2xl">Contact</h2>
       <PageEditor
-        action={updatePageAction.bind(null, key)}
+        action={updatePageAction.bind(null, "contact")}
         page={
           page
             ? {
@@ -39,7 +26,7 @@ export default async function EditPage({ params }: EditPageProps) {
                 bodyMarkdown: "",
                 publishedAt: null,
                 status: "draft",
-                title: pageLabels[key]
+                title: pageLabels.contact
               }
         }
         submitLabel="Save page"

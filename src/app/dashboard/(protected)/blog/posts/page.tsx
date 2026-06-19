@@ -8,7 +8,7 @@ const formatDate = (date: Date | null) => {
     : "-"
 }
 
-export default async function DashboardPostsPage() {
+export default async function DashboardBlogPostsPage() {
   await requireDashboardSession()
 
   const posts = await getDashboardPosts()
@@ -19,7 +19,7 @@ export default async function DashboardPostsPage() {
         <h2 className="font-black text-2xl">Posts</h2>
         <Link
           className="border border-current px-3 py-2 font-mono text-sm hover:bg-black hover:text-white"
-          href="/dashboard/posts/new"
+          href="/dashboard/blog/posts/new"
         >
           New post
         </Link>
@@ -42,7 +42,7 @@ export default async function DashboardPostsPage() {
                   <td className="py-3 pr-4">
                     <Link
                       className="font-black hover:underline"
-                      href={`/dashboard/posts/${post.id}`}
+                      href={`/dashboard/blog/posts/${post.id}`}
                     >
                       {post.title}
                     </Link>

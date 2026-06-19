@@ -11,6 +11,7 @@ import {
   posts,
   projectCategory,
   projects,
+  siteNavigationSettings,
   webauthnChallenges
 } from "./schema"
 
@@ -32,6 +33,7 @@ describe("database schema", () => {
       getTableName(posts),
       getTableName(projects),
       getTableName(pages),
+      getTableName(siteNavigationSettings),
       getTableName(mediaAssets),
       getTableName(analyticsEvents),
       getTableName(magicLinkTokens),
@@ -42,6 +44,7 @@ describe("database schema", () => {
       "posts",
       "projects",
       "pages",
+      "site_navigation_settings",
       "media_assets",
       "analytics_events",
       "magic_link_tokens",

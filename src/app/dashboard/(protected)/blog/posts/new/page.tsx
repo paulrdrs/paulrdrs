@@ -1,9 +1,9 @@
 import { requireDashboardSession } from "@/auth/guards"
 import { getDashboardMediaAssets } from "@/db/adminContent"
-import { ContentEditor } from "../../_components/ContentEditor"
+import { ContentEditor } from "../../../_components/ContentEditor"
 import { createPostAction } from "../actions"
 
-export default async function NewPostPage() {
+export default async function NewBlogPostPage() {
   await requireDashboardSession()
   const mediaAssets = await getDashboardMediaAssets()
 

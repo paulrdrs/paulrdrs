@@ -33,6 +33,10 @@ metadata, creates a server-side session, and sets the existing session cookie.
 Protected dashboard pages read the cookie, verify its signature with
 `SESSION_SECRET`, and validate the token against the `auth_sessions` table.
 
+While that session is valid, the public top navigation displays Dashboard as
+its final link. Signed-out visitors do not see the link; direct dashboard access
+still relies on the protected-route session check.
+
 ## Passkey Management
 
 Signed-in admins can manage passkeys at `/dashboard/passkeys`.

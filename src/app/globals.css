@@ -8,26 +8,29 @@
 
 @layer base {
   body {
-    @apply font-sans antialiased bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200;
+    @apply font-sans antialiased bg-neutral-100 dark:bg-neutral-950 text-neutral-800 dark:text-neutral-200;
+  }
+}
+
+@layer components {
+  .nav-text-link {
+    @apply cursor-pointer uppercase hover:underline decoration-2 decoration-yellow-400 text-lg;
   }
 }
 
 @layer utilities {
-  .nav-text-link {
-    @apply cursor-pointer uppercase hover:underline decoration-2 decoration-yellow-400;
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
 }
 
 body {
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Hide scrollbar for Chrome, Safari and Opera */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-/* Hide scrollbar for IE, Edge and Firefox */
-.no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
 }

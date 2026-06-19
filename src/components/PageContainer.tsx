@@ -6,8 +6,6 @@ type PageContainerProps = {
 
 export const PageContainer = ({ children }: PageContainerProps) => {
   return (
-    <main className="flex h-full w-full flex-col gap-4 px-4 py-8">
-      {children}
-    </main>
+    <main className="flex h-full w-full flex-col gap-4 p-4">{children}</main>
   )
 }

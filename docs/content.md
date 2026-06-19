@@ -15,12 +15,26 @@ Posts and projects support title, slug, excerpt, Markdown body, status, publish
 date, SEO fields, and optional cover media. Projects also support category and
 external links.
 
+In the dashboard, posts are managed under the blog section. Home and Contact are
+edited as top-level dashboard sections backed by keyed page records.
+
 ## Publishing
 
 Public reads only query records with `status = "published"`. Draft records stay
 available in the dashboard but do not render on public content routes.
 
 Publishing content makes it available through the matching public route.
+
+## Navigation Visibility
+
+The dashboard settings page can hide the Blog, Projects, Photography, Software,
+and Store links from the public top navigation. These settings only affect link
+visibility. The matching public routes remain accessible by direct URL while
+their navigation links are hidden.
+
+When an admin has a valid session, the public top navigation appends a Dashboard
+link to `/dashboard`. This authenticated link is always last and is not
+controlled by the navigation visibility settings.
 
 ## Markdown
 

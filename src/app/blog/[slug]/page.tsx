@@ -28,7 +28,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <PageContainer>
-      <h1 className="font-black text-3xl">{post.title}</h1>
+      <h1 className="text-5xl">{post.title}</h1>
       {post.excerpt ? <p className="font-medium">{post.excerpt}</p> : null}
       <MarkdownContent markdown={post.bodyMarkdown} />
     </PageContainer>

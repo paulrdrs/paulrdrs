@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { requireDashboardSession } from "@/auth/guards"
 import { upsertDashboardPage } from "@/db/adminContent"
-import { updatePageAction } from "./actions"
+import { updatePageAction } from "./pages"
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn()
@@ -58,7 +58,7 @@ describe("page dashboard actions", () => {
           title: "Contact"
         })
       )
-    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/pages/contact")
+    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/contact")
 
     expect(upsertDashboardPageMock).toHaveBeenCalledWith(
       "contact",
@@ -68,10 +68,9 @@ describe("page dashboard actions", () => {
         title: "Contact"
       })
     )
-    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard/pages")
-    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard/pages/contact")
+    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard/contact")
     expect(revalidatePathMock).toHaveBeenCalledWith("/contact")
-    expect(redirect).toHaveBeenCalledWith("/dashboard/pages/contact")
+    expect(redirect).toHaveBeenCalledWith("/dashboard/contact")
   })
 
   it("revalidates the homepage route for home content", async () => {
@@ -86,9 +85,11 @@ describe("page dashboard actions", () => {
           title: "Home"
         })
       )
-    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/pages/home")
+    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/home")
 
+    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard/home")
     expect(revalidatePathMock).toHaveBeenCalledWith("/")
+    expect(redirect).toHaveBeenCalledWith("/dashboard/home")
   })
 
   it("rejects unknown page keys", async () => {

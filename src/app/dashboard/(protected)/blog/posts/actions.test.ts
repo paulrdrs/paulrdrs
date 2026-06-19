@@ -48,7 +48,7 @@ describe("post dashboard actions", () => {
     })
   })
 
-  it("creates draft posts and redirects to the editor", async () => {
+  it("creates draft posts and redirects to the blog posts editor", async () => {
     createDashboardPostMock.mockResolvedValue({ id: "post-id" })
 
     await expect(
@@ -59,7 +59,7 @@ describe("post dashboard actions", () => {
           title: "Draft Post"
         })
       )
-    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/posts/post-id")
+    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/blog/posts/post-id")
 
     expect(createDashboardPostMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -69,7 +69,7 @@ describe("post dashboard actions", () => {
         title: "Draft Post"
       })
     )
-    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard/posts")
+    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard/blog/posts")
     expect(revalidatePathMock).toHaveBeenCalledWith("/blog")
   })
 
@@ -87,7 +87,7 @@ describe("post dashboard actions", () => {
           title: "Updated Post"
         })
       )
-    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/posts/post-id")
+    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/blog/posts/post-id")
 
     expect(updateDashboardPostMock).toHaveBeenCalledWith(
       "post-id",
@@ -98,6 +98,6 @@ describe("post dashboard actions", () => {
         title: "Updated Post"
       })
     )
-    expect(redirect).toHaveBeenCalledWith("/dashboard/posts/post-id")
+    expect(redirect).toHaveBeenCalledWith("/dashboard/blog/posts/post-id")
   })
 })

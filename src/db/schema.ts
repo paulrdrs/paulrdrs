@@ -140,6 +140,21 @@ export const pages = pgTable(
   ]
 )
 
+export const siteNavigationSettings = pgTable("site_navigation_settings", {
+  id: varchar("id", { length: 32 }).primaryKey().default("main"),
+  blogEnabled: boolean("blog_enabled").notNull().default(true),
+  projectsEnabled: boolean("projects_enabled").notNull().default(true),
+  photographyEnabled: boolean("photography_enabled").notNull().default(true),
+  softwareEnabled: boolean("software_enabled").notNull().default(true),
+  storeEnabled: boolean("store_enabled").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+})
+
 export const analyticsEvents = pgTable(
   "analytics_events",
   {

@@ -18,6 +18,7 @@ This is a Next.js App Router personal site and CMS deployed on Railway.
 - Auth: admin passkeys, short-lived WebAuthn challenges, and server-side
   sessions.
 - Analytics: privacy-minimal public page view events and dashboard summaries.
+- Site settings: dashboard-managed top navigation visibility.
 
 ## Public Routes
 
@@ -40,10 +41,17 @@ The `/store` route is intentionally minimal for now.
 - `/dashboard/login`
 - `/dashboard/passkeys/setup`
 - `/dashboard/passkeys`
-- `/dashboard/posts`
+- `/dashboard/home`
+- `/dashboard/contact`
+- `/dashboard/blog`
+- `/dashboard/blog/posts`
 - `/dashboard/projects`
-- `/dashboard/pages`
 - `/dashboard/media`
+- `/dashboard/settings`
+
+`/dashboard/blog` redirects to `/dashboard/blog/posts`. Home and Contact are
+top-level dashboard editors backed by keyed page records; there is no dashboard
+Pages index or legacy `/dashboard/posts` route.
 
 Protected dashboard routes validate the signed session cookie against the
 server-side session table and redirect unauthenticated requests to

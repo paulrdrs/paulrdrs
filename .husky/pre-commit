@@ -2,4 +2,4 @@ pnpx lint-staged
 pnpm run lint
 pnpm run typecheck
 pnpm run test
-pnpm run build
+railway run pnpm run build

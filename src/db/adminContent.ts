@@ -105,21 +105,6 @@ export const updateDashboardProject = async (
   return project
 }
 
-export const getDashboardPages = async () => {
-  return getDb()
-    .select({
-      createdAt: pages.createdAt,
-      id: pages.id,
-      key: pages.key,
-      publishedAt: pages.publishedAt,
-      status: pages.status,
-      title: pages.title,
-      updatedAt: pages.updatedAt
-    })
-    .from(pages)
-    .orderBy(desc(pages.updatedAt), desc(pages.createdAt))
-}
-
 export const getDashboardPage = async (key: PageKey) => {
   const [page] = await getDb()
     .select()

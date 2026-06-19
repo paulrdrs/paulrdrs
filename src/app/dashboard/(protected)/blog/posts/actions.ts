@@ -11,9 +11,9 @@ export const createPostAction = async (formData: FormData) => {
 
   const post = await createDashboardPost(parsePostForm(formData))
 
-  revalidatePath("/dashboard/posts")
+  revalidatePath("/dashboard/blog/posts")
   revalidatePath("/blog")
-  redirect(`/dashboard/posts/${post.id}`)
+  redirect(`/dashboard/blog/posts/${post.id}`)
 }
 
 export const updatePostAction = async (id: string, formData: FormData) => {
@@ -21,8 +21,8 @@ export const updatePostAction = async (id: string, formData: FormData) => {
 
   await updateDashboardPost(id, parsePostForm(formData))
 
-  revalidatePath("/dashboard/posts")
-  revalidatePath(`/dashboard/posts/${id}`)
+  revalidatePath("/dashboard/blog/posts")
+  revalidatePath(`/dashboard/blog/posts/${id}`)
   revalidatePath("/blog")
-  redirect(`/dashboard/posts/${id}`)
+  redirect(`/dashboard/blog/posts/${id}`)
 }

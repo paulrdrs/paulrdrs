@@ -44,30 +44,40 @@ describe("DashboardLayout", () => {
       screen.getByRole("heading", { name: "Dashboard" })
     ).toBeInTheDocument()
     expect(screen.getByText("admin@example.com")).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute(
-      "href",
-      "/dashboard"
-    )
-    expect(screen.getByRole("link", { name: "Posts" })).toHaveAttribute(
-      "href",
-      "/dashboard/posts"
-    )
-    expect(screen.getByRole("link", { name: "Projects" })).toHaveAttribute(
-      "href",
-      "/dashboard/projects"
-    )
-    expect(screen.getByRole("link", { name: "Pages" })).toHaveAttribute(
-      "href",
-      "/dashboard/pages"
-    )
-    expect(screen.getByRole("link", { name: "Media" })).toHaveAttribute(
-      "href",
-      "/dashboard/media"
-    )
-    expect(screen.getByRole("link", { name: "Passkeys" })).toHaveAttribute(
-      "href",
-      "/dashboard/passkeys"
-    )
+    expect(screen.getAllByRole("link")).toEqual([
+      expect.objectContaining({
+        href: "http://localhost:3000/dashboard",
+        textContent: "Overview"
+      }),
+      expect.objectContaining({
+        href: "http://localhost:3000/dashboard/home",
+        textContent: "Home"
+      }),
+      expect.objectContaining({
+        href: "http://localhost:3000/dashboard/contact",
+        textContent: "Contact"
+      }),
+      expect.objectContaining({
+        href: "http://localhost:3000/dashboard/blog",
+        textContent: "blog"
+      }),
+      expect.objectContaining({
+        href: "http://localhost:3000/dashboard/projects",
+        textContent: "Projects"
+      }),
+      expect.objectContaining({
+        href: "http://localhost:3000/dashboard/media",
+        textContent: "Media"
+      }),
+      expect.objectContaining({
+        href: "http://localhost:3000/dashboard/settings",
+        textContent: "Settings"
+      }),
+      expect.objectContaining({
+        href: "http://localhost:3000/dashboard/passkeys",
+        textContent: "Passkeys"
+      })
+    ])
     expect(screen.getByRole("button", { name: "Log out" })).toBeInTheDocument()
     expect(screen.getByText("Protected content")).toBeInTheDocument()
   })

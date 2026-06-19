@@ -31,7 +31,7 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col items-center gap-4 scroll-smooth antialiased">
         <TopNavBar />
 
-        <div className="mt-12 flex h-full w-full max-w-5xl flex-col">
+        <div className="flex h-full w-full max-w-5xl flex-col pt-12">
           {children}
         </div>
 

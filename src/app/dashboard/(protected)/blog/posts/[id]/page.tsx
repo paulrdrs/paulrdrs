@@ -1,16 +1,18 @@
 import { notFound } from "next/navigation"
 import { requireDashboardSession } from "@/auth/guards"
 import { getDashboardMediaAssets, getDashboardPost } from "@/db/adminContent"
-import { ContentEditor } from "../../_components/ContentEditor"
+import { ContentEditor } from "../../../_components/ContentEditor"
 import { updatePostAction } from "../actions"
 
-type EditPostPageProps = {
+type EditBlogPostPageProps = {
   params: Promise<{
     id: string
   }>
 }
 
-export default async function EditPostPage({ params }: EditPostPageProps) {
+export default async function EditBlogPostPage({
+  params
+}: EditBlogPostPageProps) {
   await requireDashboardSession()
 
   const { id } = await params

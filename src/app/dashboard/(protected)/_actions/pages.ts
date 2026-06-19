@@ -4,8 +4,11 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { requireDashboardSession } from "@/auth/guards"
 import { parsePageForm } from "@/cms/contentForms"
-import { isPageKey } from "@/cms/pages"
+import { isPageKey, type PageKey } from "@/cms/pages"
 import { upsertDashboardPage } from "@/db/adminContent"
+
+const dashboardPagePath = (key: PageKey) =>
+  key === "home" ? "/dashboard/home" : "/dashboard/contact"
 
 export const updatePageAction = async (key: string, formData: FormData) => {
   await requireDashboardSession()
@@ -16,8 +19,7 @@ export const updatePageAction = async (key: string, formData: FormData) => {
 
   await upsertDashboardPage(key, parsePageForm(formData))
 
-  revalidatePath("/dashboard/pages")
-  revalidatePath(`/dashboard/pages/${key}`)
+  revalidatePath(dashboardPagePath(key))
   revalidatePath(key === "home" ? "/" : `/${key}`)
-  redirect(`/dashboard/pages/${key}`)
+  redirect(dashboardPagePath(key))
 }

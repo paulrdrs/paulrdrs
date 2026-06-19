@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { requireDashboardSession } from "@/auth/guards"
 import { getDashboardPosts } from "@/db/adminContent"
-import DashboardPostsPage from "./page"
+import DashboardBlogPostsPage from "./page"
 
 vi.mock("@/auth/guards", () => ({
   requireDashboardSession: vi.fn()
@@ -14,7 +14,7 @@ vi.mock("@/db/adminContent", () => ({
 const requireDashboardSessionMock = vi.mocked(requireDashboardSession)
 const getDashboardPostsMock = vi.mocked(getDashboardPosts)
 
-describe("DashboardPostsPage", () => {
+describe("DashboardBlogPostsPage", () => {
   beforeEach(() => {
     requireDashboardSessionMock.mockResolvedValue({
       email: "admin@example.com",
@@ -36,16 +36,16 @@ describe("DashboardPostsPage", () => {
       }
     ])
 
-    render(await DashboardPostsPage())
+    render(await DashboardBlogPostsPage())
 
     expect(screen.getByRole("heading", { name: "Posts" })).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "New post" })).toHaveAttribute(
       "href",
-      "/dashboard/posts/new"
+      "/dashboard/blog/posts/new"
     )
     expect(screen.getByRole("link", { name: "Hello Post" })).toHaveAttribute(
       "href",
-      "/dashboard/posts/post-id"
+      "/dashboard/blog/posts/post-id"
     )
     expect(screen.getByText("published")).toBeInTheDocument()
     expect(screen.getByText("hello-post")).toBeInTheDocument()
@@ -54,7 +54,7 @@ describe("DashboardPostsPage", () => {
   it("renders an empty state", async () => {
     getDashboardPostsMock.mockResolvedValue([])
 
-    render(await DashboardPostsPage())
+    render(await DashboardBlogPostsPage())
 
     expect(screen.getByText("No posts yet.")).toBeInTheDocument()
   })
