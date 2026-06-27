@@ -108,6 +108,19 @@ step.
 - Drizzle migrations generated via `pnpm db:generate` (never hand-edited); run
   `pnpm format` on generated `drizzle/meta/*` so Biome is happy.
 
+## Autonomous chaining (scheduled runs)
+
+When a task runs as a scheduled agent, it should **self-advance the migration**:
+after a clean, committed task, schedule the next task to run ~2 hours later (via
+the scheduled-tasks tool). Guardrails:
+
+- **Only chain on success.** If any gate fails or the commit did not happen, do
+  NOT schedule the next task — report the blocker instead.
+- **Chain tasks 4 → 5 only.** STOP before task 6 (stats → Notion — needs
+  `NOTION_STATS_DB_ID` and a Notion stats database) and task 7 (destructive
+  dashboard/auth removal). Those require manual kickoff.
+- Commit to the current branch; never create a branch, push, or open a PR.
+
 ## Resolved decisions
 
 - **Property contract:** defined in [notion-schema.md](./notion-schema.md)
