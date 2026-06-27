@@ -10,6 +10,14 @@ export const serverEnvsSchema = z.object({
   DATABASE_URL: z.url()
 })
 
+export const siteEnvsSchema = z.object({
+  SITE_URL: z.url()
+})
+
+export const analyticsEnvsSchema = z.object({
+  ANALYTICS_SALT: z.string().min(32)
+})
+
 export const authEnvsSchema = z.object({
   ADMIN_EMAIL_ALLOWLIST: z
     .string()

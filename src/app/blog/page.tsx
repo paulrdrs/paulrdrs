@@ -1,6 +1,6 @@
-import Link from "next/link"
 import { trackPageView } from "@/analytics/server"
 import { PageContainer } from "@/components/PageContainer"
+import { PostList } from "@/components/PostList"
 import { getPublishedPosts } from "@/db/content"
 
 export const dynamic = "force-dynamic"
@@ -11,26 +11,14 @@ export default async function BlogPage() {
 
   return (
     <PageContainer>
-      <h1 className="font-black text-3xl">Blog</h1>
+      <header className="pb-2">
+        <h1 className="page-title">Blog</h1>
+      </header>
 
       {posts.length > 0 ? (
-        <ul className="flex flex-col gap-4">
-          {posts.map((post) => (
-            <li className="flex flex-col gap-1" key={post.id}>
-              <Link
-                className="font-black text-xl hover:underline"
-                href={`/blog/${post.slug}`}
-              >
-                {post.title}
-              </Link>
-              {post.excerpt ? (
-                <p className="font-medium">{post.excerpt}</p>
-              ) : null}
-            </li>
-          ))}
-        </ul>
+        <PostList posts={posts} />
       ) : (
-        <p className="font-medium">No posts published yet.</p>
+        <div className="empty-state">No posts published yet.</div>
       )}
     </PageContainer>
   )

@@ -1,10 +1,26 @@
 import "server-only"
-import { authEnvsSchema, serverEnvsSchema, storageEnvsSchema } from "./schemas"
+import {
+  analyticsEnvsSchema,
+  authEnvsSchema,
+  serverEnvsSchema,
+  siteEnvsSchema,
+  storageEnvsSchema
+} from "./schemas"
+
+export const getAnalyticsEnvs = () =>
+  analyticsEnvsSchema.parse({
+    ANALYTICS_SALT: process.env.ANALYTICS_SALT
+  })
 
 export const getServerEnvs = () =>
   serverEnvsSchema.parse({
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV || "development"
+  })
+
+export const getSiteEnvs = () =>
+  siteEnvsSchema.parse({
+    SITE_URL: process.env.SITE_URL
   })
 
 export const getAuthEnvs = () =>

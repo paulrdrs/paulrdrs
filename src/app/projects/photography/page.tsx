@@ -1,6 +1,6 @@
-import Link from "next/link"
 import { trackPageView } from "@/analytics/server"
 import { PageContainer } from "@/components/PageContainer"
+import { ProjectGrid } from "@/components/ProjectGrid"
 import { getPublishedProjects } from "@/db/content"
 
 export const dynamic = "force-dynamic"
@@ -11,26 +11,19 @@ export default async function PhotographyProjectsPage() {
 
   return (
     <PageContainer>
-      <h1 className="font-black text-3xl">Photography</h1>
+      <header className="pb-2">
+        <div>
+          <p className="eyebrow mb-4">Projects</p>
+          <h1 className="page-title">Photography</h1>
+        </div>
+      </header>
 
       {projects.length > 0 ? (
-        <ul className="flex flex-col gap-4">
-          {projects.map((project) => (
-            <li className="flex flex-col gap-1" key={project.id}>
-              <Link
-                className="font-black text-xl hover:underline"
-                href={`/projects/photography/${project.slug}`}
-              >
-                {project.title}
-              </Link>
-              {project.excerpt ? (
-                <p className="font-medium">{project.excerpt}</p>
-              ) : null}
-            </li>
-          ))}
-        </ul>
+        <ProjectGrid projects={projects} />
       ) : (
-        <p className="font-medium">No photography projects published yet.</p>
+        <div className="empty-state">
+          No photography projects published yet.
+        </div>
       )}
     </PageContainer>
   )

@@ -19,13 +19,13 @@ export default async function DashboardPage() {
       <h2 className="font-black text-2xl">Overview</h2>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="border border-current p-4">
+        <div className="panel">
           <p className="font-mono text-sm uppercase">Views, 30 days</p>
           <p className="font-black text-4xl">
             {formatCount(analytics.recentViews)}
           </p>
         </div>
-        <div className="border border-current p-4">
+        <div className="panel">
           <p className="font-mono text-sm uppercase">Visitors, 30 days</p>
           <p className="font-black text-4xl">
             {formatCount(analytics.recentVisitors)}
@@ -33,26 +33,24 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-4">
         <h3 className="font-black text-xl">Daily views</h3>
         {analytics.dailyViews.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-              <thead className="border-current border-b font-mono text-sm">
+            <table>
+              <thead>
                 <tr>
-                  <th className="py-2 pr-4">Date</th>
-                  <th className="py-2 pr-4">Views</th>
+                  <th>Date</th>
+                  <th>Views</th>
                 </tr>
               </thead>
               <tbody>
                 {analytics.dailyViews.map((day) => (
-                  <tr className="border-current border-b" key={day.date}>
-                    <td className="py-3 pr-4 font-mono text-sm">
+                  <tr key={day.date}>
+                    <td className="font-mono text-sm">
                       {formatDate(day.date)}
                     </td>
-                    <td className="py-3 pr-4 font-black">
-                      {formatCount(day.views)}
-                    </td>
+                    <td className="font-black">{formatCount(day.views)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -63,16 +61,13 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-3">
+      <section className="grid gap-8 lg:grid-cols-3">
+        <div className="flex flex-col gap-4">
           <h3 className="font-black text-xl">Top posts</h3>
           {analytics.topPosts.length > 0 ? (
             <ol className="flex flex-col gap-2">
               {analytics.topPosts.map((post) => (
-                <li
-                  className="border-current border-b pb-2"
-                  key={post.contentId}
-                >
+                <li className="border-line border-b pb-2" key={post.contentId}>
                   <div className="font-black">{post.title}</div>
                   <div className="font-mono text-sm">
                     {formatCount(post.views)} views
@@ -85,13 +80,13 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <h3 className="font-black text-xl">Top projects</h3>
           {analytics.topProjects.length > 0 ? (
             <ol className="flex flex-col gap-2">
               {analytics.topProjects.map((project) => (
                 <li
-                  className="border-current border-b pb-2"
+                  className="border-line border-b pb-2"
                   key={project.contentId}
                 >
                   <div className="font-black">{project.title}</div>
@@ -107,12 +102,12 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <h3 className="font-black text-xl">Top paths</h3>
           {analytics.topPaths.length > 0 ? (
             <ol className="flex flex-col gap-2">
               {analytics.topPaths.map((path) => (
-                <li className="border-current border-b pb-2" key={path.path}>
+                <li className="border-line border-b pb-2" key={path.path}>
                   <div className="break-all font-black">{path.path}</div>
                   <div className="font-mono text-sm">
                     {formatCount(path.views)} views

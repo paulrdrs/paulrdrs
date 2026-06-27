@@ -1,19 +1,63 @@
-export const Hero = () => {
+import Link from "next/link"
+import type { FeaturedHero } from "@/db/content"
+import { ContentImage } from "./ContentImage"
+import { MarkdownContent } from "./MarkdownContent"
+
+type HeroProps = {
+  featured?: FeaturedHero
+  introMarkdown?: string
+  title: string
+}
+
+export const Hero = ({ featured, introMarkdown, title }: HeroProps) => {
+  if (!featured) {
+    return (
+      <section className="grid gap-8 pb-8 lg:grid-cols-12">
+        <h1 className="display-title lg:col-span-9">{title}</h1>
+        {introMarkdown ? (
+          <div className="lg:col-span-7 lg:col-start-6">
+            <MarkdownContent markdown={introMarkdown} />
+          </div>
+        ) : null}
+      </section>
+    )
+  }
+
   return (
-    <div className="flex w-full max-w-5xl flex-col items-center justify-between gap-2 px-4 pt-8">
-      <span className="font-black text-3xl">
-        {"Lorem ipsum dolor sit amet consectetur adipiscing elit"}
-      </span>
+    <section className="grid gap-8 pb-12 lg:grid-cols-12 lg:items-end">
+      <div className="flex flex-col justify-end gap-4 lg:col-span-5 lg:pb-4">
+        <p className="eyebrow">Featured · {featured.label}</p>
+        <h1 className="text-balance font-black text-5xl sm:text-7xl">
+          <Link className="hover:text-muted" href={featured.href}>
+            {featured.title}
+          </Link>
+        </h1>
+        {featured.excerpt ? (
+          <p className="max-w-xl text-lg text-muted">{featured.excerpt}</p>
+        ) : null}
+        <Link
+          className="font-mono text-link text-sm uppercase"
+          href={featured.href}
+        >
+          View feature
+        </Link>
+      </div>
 
-      <span className="font-medium">{`Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.`}</span>
-
-      <span className="text-sm">
-        {"Lorem ipsum dolor sit amet consectetur adipiscing elit"}
-      </span>
-
-      <span className="text-sm underline decoration-2 decoration-sky-500">
-        {"#photography #software"}
-      </span>
-    </div>
+      {featured.coverMediaId ? (
+        <Link className="group lg:col-span-7" href={featured.href}>
+          <ContentImage
+            alt={featured.coverAltText}
+            attribution={featured.coverAttribution}
+            className="aspect-4/3 lg:aspect-5/4"
+            id={featured.coverMediaId}
+            priority
+          />
+        </Link>
+      ) : (
+        <div className="hidden aspect-5/4 items-end border border-line p-4 text-muted lg:col-span-7 lg:flex">
+          <span className="font-mono text-xs uppercase">{featured.label}</span>
+        </div>
+      )}
+    </section>
   )
 }

@@ -26,6 +26,11 @@ describe("ProjectsPage", () => {
         title: "Camera Work",
         slug: "camera-work",
         category: "photography",
+        coverAltText: null,
+        coverAttribution: null,
+        coverHeight: null,
+        coverMediaId: null,
+        coverWidth: null,
         excerpt: "A published project.",
         publishedAt: new Date("2026-01-01"),
         createdAt: new Date("2026-01-01")

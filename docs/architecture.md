@@ -31,6 +31,7 @@ This is a Next.js App Router personal site and CMS deployed on Railway.
 - `/projects/[category]/[slug]`
 - `/store`
 - `/contact`
+- `/photo/[id]`
 - `/media/[id]`
 
 The `/store` route is intentionally minimal for now.
@@ -64,3 +65,17 @@ of the rendering model.
 
 Components should keep styling internal or expose semantic props such as
 `variant` or `size`; avoid raw style or class props on reusable components.
+
+## Presentation
+
+The public site and dashboard share semantic Tailwind theme tokens for canvas,
+surface, text, muted text, rules, and accent color. Light and dark palettes
+follow the visitor's operating-system preference. Public chrome is hidden on
+dashboard and passkey routes, which use their own compact navigation and layout.
+
+### Spacing Scale
+
+Padding, margin, and gap utilities must use only Tailwind spacing values `1`,
+`2`, `4`, `8`, `12`, or `16`. Use `mx-auto` when centering a constrained shell.
+Do not introduce raw CSS spacing, arbitrary spacing utilities, negative spacing,
+or additional scale values.

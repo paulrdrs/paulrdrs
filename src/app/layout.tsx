@@ -1,7 +1,9 @@
 import type { Metadata } from "next"
 import { Geist, Inconsolata } from "next/font/google"
 import "./globals.css"
+import { SiteFrame } from "@/components/SiteFrame"
 import { TopNavBar } from "@/components/TopNavBar"
+import { getSiteEnvs } from "@/envs/server"
 
 const inconsolata = Inconsolata({
   variable: "--font-inconsolata",
@@ -13,9 +15,21 @@ const geist = Geist({
   subsets: ["latin"]
 })
 
+const resolveMetadataBase = () => {
+  try {
+    return new URL(getSiteEnvs().SITE_URL)
+  } catch {
+    return undefined
+  }
+}
+
 export const metadata: Metadata = {
-  title: "paulrdrs",
-  description: "paulrdrs"
+  metadataBase: resolveMetadataBase(),
+  title: {
+    default: "paulrdrs",
+    template: "%s · paulrdrs"
+  },
+  description: "Personal site, blog, and projects portfolio of Paulo Rodrigues."
 }
 
 export default function RootLayout({
@@ -24,18 +38,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${inconsolata.variable}`}>
+    <html
+      lang="en"
+      className={`${geist.variable} ${inconsolata.variable}`}
+      data-scroll-behavior="smooth"
+    >
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml"></link>
       </head>
-      <body className="flex min-h-screen flex-col items-center gap-4 scroll-smooth antialiased">
-        <TopNavBar />
-
-        <div className="flex h-full w-full max-w-5xl flex-col pt-12">
-          {children}
-        </div>
-
-        <footer className="font-mono">{"paulrdrs.com"}</footer>
+      <body>
+        <SiteFrame navigation={<TopNavBar />}>{children}</SiteFrame>
       </body>
     </html>
   )

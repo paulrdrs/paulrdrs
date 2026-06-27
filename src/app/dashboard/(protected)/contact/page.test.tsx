@@ -11,6 +11,10 @@ vi.mock("@/db/adminContent", () => ({
   getDashboardPage: vi.fn()
 }))
 
+vi.mock("../_actions/pages", () => ({
+  updatePageAction: vi.fn()
+}))
+
 const requireDashboardSessionMock = vi.mocked(requireDashboardSession)
 const getDashboardPageMock = vi.mocked(getDashboardPage)
 
@@ -19,6 +23,7 @@ describe("DashboardContactPage", () => {
     requireDashboardSessionMock.mockResolvedValue({
       email: "admin@example.com",
       expiresAt: new Date("2026-01-01"),
+      lastSeenAt: new Date("2026-01-01"),
       id: "session-id"
     })
   })

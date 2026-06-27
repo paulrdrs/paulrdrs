@@ -8,7 +8,16 @@ vi.mock("@/auth/guards", () => ({
 }))
 
 vi.mock("@/db/adminContent", () => ({
+  getDashboardHeroOptions: vi.fn(async () => ({
+    media: [],
+    posts: [],
+    projects: []
+  })),
   getDashboardPage: vi.fn()
+}))
+
+vi.mock("../_actions/pages", () => ({
+  updatePageAction: vi.fn()
 }))
 
 const requireDashboardSessionMock = vi.mocked(requireDashboardSession)
@@ -19,6 +28,7 @@ describe("DashboardHomePage", () => {
     requireDashboardSessionMock.mockResolvedValue({
       email: "admin@example.com",
       expiresAt: new Date("2026-01-01"),
+      lastSeenAt: new Date("2026-01-01"),
       id: "session-id"
     })
   })

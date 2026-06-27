@@ -25,6 +25,17 @@ export const analyticsContentType = pgEnum("analytics_content_type", [
   "project"
 ])
 
+// Fresh `created_at` / `updated_at` column builders for tables that track both.
+// Returned from a factory so each table gets its own builder instances.
+const timestamps = () => ({
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+})
+
 export const mediaAssets = pgTable(
   "media_assets",
   {
@@ -38,12 +49,7 @@ export const mediaAssets = pgTable(
     altText: text("alt_text"),
     attribution: text("attribution"),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
+    ...timestamps()
   },
   (table) => [
     uniqueIndex("media_assets_object_key_unique").on(table.objectKey),
@@ -67,12 +73,7 @@ export const posts = pgTable(
     seoTitle: varchar("seo_title", { length: 255 }),
     seoDescription: text("seo_description"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
+    ...timestamps()
   },
   (table) => [
     uniqueIndex("posts_slug_unique").on(table.slug),
@@ -100,12 +101,7 @@ export const projects = pgTable(
     seoTitle: varchar("seo_title", { length: 255 }),
     seoDescription: text("seo_description"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
+    ...timestamps()
   },
   (table) => [
     uniqueIndex("projects_category_slug_unique").on(table.category, table.slug),
@@ -127,12 +123,7 @@ export const pages = pgTable(
     status: contentStatus("status").notNull().default("draft"),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
     publishedAt: timestamp("published_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
+    ...timestamps()
   },
   (table) => [
     uniqueIndex("pages_key_unique").on(table.key),
@@ -147,12 +138,7 @@ export const siteNavigationSettings = pgTable("site_navigation_settings", {
   photographyEnabled: boolean("photography_enabled").notNull().default(true),
   softwareEnabled: boolean("software_enabled").notNull().default(true),
   storeEnabled: boolean("store_enabled").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow()
+  ...timestamps()
 })
 
 export const analyticsEvents = pgTable(
@@ -180,28 +166,6 @@ export const analyticsEvents = pgTable(
   ]
 )
 
-export const magicLinkTokens = pgTable(
-  "magic_link_tokens",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    email: varchar("email", { length: 320 }).notNull(),
-    tokenHash: varchar("token_hash", { length: 128 }).notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-    consumedAt: timestamp("consumed_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
-  },
-  (table) => [
-    uniqueIndex("magic_link_tokens_token_hash_unique").on(table.tokenHash),
-    index("magic_link_tokens_email_created_at_idx").on(
-      table.email,
-      table.createdAt
-    ),
-    index("magic_link_tokens_expires_at_idx").on(table.expiresAt)
-  ]
-)
-
 export const adminPasskeys = pgTable(
   "admin_passkeys",
   {
@@ -215,12 +179,7 @@ export const adminPasskeys = pgTable(
     credentialBackedUp: boolean("credential_backed_up")
       .notNull()
       .default(false),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    ...timestamps(),
     lastUsedAt: timestamp("last_used_at", { withTimezone: true })
   },
   (table) => [

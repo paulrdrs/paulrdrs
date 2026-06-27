@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 import { createAnalyticsEvent } from "@/db/analytics"
-import { getAuthEnvs } from "@/envs/server"
+import { getAnalyticsEnvs } from "@/envs/server"
 import { POST } from "./route"
 
 vi.mock("@/db/analytics", () => ({
@@ -8,11 +8,11 @@ vi.mock("@/db/analytics", () => ({
 }))
 
 vi.mock("@/envs/server", () => ({
-  getAuthEnvs: vi.fn()
+  getAnalyticsEnvs: vi.fn()
 }))
 
 const createAnalyticsEventMock = vi.mocked(createAnalyticsEvent)
-const getAuthEnvsMock = vi.mocked(getAuthEnvs)
+const getAnalyticsEnvsMock = vi.mocked(getAnalyticsEnvs)
 
 const createRequest = (body: unknown) =>
   new NextRequest("https://paulrdrs.com/api/analytics/events", {
@@ -29,11 +29,8 @@ const createRequest = (body: unknown) =>
 describe("analytics events route", () => {
   beforeEach(() => {
     createAnalyticsEventMock.mockReset()
-    getAuthEnvsMock.mockReturnValue({
-      ADMIN_EMAIL_ALLOWLIST: ["admin@example.com"],
-      PASSKEY_BOOTSTRAP_SECRET: "a-bootstrap-secret-at-least-32-chars",
-      SESSION_SECRET: "0123456789abcdef0123456789abcdef",
-      SITE_URL: "https://paulrdrs.com"
+    getAnalyticsEnvsMock.mockReturnValue({
+      ANALYTICS_SALT: "0123456789abcdef0123456789abcdef"
     })
   })
 

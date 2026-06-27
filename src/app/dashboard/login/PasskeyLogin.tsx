@@ -47,7 +47,7 @@ export function PasskeyLogin() {
   return (
     <div className="flex max-w-md flex-col gap-4">
       <button
-        className="border border-current px-4 py-2 font-black text-base hover:bg-black hover:text-white"
+        className="button"
         disabled={isPending}
         onClick={signIn}
         type="button"
@@ -55,7 +55,11 @@ export function PasskeyLogin() {
         {isPending ? "Signing in..." : "Sign in with passkey"}
       </button>
 
-      {error ? <p className="font-medium">Passkey sign-in failed.</p> : null}
+      {error ? (
+        <p className="border-line border-l-2 pl-4 text-muted text-sm">
+          Passkey sign-in failed.
+        </p>
+      ) : null}
     </div>
   )
 }

@@ -10,7 +10,8 @@ vi.mock("@/auth/session", () => ({
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((path: string) => {
     throw new Error(`NEXT_REDIRECT:${path}`)
-  })
+  }),
+  usePathname: vi.fn(() => "/dashboard")
 }))
 
 const getCurrentSessionMock = vi.mocked(getCurrentSession)
@@ -35,6 +36,7 @@ describe("DashboardLayout", () => {
     getCurrentSessionMock.mockResolvedValue({
       email: "admin@example.com",
       expiresAt: new Date("2026-01-01"),
+      lastSeenAt: new Date("2026-01-01"),
       id: "session-id"
     })
 
@@ -59,7 +61,7 @@ describe("DashboardLayout", () => {
       }),
       expect.objectContaining({
         href: "http://localhost:3000/dashboard/blog",
-        textContent: "blog"
+        textContent: "Blog"
       }),
       expect.objectContaining({
         href: "http://localhost:3000/dashboard/projects",

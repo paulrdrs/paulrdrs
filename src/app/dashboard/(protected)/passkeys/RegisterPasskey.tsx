@@ -51,7 +51,7 @@ export function RegisterPasskey() {
   return (
     <div className="flex flex-col gap-2">
       <button
-        className="border border-current px-3 py-2 font-mono text-sm hover:bg-black hover:text-white"
+        className="button"
         disabled={isPending}
         onClick={register}
         type="button"

@@ -20,6 +20,7 @@ describe("DashboardSettingsPage", () => {
     requireDashboardSessionMock.mockResolvedValue({
       email: "admin@example.com",
       expiresAt: new Date("2026-01-01"),
+      lastSeenAt: new Date("2026-01-01"),
       id: "session-id"
     })
   })

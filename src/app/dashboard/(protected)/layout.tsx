@@ -1,7 +1,7 @@
-import Link from "next/link"
 import { redirect } from "next/navigation"
 import type { ReactNode } from "react"
 import { getCurrentSession } from "@/auth/session"
+import { NavigationLinks } from "@/components/NavigationLinks"
 
 type DashboardLayoutProps = {
   children: ReactNode
@@ -13,7 +13,7 @@ const dashboardLinks = [
   { href: "/dashboard", label: "Overview" },
   { href: "/dashboard/home", label: "Home" },
   { href: "/dashboard/contact", label: "Contact" },
-  { href: "/dashboard/blog", label: "blog" },
+  { href: "/dashboard/blog", label: "Blog" },
   { href: "/dashboard/projects", label: "Projects" },
   { href: "/dashboard/media", label: "Media" },
   { href: "/dashboard/settings", label: "Settings" },
@@ -30,38 +30,32 @@ export default async function DashboardLayout({
   }
 
   return (
-    <main className="flex h-full w-full flex-col gap-6 py-8">
-      <header className="flex flex-col gap-4 pb-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4">
+    <main className="dashboard-shell min-h-screen">
+      <header className="sticky top-0 z-40 border-line border-b bg-canvas/95 backdrop-blur-md">
+        <div className="site-shell flex min-h-20 flex-wrap items-center justify-between gap-4 py-4">
           <div className="flex flex-col gap-1">
-            <h1 className="font-black text-3xl">Dashboard</h1>
-            <p className="font-mono text-sm">{session.email}</p>
+            <h1 className="font-black text-xl">Dashboard</h1>
+            <p className="font-mono text-muted text-xs">{session.email}</p>
           </div>
 
           <form action="/dashboard/logout" method="post">
-            <button
-              className="border border-current px-3 py-2 font-mono text-sm hover:bg-black hover:text-white"
-              type="submit"
-            >
+            <button className="button-quiet" type="submit">
               Log out
             </button>
           </form>
         </div>
 
-        <nav className="no-scrollbar flex w-full max-w-5xl items-center gap-3 overflow-x-scroll bg-inherit px-4 font-mono text-sm">
-          {dashboardLinks.map((link) => (
-            <Link
-              className="nav-text-link font-medium"
-              href={link.href}
-              key={link.href}
-            >
-              {link.label}
-            </Link>
-          ))}
+        <nav
+          aria-label="Dashboard navigation"
+          className="site-shell no-scrollbar flex gap-8 overflow-x-auto border-line border-t py-2"
+        >
+          <NavigationLinks items={dashboardLinks} />
         </nav>
       </header>
 
-      <section className="flex flex-col gap-4 px-4">{children}</section>
+      <section className="site-shell flex flex-col gap-8 py-12 sm:py-16">
+        {children}
+      </section>
     </main>
   )
 }

@@ -1,4 +1,5 @@
 import {
+  analyticsEnvsSchema,
   authEnvsSchema,
   clientEnvsSchema,
   serverEnvsSchema,
@@ -111,6 +112,22 @@ describe("authEnvsSchema", () => {
       authEnvsSchema.safeParse({ ...valid, PASSKEY_RP_ID: "paulrdrs.com" })
         .success
     ).toBe(true)
+  })
+})
+
+describe("analyticsEnvsSchema", () => {
+  it("parses a sufficiently long salt", () => {
+    expect(
+      analyticsEnvsSchema.safeParse({
+        ANALYTICS_SALT: "a-salt-that-is-at-least-32-chars-long"
+      }).success
+    ).toBe(true)
+  })
+
+  it("rejects a short salt", () => {
+    expect(
+      analyticsEnvsSchema.safeParse({ ANALYTICS_SALT: "too-short" }).success
+    ).toBe(false)
   })
 })
 

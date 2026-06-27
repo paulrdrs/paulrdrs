@@ -10,7 +10,7 @@ import {
   verifyAuthenticationResponse,
   verifyRegistrationResponse
 } from "@simplewebauthn/server"
-import { and, desc, eq, gt, isNull } from "drizzle-orm"
+import { and, desc, eq, gt, isNotNull, isNull, lt, or } from "drizzle-orm"
 import { getDb } from "@/db/client"
 import { adminPasskeys, webauthnChallenges } from "@/db/schema"
 import { getAuthEnvs } from "@/envs/server"
@@ -137,6 +137,17 @@ const consumeChallenge = async (challenge: string) => {
     .update(webauthnChallenges)
     .set({ consumedAt: new Date() })
     .where(eq(webauthnChallenges.challenge, challenge))
+}
+
+export const deleteExpiredChallenges = async (now = new Date()) => {
+  await getDb()
+    .delete(webauthnChallenges)
+    .where(
+      or(
+        lt(webauthnChallenges.expiresAt, now),
+        isNotNull(webauthnChallenges.consumedAt)
+      )
+    )
 }
 
 export const getPasskeysByEmail = async (email: string) => {

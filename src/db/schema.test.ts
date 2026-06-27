@@ -5,7 +5,6 @@ import {
   analyticsEvents,
   authSessions,
   contentStatus,
-  magicLinkTokens,
   mediaAssets,
   pages,
   posts,
@@ -36,7 +35,6 @@ describe("database schema", () => {
       getTableName(siteNavigationSettings),
       getTableName(mediaAssets),
       getTableName(analyticsEvents),
-      getTableName(magicLinkTokens),
       getTableName(adminPasskeys),
       getTableName(webauthnChallenges),
       getTableName(authSessions)
@@ -47,7 +45,6 @@ describe("database schema", () => {
       "site_navigation_settings",
       "media_assets",
       "analytics_events",
-      "magic_link_tokens",
       "admin_passkeys",
       "webauthn_challenges",
       "auth_sessions"

@@ -24,6 +24,7 @@ describe("Home", () => {
       bodyMarkdown: "Intro **copy**.",
       id: "page-id",
       key: "home",
+      metadata: null,
       publishedAt: new Date("2026-01-01"),
       title: "Home intro"
     })

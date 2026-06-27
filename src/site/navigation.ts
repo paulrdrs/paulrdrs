@@ -15,12 +15,12 @@ type NavigationSection = {
 export const siteNavigationSections = [
   { field: "blogEnabled", href: "/blog", label: "Blog" },
   { field: "projectsEnabled", href: "/projects", label: "Projects" },
+  { field: "softwareEnabled", href: "/projects/software", label: "Software" },
   {
     field: "photographyEnabled",
     href: "/projects/photography",
     label: "Photography"
   },
-  { field: "softwareEnabled", href: "/projects/software", label: "Software" },
   { field: "storeEnabled", href: "/store", label: "Store" }
 ] satisfies NavigationSection[]
 

@@ -1,7 +1,8 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { requireDashboardSession } from "@/auth/guards"
-import { upsertDashboardPage } from "@/db/adminContent"
+import { getDashboardPage, upsertDashboardPage } from "@/db/adminContent"
+import { getFeaturedHeroContent } from "@/db/content"
 import { updatePageAction } from "./pages"
 
 vi.mock("next/cache", () => ({
@@ -19,10 +20,17 @@ vi.mock("@/auth/guards", () => ({
 }))
 
 vi.mock("@/db/adminContent", () => ({
+  getDashboardPage: vi.fn(),
   upsertDashboardPage: vi.fn()
 }))
 
+vi.mock("@/db/content", () => ({
+  getFeaturedHeroContent: vi.fn()
+}))
+
 const requireDashboardSessionMock = vi.mocked(requireDashboardSession)
+const getDashboardPageMock = vi.mocked(getDashboardPage)
+const getFeaturedHeroContentMock = vi.mocked(getFeaturedHeroContent)
 const revalidatePathMock = vi.mocked(revalidatePath)
 const upsertDashboardPageMock = vi.mocked(upsertDashboardPage)
 
@@ -42,8 +50,11 @@ describe("page dashboard actions", () => {
     requireDashboardSessionMock.mockResolvedValue({
       email: "admin@example.com",
       expiresAt: new Date("2026-01-01"),
+      lastSeenAt: new Date("2026-01-01"),
       id: "session-id"
     })
+    getDashboardPageMock.mockResolvedValue(undefined as never)
+    getFeaturedHeroContentMock.mockResolvedValue(undefined)
   })
 
   it("upserts contact content and revalidates public contact", async () => {
@@ -90,6 +101,60 @@ describe("page dashboard actions", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard/home")
     expect(revalidatePathMock).toHaveBeenCalledWith("/")
     expect(redirect).toHaveBeenCalledWith("/dashboard/home")
+  })
+
+  it("persists a validated homepage hero selection in metadata", async () => {
+    getFeaturedHeroContentMock.mockResolvedValue({
+      coverAltText: null,
+      coverAttribution: null,
+      coverHeight: null,
+      coverMediaId: null,
+      coverWidth: null,
+      excerpt: "Featured post",
+      href: "/blog/featured",
+      id: "post-id",
+      kind: "post",
+      label: "From the blog",
+      publishedAt: new Date("2026-01-01"),
+      slug: "featured",
+      title: "Featured"
+    })
+    upsertDashboardPageMock.mockResolvedValue({ key: "home" })
+
+    await expect(
+      updatePageAction(
+        "home",
+        createFormData({
+          bodyMarkdown: "Homepage intro.",
+          heroSelection: "post:post-id",
+          status: "published",
+          title: "Home"
+        })
+      )
+    ).rejects.toThrow("NEXT_REDIRECT:/dashboard/home")
+
+    expect(upsertDashboardPageMock).toHaveBeenCalledWith(
+      "home",
+      expect.objectContaining({
+        metadata: { hero: { id: "post-id", kind: "post" } }
+      })
+    )
+  })
+
+  it("rejects hero content without a public destination", async () => {
+    await expect(
+      updatePageAction(
+        "home",
+        createFormData({
+          bodyMarkdown: "Homepage intro.",
+          heroSelection: "post:draft-id",
+          status: "published",
+          title: "Home"
+        })
+      )
+    ).rejects.toThrow("Hero content must be publicly available")
+
+    expect(upsertDashboardPageMock).not.toHaveBeenCalled()
   })
 
   it("rejects unknown page keys", async () => {

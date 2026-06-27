@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { normalizeAnalyticsEvent } from "@/analytics/events"
 import { createAnalyticsEvent } from "@/db/analytics"
-import { getAuthEnvs } from "@/envs/server"
+import { getAnalyticsEnvs } from "@/envs/server"
 
 export const dynamic = "force-dynamic"
 
@@ -28,7 +28,7 @@ export const POST = async (request: NextRequest) => {
       request.headers.get("x-real-ip"),
     path: typeof payload?.path === "string" ? payload.path : "",
     referrer: request.headers.get("referer") ?? request.headers.get("referrer"),
-    salt: getAuthEnvs().SESSION_SECRET,
+    salt: getAnalyticsEnvs().ANALYTICS_SALT,
     userAgent: request.headers.get("user-agent")
   })
 

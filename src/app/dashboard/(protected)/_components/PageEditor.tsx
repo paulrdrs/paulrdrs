@@ -1,8 +1,21 @@
 import type { PageFormValues } from "@/cms/contentForms"
 import { MarkdownContent } from "@/components/MarkdownContent"
+import { getHeroSelectionValue, type HeroSelection } from "@/site/hero"
+
+type HeroOptions = {
+  media: Array<{ altText: string | null; filename: string; id: string }>
+  posts: Array<{ id: string; title: string }>
+  projects: Array<{
+    category: "photography" | "software"
+    id: string
+    title: string
+  }>
+}
 
 type PageEditorProps = {
   action: (formData: FormData) => void | Promise<void>
+  heroOptions?: HeroOptions
+  heroSelection?: HeroSelection | null
   page?: PageFormValues
   submitLabel: string
 }
@@ -15,19 +28,79 @@ const formatDateTimeLocal = (date: Date | null | undefined) => {
   return date.toISOString().slice(0, 16)
 }
 
-export const PageEditor = ({ action, page, submitLabel }: PageEditorProps) => {
+export const PageEditor = ({
+  action,
+  heroOptions,
+  heroSelection = null,
+  page,
+  submitLabel
+}: PageEditorProps) => {
   const bodyMarkdown = page?.bodyMarkdown ?? ""
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <div className="grid gap-8 lg:grid-cols-2">
       <form action={action} className="flex flex-col gap-4">
+        {heroOptions ? (
+          <label className="field-label" htmlFor="heroSelection">
+            Featured homepage hero
+            <select
+              className="field-control"
+              defaultValue={getHeroSelectionValue(heroSelection)}
+              id="heroSelection"
+              name="heroSelection"
+            >
+              <option value="">Home page introduction</option>
+              {heroOptions.posts.length > 0 ? (
+                <optgroup label="Blog posts">
+                  {heroOptions.posts.map((post) => (
+                    <option key={post.id} value={`post:${post.id}`}>
+                      {post.title}
+                    </option>
+                  ))}
+                </optgroup>
+              ) : null}
+              {(["software", "photography"] as const).map((category) => {
+                const projects = heroOptions.projects.filter(
+                  (project) => project.category === category
+                )
+
+                return projects.length > 0 ? (
+                  <optgroup
+                    key={category}
+                    label={category === "software" ? "Software" : "Photography"}
+                  >
+                    {projects.map((project) => (
+                      <option key={project.id} value={`project:${project.id}`}>
+                        {project.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : null
+              })}
+              {heroOptions.media.length > 0 ? (
+                <optgroup label="Individual photos">
+                  {heroOptions.media.map((asset) => (
+                    <option key={asset.id} value={`media:${asset.id}`}>
+                      {asset.altText || asset.filename}
+                    </option>
+                  ))}
+                </optgroup>
+              ) : null}
+            </select>
+            <span className="font-sans text-muted text-sm normal-case tracking-normal">
+              Published content links to its page. Individual photos open in a
+              dedicated viewer.
+            </span>
+          </label>
+        ) : null}
+
         <label
           className="flex flex-col gap-2 font-mono text-sm"
           htmlFor="title"
         >
           Title
           <input
-            className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+            className="field-control"
             defaultValue={page?.title ?? ""}
             id="title"
             name="title"
@@ -42,7 +115,7 @@ export const PageEditor = ({ action, page, submitLabel }: PageEditorProps) => {
         >
           Markdown body
           <textarea
-            className="min-h-72 border border-current bg-transparent px-3 py-2 font-sans text-base"
+            className="field-control min-h-72"
             defaultValue={bodyMarkdown}
             id="bodyMarkdown"
             name="bodyMarkdown"
@@ -56,7 +129,7 @@ export const PageEditor = ({ action, page, submitLabel }: PageEditorProps) => {
           >
             Status
             <select
-              className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+              className="field-control"
               defaultValue={page?.status ?? "draft"}
               id="status"
               name="status"
@@ -72,7 +145,7 @@ export const PageEditor = ({ action, page, submitLabel }: PageEditorProps) => {
           >
             Publish date
             <input
-              className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+              className="field-control"
               defaultValue={formatDateTimeLocal(page?.publishedAt)}
               id="publishedAt"
               name="publishedAt"
@@ -81,16 +154,13 @@ export const PageEditor = ({ action, page, submitLabel }: PageEditorProps) => {
           </label>
         </div>
 
-        <button
-          className="border border-current px-4 py-2 font-black text-base hover:bg-black hover:text-white"
-          type="submit"
-        >
+        <button className="button" type="submit">
           {submitLabel}
         </button>
       </form>
 
-      <aside className="flex flex-col gap-3">
-        <h3 className="font-black text-xl">Preview</h3>
+      <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
+        <p className="eyebrow">Preview</p>
         {bodyMarkdown ? (
           <MarkdownContent markdown={bodyMarkdown} />
         ) : (

@@ -48,15 +48,12 @@ export const ContentEditor = ({
   const bodyMarkdown = content?.bodyMarkdown ?? ""
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <div className="grid gap-8 lg:grid-cols-2">
       <form action={action} className="flex flex-col gap-4">
-        <label
-          className="flex flex-col gap-2 font-mono text-sm"
-          htmlFor="title"
-        >
+        <label className="field-label" htmlFor="title">
           Title
           <input
-            className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+            className="field-control"
             defaultValue={content?.title ?? ""}
             id="title"
             name="title"
@@ -65,10 +62,10 @@ export const ContentEditor = ({
           />
         </label>
 
-        <label className="flex flex-col gap-2 font-mono text-sm" htmlFor="slug">
+        <label className="field-label" htmlFor="slug">
           Slug
           <input
-            className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+            className="field-control"
             defaultValue={content?.slug ?? ""}
             id="slug"
             name="slug"
@@ -77,13 +74,10 @@ export const ContentEditor = ({
         </label>
 
         {kind === "project" ? (
-          <label
-            className="flex flex-col gap-2 font-mono text-sm"
-            htmlFor="category"
-          >
+          <label className="field-label" htmlFor="category">
             Category
             <select
-              className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+              className="field-control"
               defaultValue={content?.category ?? "software"}
               id="category"
               name="category"
@@ -98,13 +92,10 @@ export const ContentEditor = ({
           </label>
         ) : null}
 
-        <label
-          className="flex flex-col gap-2 font-mono text-sm"
-          htmlFor="coverMediaId"
-        >
+        <label className="field-label" htmlFor="coverMediaId">
           Cover media
           <select
-            className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+            className="field-control"
             defaultValue={content?.coverMediaId ?? ""}
             id="coverMediaId"
             name="coverMediaId"
@@ -118,26 +109,20 @@ export const ContentEditor = ({
           </select>
         </label>
 
-        <label
-          className="flex flex-col gap-2 font-mono text-sm"
-          htmlFor="excerpt"
-        >
+        <label className="field-label" htmlFor="excerpt">
           Excerpt
           <textarea
-            className="min-h-24 border border-current bg-transparent px-3 py-2 font-sans text-base"
+            className="field-control min-h-24"
             defaultValue={content?.excerpt ?? ""}
             id="excerpt"
             name="excerpt"
           />
         </label>
 
-        <label
-          className="flex flex-col gap-2 font-mono text-sm"
-          htmlFor="bodyMarkdown"
-        >
+        <label className="field-label" htmlFor="bodyMarkdown">
           Markdown body
           <textarea
-            className="min-h-72 border border-current bg-transparent px-3 py-2 font-sans text-base"
+            className="field-control min-h-72"
             defaultValue={bodyMarkdown}
             id="bodyMarkdown"
             name="bodyMarkdown"
@@ -145,13 +130,10 @@ export const ContentEditor = ({
         </label>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <label
-            className="flex flex-col gap-2 font-mono text-sm"
-            htmlFor="status"
-          >
+          <label className="field-label" htmlFor="status">
             Status
             <select
-              className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+              className="field-control"
               defaultValue={content?.status ?? "draft"}
               id="status"
               name="status"
@@ -161,13 +143,10 @@ export const ContentEditor = ({
             </select>
           </label>
 
-          <label
-            className="flex flex-col gap-2 font-mono text-sm"
-            htmlFor="publishedAt"
-          >
+          <label className="field-label" htmlFor="publishedAt">
             Publish date
             <input
-              className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+              className="field-control"
               defaultValue={formatDateTimeLocal(content?.publishedAt)}
               id="publishedAt"
               name="publishedAt"
@@ -176,13 +155,10 @@ export const ContentEditor = ({
           </label>
         </div>
 
-        <label
-          className="flex flex-col gap-2 font-mono text-sm"
-          htmlFor="seoTitle"
-        >
+        <label className="field-label" htmlFor="seoTitle">
           SEO title
           <input
-            className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+            className="field-control"
             defaultValue={content?.seoTitle ?? ""}
             id="seoTitle"
             name="seoTitle"
@@ -190,29 +166,23 @@ export const ContentEditor = ({
           />
         </label>
 
-        <label
-          className="flex flex-col gap-2 font-mono text-sm"
-          htmlFor="seoDescription"
-        >
+        <label className="field-label" htmlFor="seoDescription">
           SEO description
           <textarea
-            className="min-h-20 border border-current bg-transparent px-3 py-2 font-sans text-base"
+            className="field-control min-h-20"
             defaultValue={content?.seoDescription ?? ""}
             id="seoDescription"
             name="seoDescription"
           />
         </label>
 
-        <button
-          className="border border-current px-4 py-2 font-black text-base hover:bg-black hover:text-white"
-          type="submit"
-        >
+        <button className="button" type="submit">
           {submitLabel}
         </button>
       </form>
 
-      <aside className="flex flex-col gap-3">
-        <h3 className="font-black text-xl">Preview</h3>
+      <aside className="flex flex-col gap-4 lg:sticky lg:top-32 lg:self-start">
+        <p className="eyebrow">Preview</p>
         {bodyMarkdown ? (
           <MarkdownContent markdown={bodyMarkdown} />
         ) : (

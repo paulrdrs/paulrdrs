@@ -25,6 +25,17 @@ available in the dashboard but do not render on public content routes.
 
 Publishing content makes it available through the matching public route.
 
+## Homepage Hero
+
+The Home editor can feature a published post, a published software or
+photography project, or an uploaded image. The selection is stored as a
+validated `{ kind, id }` value in the Home page's JSON metadata.
+
+Selected posts and projects link to their existing public routes. Selected
+media links to `/photo/[id]`, an unlisted image detail page that includes alt
+text and attribution. If the selection becomes unavailable, or no selection is
+made, the published Home title and Markdown become the typographic hero.
+
 ## Navigation Visibility
 
 The dashboard settings page can hide the Blog, Projects, Photography, Software,

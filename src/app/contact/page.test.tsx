@@ -24,6 +24,7 @@ describe("ContactPage", () => {
       bodyMarkdown: "Email **hello@example.com**.",
       id: "page-id",
       key: "contact",
+      metadata: null,
       publishedAt: new Date("2026-01-01"),
       title: "Reach me"
     })

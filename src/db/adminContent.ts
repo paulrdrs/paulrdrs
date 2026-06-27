@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, like } from "drizzle-orm"
 import type {
   PageFormValues,
   PostFormValues,
@@ -117,7 +117,7 @@ export const getDashboardPage = async (key: PageKey) => {
 
 export const upsertDashboardPage = async (
   key: PageKey,
-  values: PageFormValues
+  values: PageFormValues & { metadata?: Record<string, unknown> }
 ) => {
   const [page] = await getDb()
     .insert(pages)
@@ -129,6 +129,40 @@ export const upsertDashboardPage = async (
     .returning({ key: pages.key })
 
   return page
+}
+
+export const getDashboardHeroOptions = async () => {
+  const [publishedPosts, publishedProjects, media] = await Promise.all([
+    getDb()
+      .select({ id: posts.id, title: posts.title })
+      .from(posts)
+      .where(eq(posts.status, "published"))
+      .orderBy(desc(posts.publishedAt), desc(posts.createdAt)),
+    getDb()
+      .select({
+        category: projects.category,
+        id: projects.id,
+        title: projects.title
+      })
+      .from(projects)
+      .where(eq(projects.status, "published"))
+      .orderBy(desc(projects.publishedAt), desc(projects.createdAt)),
+    getDb()
+      .select({
+        altText: mediaAssets.altText,
+        filename: mediaAssets.filename,
+        id: mediaAssets.id
+      })
+      .from(mediaAssets)
+      .where(like(mediaAssets.mimeType, "image/%"))
+      .orderBy(desc(mediaAssets.createdAt))
+  ])
+
+  return {
+    media,
+    posts: publishedPosts,
+    projects: publishedProjects
+  }
 }
 
 export const getDashboardMediaAssets = async () => {

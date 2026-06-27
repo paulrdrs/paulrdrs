@@ -1,7 +1,10 @@
-import { and, eq, gt } from "drizzle-orm"
+import { and, eq, gt, lt } from "drizzle-orm"
 import { getDb } from "@/db/client"
 import { authSessions } from "@/db/schema"
-import { AUTH_SESSION_TTL_DAYS } from "./constants"
+import {
+  AUTH_SESSION_TTL_DAYS,
+  SESSION_LAST_SEEN_THROTTLE_MINUTES
+} from "./constants"
 import { createOpaqueToken, hashToken } from "./crypto"
 
 export const normalizeEmail = (email: string) => email.trim().toLowerCase()
@@ -33,7 +36,8 @@ export const getSessionByToken = async (token: string, now = new Date()) => {
     .select({
       id: authSessions.id,
       email: authSessions.email,
-      expiresAt: authSessions.expiresAt
+      expiresAt: authSessions.expiresAt,
+      lastSeenAt: authSessions.lastSeenAt
     })
     .from(authSessions)
     .where(
@@ -48,10 +52,14 @@ export const getSessionByToken = async (token: string, now = new Date()) => {
     return undefined
   }
 
-  await getDb()
-    .update(authSessions)
-    .set({ lastSeenAt: now })
-    .where(eq(authSessions.id, session.id))
+  const throttleMs = SESSION_LAST_SEEN_THROTTLE_MINUTES * 60 * 1000
+
+  if (now.getTime() - session.lastSeenAt.getTime() >= throttleMs) {
+    await getDb()
+      .update(authSessions)
+      .set({ lastSeenAt: now })
+      .where(eq(authSessions.id, session.id))
+  }
 
   return session
 }
@@ -60,4 +68,8 @@ export const deleteSessionByToken = async (token: string) => {
   await getDb()
     .delete(authSessions)
     .where(eq(authSessions.tokenHash, hashToken(token)))
+}
+
+export const deleteExpiredSessions = async (now = new Date()) => {
+  await getDb().delete(authSessions).where(lt(authSessions.expiresAt, now))
 }

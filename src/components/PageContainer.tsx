@@ -5,7 +5,5 @@ type PageContainerProps = {
 }
 
 export const PageContainer = ({ children }: PageContainerProps) => {
-  return (
-    <main className="flex h-full w-full flex-col gap-4 p-4">{children}</main>
-  )
+  return <main className="page-stack content-shell">{children}</main>
 }

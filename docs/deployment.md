@@ -4,6 +4,9 @@ This site deploys to Railway from the `web` service in the `production`
 environment. The project also needs a Railway Postgres service named `db` and a
 Railway Storage Bucket for private media objects.
 
+DNS for the domain is the only piece managed outside Railway (on Cloudflare);
+everything else — app, database, and media storage — runs on Railway.
+
 ## Services
 
 - `web`: Next.js app.
@@ -20,8 +23,9 @@ Configure these variables on the `web` service:
   setup and manual re-bootstrap.
 - `PASSKEY_RP_ID`: optional passkey relying party ID. Defaults to `SITE_URL`
   hostname with a leading `www.` removed.
-- `SESSION_SECRET`: at least 32 characters, used for sessions and analytics
-  visitor hashing.
+- `SESSION_SECRET`: at least 32 characters, used to sign the session cookie.
+- `ANALYTICS_SALT`: at least 32 characters, used as the HMAC salt for daily
+  visitor hashing. Keep this distinct from `SESSION_SECRET`.
 - `SITE_URL`: production site origin, for example `https://paulrdrs.com`.
 - `STORAGE_ENDPOINT`: Railway bucket S3-compatible endpoint.
 - `STORAGE_BUCKET`: Railway bucket name.

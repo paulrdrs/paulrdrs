@@ -18,7 +18,9 @@ Core local values:
 - `PASSKEY_RP_ID`: optional. Defaults to the `SITE_URL` hostname with leading
   `www.` removed.
 - `SESSION_SECRET`: at least 32 characters.
-- `SITE_URL`: local or production origin used for passkey origin checks.
+- `ANALYTICS_SALT`: at least 32 characters, HMAC salt for visitor hashing.
+- `SITE_URL`: local or production origin used for passkey origin checks and
+  canonical/sitemap URLs.
 - `STORAGE_ENDPOINT`
 - `STORAGE_BUCKET`
 - `STORAGE_ACCESS_KEY_ID`

@@ -26,6 +26,13 @@ describe("BlogPostPage", () => {
       slug: "hello-post",
       excerpt: "A published post.",
       bodyMarkdown: "# Body heading",
+      seoTitle: null,
+      seoDescription: null,
+      coverAltText: null,
+      coverAttribution: null,
+      coverHeight: null,
+      coverMediaId: null,
+      coverWidth: null,
       publishedAt: new Date("2026-01-01"),
       createdAt: new Date("2026-01-01")
     })

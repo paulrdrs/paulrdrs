@@ -21,6 +21,13 @@ describe("media validation", () => {
     ).toThrow("Unsupported file type")
   })
 
+  it("rejects SVG uploads to avoid stored XSS", () => {
+    expect(isAllowedMediaMimeType("image/svg+xml")).toBe(false)
+    expect(() =>
+      validateMediaFile(createFile({ type: "image/svg+xml" }))
+    ).toThrow("Unsupported file type")
+  })
+
   it("rejects empty files", () => {
     expect(() =>
       validateMediaFile(createFile({ size: 0, type: "image/png" }))

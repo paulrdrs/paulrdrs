@@ -55,10 +55,10 @@ export function PasskeySetup() {
 
   return (
     <form action={register} className="flex max-w-md flex-col gap-4">
-      <label className="flex flex-col gap-2 font-mono text-sm" htmlFor="email">
+      <label className="field-label" htmlFor="email">
         Email
         <input
-          className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+          className="field-control"
           id="email"
           name="email"
           required
@@ -66,13 +66,10 @@ export function PasskeySetup() {
         />
       </label>
 
-      <label
-        className="flex flex-col gap-2 font-mono text-sm"
-        htmlFor="bootstrapSecret"
-      >
+      <label className="field-label" htmlFor="bootstrapSecret">
         Bootstrap secret
         <input
-          className="border border-current bg-transparent px-3 py-2 font-sans text-base"
+          className="field-control"
           id="bootstrapSecret"
           name="bootstrapSecret"
           required
@@ -80,15 +77,13 @@ export function PasskeySetup() {
         />
       </label>
 
-      <button
-        className="border border-current px-4 py-2 font-black text-base hover:bg-black hover:text-white"
-        disabled={isPending}
-        type="submit"
-      >
+      <button className="button" disabled={isPending} type="submit">
         {isPending ? "Registering..." : "Register passkey"}
       </button>
 
-      {error ? <p className="font-medium">Passkey setup failed.</p> : null}
+      {error ? (
+        <p className="text-muted text-sm">Passkey setup failed.</p>
+      ) : null}
     </form>
   )
 }

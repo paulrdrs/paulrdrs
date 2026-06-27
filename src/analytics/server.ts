@@ -4,7 +4,7 @@ import { headers } from "next/headers"
 import type { AnalyticsContentType } from "@/analytics/events"
 import { normalizeAnalyticsEvent } from "@/analytics/events"
 import { createAnalyticsEvent } from "@/db/analytics"
-import { getAuthEnvs } from "@/envs/server"
+import { getAnalyticsEnvs } from "@/envs/server"
 
 type TrackPageViewInput = {
   contentId?: string | null
@@ -34,7 +34,7 @@ export const trackPageView = async ({
         headerStore.get("x-real-ip"),
       path,
       referrer: headerStore.get("referer") ?? headerStore.get("referrer"),
-      salt: getAuthEnvs().SESSION_SECRET,
+      salt: getAnalyticsEnvs().ANALYTICS_SALT,
       userAgent
     })
 

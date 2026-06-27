@@ -7,9 +7,6 @@
     "source.organizeImports.biome": "explicit",
     "source.fixAll.biome": "explicit"
   },
-  "files.associations": {
-    "wrangler.json": "jsonc"
-  },
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
