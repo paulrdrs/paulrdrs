@@ -104,7 +104,7 @@ step.
 
 - `pnpm typecheck && pnpm lint && pnpm test` and `pnpm build` all pass.
 - New/changed logic has colocated unit tests following existing patterns.
-- Conventional-commit message; the task is a single focused commit/branch.
+- Conventional-commit message; the task is a single focused commit on the current branch (do not create a new branch).
 - Drizzle migrations generated via `pnpm db:generate` (never hand-edited); run
   `pnpm format` on generated `drizzle/meta/*` so Biome is happy.
 

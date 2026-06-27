@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "next build",
+    "check:deps": "node scripts/check-exact-deps.ts",
+    "check:no-js": "node scripts/check-no-js.ts",
     "commit": "git-cz",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -17,7 +19,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1063.0",
+    "@aws-sdk/client-s3": "3.1063.0",
+    "@notionhq/client": "5.22.0",
     "@simplewebauthn/browser": "13.3.0",
     "@simplewebauthn/server": "13.3.1",
     "drizzle-orm": "0.45.2",

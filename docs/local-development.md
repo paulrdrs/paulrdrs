@@ -26,6 +26,13 @@ Core local values:
 - `STORAGE_ACCESS_KEY_ID`
 - `STORAGE_SECRET_ACCESS_KEY`
 - `STORAGE_REGION`
+- `NOTION_TOKEN`: Notion integration token used to read the Posts, Projects,
+  and Pages databases.
+- `NOTION_POSTS_DB_ID`: Notion database ID for the Posts database.
+- `NOTION_PROJECTS_DB_ID`: Notion database ID for the Projects database.
+- `NOTION_PAGES_DB_ID`: Notion database ID for the Pages database.
+- `JOBS_SECRET`: at least 32 characters, used to authorize requests to the
+  `/api/jobs/*` endpoints.
 
 Do not expose storage secrets or database URLs through client-side env vars.
 
@@ -58,6 +65,21 @@ railway run --service web pnpm dev
 If Railway provides a private `DATABASE_URL`, make sure the local command also
 has `DATABASE_PUBLIC_URL` available or override the database URL for that
 command so your machine can reach Postgres.
+
+## Dependencies
+
+Dependencies must pin an **exact** version — never a `^`/`~`/range. `.npmrc` sets
+`save-exact=true` so `pnpm add <pkg>` pins automatically; do not hand-write a
+range. `pnpm check:deps` (run in the pre-commit hook) fails the commit on any
+non-exact specifier.
+
+## TypeScript only
+
+All code and scripts are TypeScript (`.ts`/`.tsx`) — Node 24 runs `.ts` files
+directly, so even repo scripts (see `scripts/`) are `.ts`. Plain JavaScript
+(`.js`/`.jsx`/`.cjs`/`.mjs`) is not allowed; the sole exception is a tool config
+with no TypeScript form (e.g. `postcss.config.mjs`), allowlisted in
+`scripts/check-no-js.ts`. `pnpm check:no-js` (pre-commit) enforces this.
 
 ## Common Commands
 

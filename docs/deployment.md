@@ -32,6 +32,13 @@ Configure these variables on the `web` service:
 - `STORAGE_ACCESS_KEY_ID`: Railway bucket S3-compatible access key.
 - `STORAGE_SECRET_ACCESS_KEY`: Railway bucket S3-compatible secret key.
 - `STORAGE_REGION`: Railway bucket S3-compatible region.
+- `NOTION_TOKEN`: Notion integration token used to read the Posts, Projects,
+  and Pages databases.
+- `NOTION_POSTS_DB_ID`: Notion database ID for the Posts database.
+- `NOTION_PROJECTS_DB_ID`: Notion database ID for the Projects database.
+- `NOTION_PAGES_DB_ID`: Notion database ID for the Pages database.
+- `JOBS_SECRET`: at least 32 characters, used to authorize requests to the
+  `/api/jobs/*` endpoints (Railway Cron Jobs).
 
 Do not configure the storage values only on the bucket resource. The `web`
 service reads them at runtime to upload media and proxy private objects.

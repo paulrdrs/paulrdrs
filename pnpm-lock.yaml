@@ -9,8 +9,11 @@ importers:
   .:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: ^3.1063.0
+        specifier: 3.1063.0
         version: 3.1063.0
+      '@notionhq/client':
+        specifier: 5.22.0
+        version: 5.22.0
       '@simplewebauthn/browser':
         specifier: 13.3.0
         version: 13.3.0
@@ -1146,6 +1149,10 @@ packages:
   '@nodable/entities@2.1.1':
     resolution: {integrity: sha512-Pig3HxDIoMgjdEH8OCf/dkcTmLFjJRjWuq8jSnklu284/TKOPibSRERmOykiwmyXTtv61mP+44f3GMx0tLAyjg==}
 
+  '@notionhq/client@5.22.0':
+    resolution: {integrity: sha512-lZ3JGBCd6O6MNHWn/58QcUqX1FgmlcODcx/EaUEEpuxLXF5tSi+v29Vzoz8mZ6JgDWDn5pMzzjB69QevYjQQZA==}
+    engines: {node: '>=18'}
+
   '@oxc-project/types@0.133.0':
     resolution: {integrity: sha512-KzkdCd6Uxqnf6l3HOw1xfatAlUURA0g14cvBYFyJ5SaNOQbOUvBr9PKArcPcrNIeRsBdgcUzOGrhKveVpvOIGA==}
 
@@ -2088,6 +2095,7 @@ packages:
   git-raw-commits@5.0.1:
     resolution: {integrity: sha512-Y+csSm2GD/PCSh6Isd/WiMjNAydu0VBiG9J7EdQsNA5P9uXvLayqjmTsNlK5Gs9IhblFZqOU0yid5Il5JPoLiQ==}
     engines: {node: '>=18'}
+    deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob@7.2.3:
@@ -3982,6 +3990,8 @@ snapshots:
     optional: true
 
   '@nodable/entities@2.1.1': {}
+
+  '@notionhq/client@5.22.0': {}
 
   '@oxc-project/types@0.133.0': {}
 

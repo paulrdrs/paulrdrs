@@ -102,4 +102,13 @@ neighboring files before introducing anything new.
   Never hand-edit generated SQL/snapshots; run `pnpm format` on the generated
   `drizzle/meta/*` files.
 - Conventional Commits (commitlint is enforced). One task → one focused
-  commit/branch.
+  commit on the current branch (do not create a new branch).
+- **Exact dependency versions only — never `^`/`~`/ranges.** `.npmrc` has
+  `save-exact=true`, so `pnpm add <pkg>` pins automatically; never hand-write a
+  range. The `pnpm check:deps` guard (run in pre-commit) fails on any non-exact
+  spec.
+- **TypeScript only — no `.js`/`.jsx`/`.cjs`/`.mjs`.** Write all code and scripts
+  in `.ts`/`.tsx` (Node 24 runs `.ts` directly). The only exception is a tool
+  config with no TypeScript form (e.g. `postcss.config.mjs`), which must be
+  allowlisted in `scripts/check-no-js.ts`. The `pnpm check:no-js` guard (run in
+  pre-commit) fails on any non-allowlisted JS file.

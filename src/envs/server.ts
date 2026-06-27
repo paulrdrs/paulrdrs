@@ -2,6 +2,7 @@ import "server-only"
 import {
   analyticsEnvsSchema,
   authEnvsSchema,
+  notionEnvsSchema,
   serverEnvsSchema,
   siteEnvsSchema,
   storageEnvsSchema
@@ -39,4 +40,13 @@ export const getStorageEnvs = () =>
     STORAGE_ENDPOINT: process.env.STORAGE_ENDPOINT,
     STORAGE_REGION: process.env.STORAGE_REGION,
     STORAGE_SECRET_ACCESS_KEY: process.env.STORAGE_SECRET_ACCESS_KEY
+  })
+
+export const getNotionEnvs = () =>
+  notionEnvsSchema.parse({
+    JOBS_SECRET: process.env.JOBS_SECRET,
+    NOTION_PAGES_DB_ID: process.env.NOTION_PAGES_DB_ID,
+    NOTION_POSTS_DB_ID: process.env.NOTION_POSTS_DB_ID,
+    NOTION_PROJECTS_DB_ID: process.env.NOTION_PROJECTS_DB_ID,
+    NOTION_TOKEN: process.env.NOTION_TOKEN
   })
