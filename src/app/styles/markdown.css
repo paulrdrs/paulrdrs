@@ -129,4 +129,26 @@
     @apply my-12;
     border-color: var(--line);
   }
+
+  .markdown-content .callout {
+    display: flex;
+    max-width: 42rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    @apply gap-4 p-4;
+  }
+
+  .markdown-content .callout-icon {
+    line-height: 1;
+  }
+
+  .markdown-content details.toggle {
+    max-width: 42rem;
+  }
+
+  .markdown-content details.toggle > summary {
+    cursor: pointer;
+    color: var(--ink);
+    font-weight: 600;
+  }
 }
