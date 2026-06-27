@@ -36,6 +36,13 @@
       "when": 1782570094454,
       "tag": "0004_cooing_doomsday",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782593284461,
+      "tag": "0005_cultured_monster_badoon",
+      "breakpoints": true
     }
   ]
 }

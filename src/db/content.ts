@@ -1,11 +1,13 @@
-import { and, desc, eq } from "drizzle-orm"
+import { and, desc, eq, sql } from "drizzle-orm"
 import { cache } from "react"
+import type { NotionBlockTree } from "@/notion/types"
 import type { HeroSelection } from "@/site/hero"
 import { getDb } from "./client"
 import type { ProjectCategory } from "./contentTypes"
 import { mediaAssets, pages, posts, projects } from "./schema"
 
 type PublishedPage = {
+  body: NotionBlockTree | null
   bodyMarkdown: string
   id: string
   key: string
@@ -30,7 +32,7 @@ export const getPublishedPosts = async () => {
 }
 
 export const getPublishedPostBySlug = cache(async (slug: string) => {
-  const [post] = await getDb()
+  const rows = await getDb()
     .select({
       ...coverSelection,
       id: posts.id,
@@ -38,6 +40,7 @@ export const getPublishedPostBySlug = cache(async (slug: string) => {
       slug: posts.slug,
       excerpt: posts.excerpt,
       bodyMarkdown: posts.bodyMarkdown,
+      body: posts.body,
       seoTitle: posts.seoTitle,
       seoDescription: posts.seoDescription,
       publishedAt: posts.publishedAt,
@@ -48,7 +51,7 @@ export const getPublishedPostBySlug = cache(async (slug: string) => {
     .where(and(eq(posts.slug, slug), eq(posts.status, "published")))
     .limit(1)
 
-  return post
+  return rows.at(0)
 })
 
 export const getPublishedProjects = async (category?: ProjectCategory) => {
@@ -75,7 +78,7 @@ export const getPublishedProjects = async (category?: ProjectCategory) => {
 
 export const getPublishedProjectBySlug = cache(
   async (category: ProjectCategory, slug: string) => {
-    const [project] = await getDb()
+    const rows = await getDb()
       .select({
         ...coverSelection,
         id: projects.id,
@@ -84,6 +87,7 @@ export const getPublishedProjectBySlug = cache(
         category: projects.category,
         excerpt: projects.excerpt,
         bodyMarkdown: projects.bodyMarkdown,
+        body: projects.body,
         links: projects.links,
         seoTitle: projects.seoTitle,
         seoDescription: projects.seoDescription,
@@ -101,7 +105,43 @@ export const getPublishedProjectBySlug = cache(
       )
       .limit(1)
 
-    return project
+    return rows.at(0)
+  }
+)
+
+// Slug redirects: find a published row whose `slugHistory` contains a now-stale
+// slug, so the route can 301 to its current slug. Uses the jsonb containment
+// operator (@>).
+export const getPostSlugByPreviousSlug = cache(async (slug: string) => {
+  const rows = await getDb()
+    .select({ slug: posts.slug })
+    .from(posts)
+    .where(
+      and(
+        eq(posts.status, "published"),
+        sql`${posts.slugHistory} @> ${JSON.stringify([slug])}::jsonb`
+      )
+    )
+    .limit(1)
+
+  return rows.at(0)?.slug
+})
+
+export const getProjectSlugByPreviousSlug = cache(
+  async (category: ProjectCategory, slug: string) => {
+    const rows = await getDb()
+      .select({ slug: projects.slug })
+      .from(projects)
+      .where(
+        and(
+          eq(projects.category, category),
+          eq(projects.status, "published"),
+          sql`${projects.slugHistory} @> ${JSON.stringify([slug])}::jsonb`
+        )
+      )
+      .limit(1)
+
+    return rows.at(0)?.slug
   }
 )
 
@@ -109,6 +149,7 @@ export const getPublishedPageByKey = cache(
   async (key: string): Promise<PublishedPage | undefined> => {
     const [page] = await getDb()
       .select({
+        body: pages.body,
         bodyMarkdown: pages.bodyMarkdown,
         id: pages.id,
         key: pages.key,

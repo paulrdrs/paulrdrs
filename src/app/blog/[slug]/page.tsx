@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 import { trackPageView } from "@/analytics/server"
+import { ContentBody } from "@/components/ContentBody"
 import { ContentImage } from "@/components/ContentImage"
-import { MarkdownContent } from "@/components/MarkdownContent"
 import { PageContainer } from "@/components/PageContainer"
-import { getPublishedPostBySlug } from "@/db/content"
+import { getPostSlugByPreviousSlug, getPublishedPostBySlug } from "@/db/content"
+import { blockTreeToPlainText } from "@/lib/content"
 import { buildContentMetadata } from "@/lib/metadata"
 
 export const dynamic = "force-dynamic"
@@ -27,7 +28,10 @@ export async function generateMetadata({
 
   return buildContentMetadata({
     coverMediaId: post.coverMediaId,
-    description: post.seoDescription ?? post.excerpt,
+    description:
+      post.seoDescription ??
+      post.excerpt ??
+      (post.body ? blockTreeToPlainText(post.body) : null),
     path: `/blog/${post.slug}`,
     title: post.seoTitle ?? post.title
   })
@@ -38,6 +42,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = await getPublishedPostBySlug(slug)
 
   if (!post) {
+    const currentSlug = await getPostSlugByPreviousSlug(slug)
+    if (currentSlug) {
+      permanentRedirect(`/blog/${currentSlug}`)
+    }
     notFound()
   }
 
@@ -68,7 +76,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         />
       ) : null}
       <div>
-        <MarkdownContent markdown={post.bodyMarkdown} />
+        <ContentBody body={post.body} markdown={post.bodyMarkdown} />
       </div>
     </PageContainer>
   )

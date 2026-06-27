@@ -36,6 +36,8 @@ describe("DashboardHomePage", () => {
   it("renders the home page editor with existing content", async () => {
     getDashboardPageMock.mockResolvedValue({
       bodyMarkdown: "Homepage **intro**.",
+      body: null,
+      notionPageId: null,
       createdAt: new Date("2026-01-01"),
       id: "home-id",
       key: "home",

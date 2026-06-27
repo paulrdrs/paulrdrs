@@ -11,6 +11,7 @@ import {
   uuid,
   varchar
 } from "drizzle-orm/pg-core"
+import type { NotionBlockTree } from "../notion/types"
 
 export const contentStatus = pgEnum("content_status", ["draft", "published"])
 
@@ -49,10 +50,12 @@ export const mediaAssets = pgTable(
     altText: text("alt_text"),
     attribution: text("attribution"),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
+    sourceKey: text("source_key"),
     ...timestamps()
   },
   (table) => [
     uniqueIndex("media_assets_object_key_unique").on(table.objectKey),
+    uniqueIndex("media_assets_source_key_unique").on(table.sourceKey),
     index("media_assets_created_at_idx").on(table.createdAt)
   ]
 )
@@ -73,10 +76,14 @@ export const posts = pgTable(
     seoTitle: varchar("seo_title", { length: 255 }),
     seoDescription: text("seo_description"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
+    body: jsonb("body").$type<NotionBlockTree>(),
+    notionPageId: text("notion_page_id"),
+    slugHistory: jsonb("slug_history").$type<string[]>().notNull().default([]),
     ...timestamps()
   },
   (table) => [
     uniqueIndex("posts_slug_unique").on(table.slug),
+    uniqueIndex("posts_notion_page_id_unique").on(table.notionPageId),
     index("posts_status_published_at_idx").on(table.status, table.publishedAt)
   ]
 )
@@ -101,10 +108,14 @@ export const projects = pgTable(
     seoTitle: varchar("seo_title", { length: 255 }),
     seoDescription: text("seo_description"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
+    body: jsonb("body").$type<NotionBlockTree>(),
+    notionPageId: text("notion_page_id"),
+    slugHistory: jsonb("slug_history").$type<string[]>().notNull().default([]),
     ...timestamps()
   },
   (table) => [
     uniqueIndex("projects_category_slug_unique").on(table.category, table.slug),
+    uniqueIndex("projects_notion_page_id_unique").on(table.notionPageId),
     index("projects_category_status_published_at_idx").on(
       table.category,
       table.status,
@@ -123,10 +134,13 @@ export const pages = pgTable(
     status: contentStatus("status").notNull().default("draft"),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
     publishedAt: timestamp("published_at", { withTimezone: true }),
+    body: jsonb("body").$type<NotionBlockTree>(),
+    notionPageId: text("notion_page_id"),
     ...timestamps()
   },
   (table) => [
     uniqueIndex("pages_key_unique").on(table.key),
+    uniqueIndex("pages_notion_page_id_unique").on(table.notionPageId),
     index("pages_status_idx").on(table.status)
   ]
 )

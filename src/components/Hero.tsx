@@ -1,23 +1,21 @@
 import Link from "next/link"
+import type { ReactNode } from "react"
 import type { FeaturedHero } from "@/db/content"
 import { ContentImage } from "./ContentImage"
-import { MarkdownContent } from "./MarkdownContent"
 
 type HeroProps = {
   featured?: FeaturedHero
-  introMarkdown?: string
+  intro?: ReactNode
   title: string
 }
 
-export const Hero = ({ featured, introMarkdown, title }: HeroProps) => {
+export const Hero = ({ featured, intro, title }: HeroProps) => {
   if (!featured) {
     return (
       <section className="grid gap-8 pb-8 lg:grid-cols-12">
         <h1 className="display-title lg:col-span-9">{title}</h1>
-        {introMarkdown ? (
-          <div className="lg:col-span-7 lg:col-start-6">
-            <MarkdownContent markdown={introMarkdown} />
-          </div>
+        {intro ? (
+          <div className="lg:col-span-7 lg:col-start-6">{intro}</div>
         ) : null}
       </section>
     )

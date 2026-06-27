@@ -33,6 +33,7 @@ describe("media proxy route", () => {
       metadata: {},
       mimeType: "image/png",
       objectKey: "media/photo.png",
+      sourceKey: null,
       sizeBytes: 5,
       updatedAt: new Date("2026-01-01"),
       width: null

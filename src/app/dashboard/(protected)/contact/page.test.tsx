@@ -31,6 +31,8 @@ describe("DashboardContactPage", () => {
   it("renders the contact page editor with existing content", async () => {
     getDashboardPageMock.mockResolvedValue({
       bodyMarkdown: "Contact **details**.",
+      body: null,
+      notionPageId: null,
       createdAt: new Date("2026-01-01"),
       id: "contact-id",
       key: "contact",

@@ -1,7 +1,30 @@
 import { render, screen } from "@testing-library/react"
 import { trackPageView } from "@/analytics/server"
 import { getPublishedPageByKey } from "@/db/content"
+import type { NotionBlockTree } from "@/notion/types"
 import ContactPage from "./page"
+
+const notionBody = (text: string): NotionBlockTree => [
+  {
+    id: "b1",
+    type: "heading_2",
+    richText: [
+      {
+        text,
+        href: null,
+        annotations: {
+          bold: false,
+          italic: false,
+          strikethrough: false,
+          underline: false,
+          code: false,
+          color: "default"
+        }
+      }
+    ],
+    children: []
+  }
+]
 
 vi.mock("@/analytics/server", () => ({
   trackPageView: vi.fn()
@@ -22,6 +45,7 @@ describe("ContactPage", () => {
   it("renders published CMS contact content", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
       bodyMarkdown: "Email **hello@example.com**.",
+      body: null,
       id: "page-id",
       key: "contact",
       metadata: null,
@@ -41,6 +65,25 @@ describe("ContactPage", () => {
       screen.getByRole("heading", { name: "Reach me" })
     ).toBeInTheDocument()
     expect(screen.getByText("hello@example.com")).toBeInTheDocument()
+  })
+
+  it("renders Notion blocks when contact body is present", async () => {
+    getPublishedPageByKeyMock.mockResolvedValue({
+      bodyMarkdown: "Email **hello@example.com**.",
+      body: notionBody("Notion contact"),
+      id: "page-id",
+      key: "contact",
+      metadata: null,
+      publishedAt: new Date("2026-01-01"),
+      title: "Reach me"
+    })
+
+    render(await ContactPage())
+
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Notion contact" })
+    ).toBeInTheDocument()
+    expect(screen.queryByText("hello@example.com")).not.toBeInTheDocument()
   })
 
   it("renders a fallback when contact content is missing", async () => {

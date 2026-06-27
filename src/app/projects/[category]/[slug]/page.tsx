@@ -1,11 +1,15 @@
 import type { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 import { trackPageView } from "@/analytics/server"
+import { ContentBody } from "@/components/ContentBody"
 import { ContentImage } from "@/components/ContentImage"
-import { MarkdownContent } from "@/components/MarkdownContent"
 import { PageContainer } from "@/components/PageContainer"
-import { getPublishedProjectBySlug } from "@/db/content"
+import {
+  getProjectSlugByPreviousSlug,
+  getPublishedProjectBySlug
+} from "@/db/content"
 import { isProjectCategory } from "@/db/contentTypes"
+import { blockTreeToPlainText } from "@/lib/content"
 import { buildContentMetadata } from "@/lib/metadata"
 
 export const dynamic = "force-dynamic"
@@ -34,7 +38,10 @@ export async function generateMetadata({
 
   return buildContentMetadata({
     coverMediaId: project.coverMediaId,
-    description: project.seoDescription ?? project.excerpt,
+    description:
+      project.seoDescription ??
+      project.excerpt ??
+      (project.body ? blockTreeToPlainText(project.body) : null),
     path: `/projects/${project.category}/${project.slug}`,
     title: project.seoTitle ?? project.title
   })
@@ -50,6 +57,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const project = await getPublishedProjectBySlug(category, slug)
 
   if (!project) {
+    const currentSlug = await getProjectSlugByPreviousSlug(category, slug)
+    if (currentSlug) {
+      permanentRedirect(`/projects/${category}/${currentSlug}`)
+    }
     notFound()
   }
 
@@ -80,7 +91,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         />
       ) : null}
       <div>
-        <MarkdownContent markdown={project.bodyMarkdown} />
+        <ContentBody body={project.body} markdown={project.bodyMarkdown} />
       </div>
       {project.links.length > 0 ? (
         <ul className="flex flex-wrap gap-4 pt-2">
