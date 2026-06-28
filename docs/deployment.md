@@ -61,6 +61,29 @@ deployment starts. In Railway production, Drizzle uses the private
 
 If the migration command exits non-zero, Railway stops the deployment.
 
+## Notion Content Sync Cron
+
+`POST /api/jobs/sync-content` reads the Posts, Projects, and Pages Notion
+databases and upserts them into Postgres, keyed by `notionPageId`. It is guarded
+by `JOBS_SECRET` and is otherwise a plain `force-dynamic` route, so it can be
+triggered manually or by a webhook later — but the primary trigger is a Railway
+Cron Job:
+
+1. In the Railway project, add a new service of type **Cron Job** (not a
+   long-running worker or function — a full sync can run long under Notion's
+   ~3 req/s rate limit, and a function could time out mid-sync).
+2. Set its schedule to every ~15 minutes, for example `*/15 * * * *`.
+3. Set its command to POST the endpoint with the secret, for example:
+   ```
+   curl -fsS -X POST https://<production-host>/api/jobs/sync-content \
+     -H "x-jobs-secret: ${JOBS_SECRET}"
+   ```
+4. Give the cron service access to `JOBS_SECRET` (shared with the `web`
+   service) so the value isn't duplicated.
+
+The cadence is adjustable; 15 minutes balances content freshness against the
+Notion rate limit for a full three-database sync.
+
 ## Production Smoke Test
 
 After deploying a change that touches CMS, auth, media, storage, migrations, or
