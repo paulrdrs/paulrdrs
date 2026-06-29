@@ -1,21 +1,16 @@
-import { getCurrentSession } from "@/auth/session"
 import { getSiteNavigationSettings } from "@/db/siteSettings"
 import { siteNavigationSections } from "@/site/navigation"
 import { type NavigationItem, NavigationLinks } from "./NavigationLinks"
 
 export const TopNavBar = async () => {
-  const [settings, session] = await Promise.all([
-    getSiteNavigationSettings(),
-    getCurrentSession()
-  ])
+  const settings = await getSiteNavigationSettings()
 
   const items: NavigationItem[] = [
     { href: "/", label: "paulrdrs" },
     ...siteNavigationSections
       .filter((section) => settings[section.field])
       .map(({ href, label }) => ({ href, label })),
-    { href: "/contact", label: "Contact" },
-    ...(session ? [{ href: "/dashboard", label: "Dashboard" }] : [])
+    { href: "/contact", label: "Contact" }
   ]
 
   return (
