@@ -132,27 +132,16 @@ describe("mapProjectPage", () => {
   const baseProjectProperties = (overrides: Record<string, unknown> = {}) => ({
     ...basePostProperties(),
     Category: select("software"),
-    Links: richText(
-      [
-        "Repo | https://github.com/example/repo",
-        "  ",
-        "Live | https://example.com",
-        "Bad line with no pipe",
-        "Missing url | "
-      ].join("\n")
-    ),
     ...overrides
   })
 
-  it("maps category and parses valid Label | URL link lines", () => {
+  it("maps category and carries no tags or links", () => {
     const page = buildPage(baseProjectProperties(), "project-1")
     const mapped = mapProjectPage(page)
 
     expect(mapped.category).toBe("software")
-    expect(mapped.links).toEqual([
-      { label: "Repo", url: "https://github.com/example/repo" },
-      { label: "Live", url: "https://example.com" }
-    ])
+    expect(mapped).not.toHaveProperty("tags")
+    expect(mapped).not.toHaveProperty("links")
   })
 
   it("throws a malformed-page error for an invalid category", () => {

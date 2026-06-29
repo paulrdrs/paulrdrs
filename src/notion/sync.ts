@@ -8,6 +8,7 @@ import { getNotionEnvs } from "@/envs/server"
 import { fetchPageBlocks } from "./blocks"
 import { getNotionClient } from "./client"
 import {
+  type MappedContent,
   type MappedPage,
   type MappedPost,
   type MappedProject,
@@ -76,7 +77,7 @@ const resolveSlug = (
   return { slug: mappedSlug, slugHistory }
 }
 
-const rehostCover = async (mapped: MappedPost) =>
+const rehostCover = async (mapped: MappedContent) =>
   mapped.coverImage
     ? rehostImage(
         mapped.coverImage.url,
@@ -186,7 +187,6 @@ const upsertProject = async (mapped: MappedProject, body: NotionBlockTree) => {
     category: mapped.category,
     coverMediaId,
     excerpt: mapped.excerpt,
-    links: mapped.links,
     notionPageId: mapped.notionPageId,
     publishedAt: mapped.publishedAt,
     seoDescription: mapped.seoDescription,

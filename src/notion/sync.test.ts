@@ -45,6 +45,19 @@ const basePost = {
   title: "Title"
 }
 
+const baseProject = {
+  category: "software" as const,
+  coverImage: null,
+  excerpt: null,
+  notionPageId: "project-1",
+  publishedAt: null,
+  seoDescription: null,
+  seoTitle: null,
+  slug: "project-slug",
+  status: "draft" as const,
+  title: "Title"
+}
+
 const buildNotionPage = (id: string) => ({
   id,
   object: "page" as const,
@@ -250,13 +263,11 @@ describe("syncPosts", () => {
 })
 
 describe("syncProjects", () => {
-  it("scopes the slug collision check to the project category and persists links", async () => {
+  it("scopes the slug collision check to the project category", async () => {
     mockNotionClient(["project-1"])
     fetchPageBlocksMock.mockResolvedValue([])
     mapProjectPageMock.mockReturnValue({
-      ...basePost,
-      category: "software",
-      links: [{ label: "Repo", url: "https://github.com/example" }],
+      ...baseProject,
       notionPageId: "project-1",
       slug: "my-project"
     })
@@ -266,10 +277,7 @@ describe("syncProjects", () => {
 
     expect(summary).toEqual({ errors: [], synced: 1 })
     expect(values).toHaveBeenCalledWith(
-      expect.objectContaining({
-        category: "software",
-        links: [{ label: "Repo", url: "https://github.com/example" }]
-      })
+      expect.objectContaining({ category: "software" })
     )
   })
 })
@@ -315,9 +323,7 @@ describe("runNotionSync", () => {
     fetchPageBlocksMock.mockResolvedValue([])
     mapPostPageMock.mockReturnValue({ ...basePost, notionPageId: "entry-1" })
     mapProjectPageMock.mockReturnValue({
-      ...basePost,
-      category: "software",
-      links: [],
+      ...baseProject,
       notionPageId: "entry-1"
     })
     mapPagePageMock.mockReturnValue({

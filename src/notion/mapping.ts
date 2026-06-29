@@ -10,12 +10,7 @@ export type NotionPage = {
   readonly properties: Record<string, unknown>
 }
 
-export type ProjectLink = {
-  readonly label: string
-  readonly url: string
-}
-
-export type MappedPost = {
+export type MappedContent = {
   readonly coverImage: NotionImageSource | null
   readonly excerpt: string | null
   readonly notionPageId: string
@@ -24,13 +19,17 @@ export type MappedPost = {
   readonly seoTitle: string | null
   readonly slug: string
   readonly status: ContentStatus
-  readonly tags: string[]
   readonly title: string
 }
 
-export type MappedProject = MappedPost & {
+export type MappedPost = MappedContent & {
+  readonly tags: string[]
+}
+
+// Projects intentionally carry no Tags or Links properties — links live inline
+// in the page body (rendered as normal links). See agents-plan/notion-schema.md.
+export type MappedProject = MappedContent & {
   readonly category: ProjectCategory
-  readonly links: ProjectLink[]
 }
 
 export type MappedPage = {
@@ -148,29 +147,6 @@ const getKey = (page: NotionPage): PageKey => {
   return name
 }
 
-const parseLinkLine = (line: string): ProjectLink | null => {
-  const separatorIndex = line.indexOf("|")
-
-  if (separatorIndex === -1) {
-    return null
-  }
-
-  const label = line.slice(0, separatorIndex).trim()
-  const url = line.slice(separatorIndex + 1).trim()
-
-  if (!label || !z.url().safeParse(url).success) {
-    return null
-  }
-
-  return { label, url }
-}
-
-const getLinks = (page: NotionPage): ProjectLink[] =>
-  getRichText(page, "Links")
-    .split("\n")
-    .map(parseLinkLine)
-    .filter((link): link is ProjectLink => link !== null)
-
 const withMalformedPageError = <T>(
   kind: string,
   page: NotionPage,
@@ -184,7 +160,7 @@ const withMalformedPageError = <T>(
   }
 }
 
-const mapPostProperties = (page: NotionPage) => {
+const mapContentProperties = (page: NotionPage): MappedContent => {
   const title = getTitle(page)
 
   return {
@@ -196,19 +172,20 @@ const mapPostProperties = (page: NotionPage) => {
     seoTitle: getNullableRichText(page, "SEO Title"),
     slug: getSlug(page, title),
     status: getStatus(page),
-    tags: getTags(page),
     title
   }
 }
 
 export const mapPostPage = (page: NotionPage): MappedPost =>
-  withMalformedPageError("post", page, () => mapPostProperties(page))
+  withMalformedPageError("post", page, () => ({
+    ...mapContentProperties(page),
+    tags: getTags(page)
+  }))
 
 export const mapProjectPage = (page: NotionPage): MappedProject =>
   withMalformedPageError("project", page, () => ({
-    ...mapPostProperties(page),
-    category: getCategory(page),
-    links: getLinks(page)
+    ...mapContentProperties(page),
+    category: getCategory(page)
   }))
 
 export const mapPagePage = (page: NotionPage): MappedPage =>

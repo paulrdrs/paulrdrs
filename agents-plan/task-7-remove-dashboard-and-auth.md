@@ -53,6 +53,11 @@ site + Notion sync job + stats job.
 - Drop the now-unused `bodyMarkdown` column from `posts`, `projects`, `pages`
   (content lives in `body`). Make `notionPageId` `notNull` if every row is now
   Notion-sourced.
+- Drop the `projects.links` column — only the legacy dashboard editor wrote it;
+  Notion-sourced projects keep external links inline in the page body. Also
+  remove `links` from `getPublishedProjectBySlug` ([src/db/content.ts](../src/db/content.ts))
+  and the CTA-button section in the project route
+  ([src/app/projects/[category]/[slug]/page.tsx](../src/app/projects/[category]/[slug]/page.tsx)).
 - `pnpm db:generate`; `pnpm format` the generated `drizzle/meta/*`.
 
 ### 6. Docs

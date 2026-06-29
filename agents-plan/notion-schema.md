@@ -30,13 +30,17 @@ content model. The sync ([task-4](./task-4-notion-fetch-and-mapping.md),
 
 ## Projects DB
 
-Same as Posts, with these differences:
+Same as Posts **but without `Tags`**, plus one property:
 
 | Notion property | Type | → column | Notes |
 |---|---|---|---|
 | Category | Select | `category` | Options: **photography**, **software** |
-| Links | Text (multi-line) | `links` (`{label,url}[]`) | One `Label \| URL` per line; sync trims, validates each URL (zod), skips blank/invalid lines |
-| *(no Tags)* | | | Projects don't use tags |
+
+Projects do **not** have `Tags` or a structured `Links` property. External links
+(repo, live demo, …) go **inline in the project's page body** as normal links —
+the block renderer turns them into clickable `<a>` elements. (The DB still has a
+vestigial `links` column used only by the legacy dashboard editor, removed in
+task 7; the Notion sync never writes it.)
 
 ## Pages DB (home, contact)
 
