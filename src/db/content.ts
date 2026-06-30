@@ -8,7 +8,6 @@ import { mediaAssets, pages, posts, projects } from "./schema"
 
 type PublishedPage = {
   body: NotionBlockTree | null
-  bodyMarkdown: string
   id: string
   key: string
   metadata: Record<string, unknown> | null
@@ -39,7 +38,6 @@ export const getPublishedPostBySlug = cache(async (slug: string) => {
       title: posts.title,
       slug: posts.slug,
       excerpt: posts.excerpt,
-      bodyMarkdown: posts.bodyMarkdown,
       body: posts.body,
       seoTitle: posts.seoTitle,
       seoDescription: posts.seoDescription,
@@ -86,9 +84,7 @@ export const getPublishedProjectBySlug = cache(
         slug: projects.slug,
         category: projects.category,
         excerpt: projects.excerpt,
-        bodyMarkdown: projects.bodyMarkdown,
         body: projects.body,
-        links: projects.links,
         seoTitle: projects.seoTitle,
         seoDescription: projects.seoDescription,
         publishedAt: projects.publishedAt,
@@ -150,7 +146,6 @@ export const getPublishedPageByKey = cache(
     const [page] = await getDb()
       .select({
         body: pages.body,
-        bodyMarkdown: pages.bodyMarkdown,
         id: pages.id,
         key: pages.key,
         metadata: pages.metadata,

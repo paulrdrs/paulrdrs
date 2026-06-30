@@ -44,7 +44,6 @@ describe("Home", () => {
 
   it("renders the homepage title without a Notion body", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
-      bodyMarkdown: "Intro **copy**.",
       body: null,
       id: "page-id",
       key: "home",
@@ -70,7 +69,6 @@ describe("Home", () => {
 
   it("renders Notion blocks when homepage body is present", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
-      bodyMarkdown: "Intro **copy**.",
       body: notionBody("Notion home"),
       id: "page-id",
       key: "home",

@@ -43,6 +43,13 @@
       "when": 1782593284461,
       "tag": "0005_cultured_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782822333499,
+      "tag": "0006_dapper_zombie",
+      "breakpoints": true
     }
   ]
 }

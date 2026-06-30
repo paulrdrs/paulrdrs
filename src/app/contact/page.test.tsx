@@ -44,7 +44,6 @@ describe("ContactPage", () => {
 
   it("renders the contact title without a Notion body", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
-      bodyMarkdown: "Email **hello@example.com**.",
       body: null,
       id: "page-id",
       key: "contact",
@@ -70,7 +69,6 @@ describe("ContactPage", () => {
 
   it("renders Notion blocks when contact body is present", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
-      bodyMarkdown: "Email **hello@example.com**.",
       body: notionBody("Notion contact"),
       id: "page-id",
       key: "contact",

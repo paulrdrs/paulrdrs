@@ -32,7 +32,6 @@ const buildPost = (overrides: Record<string, unknown> = {}) => ({
   title: "Hello Post",
   slug: "hello-post",
   excerpt: "A published post.",
-  bodyMarkdown: "# Body heading",
   body: null as NotionBlockTree | null,
   seoTitle: null,
   seoDescription: null,

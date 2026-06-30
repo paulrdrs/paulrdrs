@@ -1,17 +1,14 @@
 import { getTableName } from "drizzle-orm"
 import {
-  adminPasskeys,
   analyticsContentType,
   analyticsEvents,
-  authSessions,
   contentStatus,
   mediaAssets,
   pages,
   posts,
   projectCategory,
   projects,
-  siteNavigationSettings,
-  webauthnChallenges
+  siteNavigationSettings
 } from "./schema"
 
 describe("database schema", () => {
@@ -34,20 +31,14 @@ describe("database schema", () => {
       getTableName(pages),
       getTableName(siteNavigationSettings),
       getTableName(mediaAssets),
-      getTableName(analyticsEvents),
-      getTableName(adminPasskeys),
-      getTableName(webauthnChallenges),
-      getTableName(authSessions)
+      getTableName(analyticsEvents)
     ]).toEqual([
       "posts",
       "projects",
       "pages",
       "site_navigation_settings",
       "media_assets",
-      "analytics_events",
-      "admin_passkeys",
-      "webauthn_challenges",
-      "auth_sessions"
+      "analytics_events"
     ])
   })
 })

@@ -67,7 +67,6 @@ export const posts = pgTable(
     title: varchar("title", { length: 255 }).notNull(),
     slug: varchar("slug", { length: 255 }).notNull(),
     excerpt: text("excerpt"),
-    bodyMarkdown: text("body_markdown").notNull().default(""),
     status: contentStatus("status").notNull().default("draft"),
     coverMediaId: uuid("cover_media_id").references(() => mediaAssets.id, {
       onDelete: "set null"
@@ -96,15 +95,10 @@ export const projects = pgTable(
     slug: varchar("slug", { length: 255 }).notNull(),
     category: projectCategory("category").notNull(),
     excerpt: text("excerpt"),
-    bodyMarkdown: text("body_markdown").notNull().default(""),
     status: contentStatus("status").notNull().default("draft"),
     coverMediaId: uuid("cover_media_id").references(() => mediaAssets.id, {
       onDelete: "set null"
     }),
-    links: jsonb("links")
-      .$type<Array<{ label: string; url: string }>>()
-      .notNull()
-      .default([]),
     seoTitle: varchar("seo_title", { length: 255 }),
     seoDescription: text("seo_description"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
@@ -130,7 +124,6 @@ export const pages = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     key: varchar("key", { length: 120 }).notNull(),
     title: varchar("title", { length: 255 }).notNull(),
-    bodyMarkdown: text("body_markdown").notNull().default(""),
     status: contentStatus("status").notNull().default("draft"),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
     publishedAt: timestamp("published_at", { withTimezone: true }),
@@ -177,71 +170,5 @@ export const analyticsEvents = pgTable(
       table.occurredAt
     ),
     index("analytics_events_content_idx").on(table.contentType, table.contentId)
-  ]
-)
-
-export const adminPasskeys = pgTable(
-  "admin_passkeys",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    email: varchar("email", { length: 320 }).notNull(),
-    credentialId: text("credential_id").notNull(),
-    credentialPublicKey: text("credential_public_key").notNull(),
-    counter: integer("counter").notNull().default(0),
-    transports: jsonb("transports").$type<string[]>().notNull().default([]),
-    credentialDeviceType: varchar("credential_device_type", { length: 32 }),
-    credentialBackedUp: boolean("credential_backed_up")
-      .notNull()
-      .default(false),
-    ...timestamps(),
-    lastUsedAt: timestamp("last_used_at", { withTimezone: true })
-  },
-  (table) => [
-    uniqueIndex("admin_passkeys_credential_id_unique").on(table.credentialId),
-    index("admin_passkeys_email_idx").on(table.email)
-  ]
-)
-
-export const webauthnChallenges = pgTable(
-  "webauthn_challenges",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    challenge: text("challenge").notNull(),
-    email: varchar("email", { length: 320 }),
-    type: varchar("type", { length: 32 }).notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-    consumedAt: timestamp("consumed_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
-  },
-  (table) => [
-    uniqueIndex("webauthn_challenges_challenge_unique").on(table.challenge),
-    index("webauthn_challenges_lookup_idx").on(
-      table.challenge,
-      table.type,
-      table.expiresAt
-    )
-  ]
-)
-
-export const authSessions = pgTable(
-  "auth_sessions",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    email: varchar("email", { length: 320 }).notNull(),
-    tokenHash: varchar("token_hash", { length: 128 }).notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    lastSeenAt: timestamp("last_seen_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
-  },
-  (table) => [
-    uniqueIndex("auth_sessions_token_hash_unique").on(table.tokenHash),
-    index("auth_sessions_email_idx").on(table.email),
-    index("auth_sessions_expires_at_idx").on(table.expiresAt)
   ]
 )

@@ -47,11 +47,9 @@ const buildProject = (overrides: Record<string, unknown> = {}) => ({
   coverMediaId: null,
   coverWidth: null,
   excerpt: "A published project.",
-  bodyMarkdown: "# Project body",
   body: null as NotionBlockTree | null,
   seoTitle: null,
   seoDescription: null,
-  links: [{ label: "View project", url: "https://example.com" }],
   publishedAt: new Date("2026-01-01"),
   createdAt: new Date("2026-01-01"),
   ...overrides
@@ -85,7 +83,7 @@ describe("ProjectPage", () => {
     isProjectCategoryMock.mockReturnValue(true)
   })
 
-  it("renders the project title and links without a Notion body", async () => {
+  it("renders the project title without a Notion body", async () => {
     getPublishedProjectBySlugMock.mockResolvedValue(buildProject())
 
     render(
@@ -105,12 +103,6 @@ describe("ProjectPage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Camera Work" })
     ).toBeInTheDocument()
-    // Legacy Markdown is no longer rendered; only the Notion block tree is.
-    expect(screen.queryByText("Project body")).not.toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "View project" })).toHaveAttribute(
-      "href",
-      "https://example.com"
-    )
   })
 
   it("renders Notion blocks when body is present", async () => {
