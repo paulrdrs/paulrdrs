@@ -42,7 +42,7 @@ describe("ContactPage", () => {
     trackPageViewMock.mockReset()
   })
 
-  it("renders published CMS contact content", async () => {
+  it("renders the contact title without a Notion body", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
       bodyMarkdown: "Email **hello@example.com**.",
       body: null,
@@ -64,7 +64,8 @@ describe("ContactPage", () => {
     expect(
       screen.getByRole("heading", { name: "Reach me" })
     ).toBeInTheDocument()
-    expect(screen.getByText("hello@example.com")).toBeInTheDocument()
+    // Legacy Markdown is no longer rendered; only the Notion block tree is.
+    expect(screen.queryByText("hello@example.com")).not.toBeInTheDocument()
   })
 
   it("renders Notion blocks when contact body is present", async () => {

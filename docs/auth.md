@@ -1,58 +1,28 @@
-# Dashboard Auth
+# Auth
 
-Dashboard auth is passkeys-only. Email-based sign-in is not a runtime
-requirement.
+There is **no authenticated surface**. The custom dashboard and its
+passkey/WebAuthn sign-in were removed once content moved to Notion (see
+[Content](./content.md)). The deployed app is the public site plus the guarded
+Notion sync job — nothing requires a login.
 
-## Environment Variables
+## What this means
 
-- `ADMIN_EMAIL_ALLOWLIST`: comma-separated list of email addresses that may
-  register admin passkeys.
-- `PASSKEY_BOOTSTRAP_SECRET`: protects initial setup and manual re-bootstrap
-  after a database reset.
-- `PASSKEY_RP_ID`: optional passkey relying party ID. Defaults to `SITE_URL`
-  hostname with leading `www.` removed.
-- `SESSION_SECRET`: signs the HTTP-only session cookie.
-- `SITE_URL`: canonical origin used for WebAuthn origin verification.
+- No `/dashboard` routes, no login/logout, no passkey registration.
+- No auth environment variables (`ADMIN_EMAIL_ALLOWLIST`,
+  `PASSKEY_BOOTSTRAP_SECRET`, `PASSKEY_RP_ID`, `SESSION_SECRET`). These were
+  removed from the `web` service.
+- No session cookie. The only privileged endpoints are `/api/jobs/*`, which are
+  authorized with the `JOBS_SECRET` shared secret, not a user session (see
+  [Deployment](./deployment.md)).
 
-## Setup Flow
+## Editing content
 
-Initial setup happens at `/dashboard/passkeys/setup`.
+Content is authored in Notion and synced to Postgres by the cron-triggered
+`/api/jobs/sync-content` job. To change the site, edit the Notion databases — no
+app-side authentication is involved.
 
-An allowlisted email plus the bootstrap secret can start WebAuthn registration.
-Successful registration stores the credential in Postgres, creates a
-server-side session, and sets the signed session cookie.
+## Legacy database tables
 
-The bootstrap secret is not used for normal login.
-
-## Login Flow
-
-`/dashboard/login` starts a discoverable passkey authentication ceremony with
-user verification required. After a verified assertion, the app updates passkey
-metadata, creates a server-side session, and sets the existing session cookie.
-
-Protected dashboard pages read the cookie, verify its signature with
-`SESSION_SECRET`, and validate the token against the `auth_sessions` table.
-
-While that session is valid, the public top navigation displays Dashboard as
-its final link. Signed-out visitors do not see the link; direct dashboard access
-still relies on the protected-route session check.
-
-## Passkey Management
-
-Signed-in admins can manage passkeys at `/dashboard/passkeys`.
-
-Admins can register additional passkeys while signed in. Deleting a passkey is
-allowed only when another passkey remains for that admin email.
-
-## Recovery
-
-There is no user-facing lost-passkey recovery flow. If all passkeys are lost,
-recover operationally with Railway/Postgres access:
-
-1. Clear or replace the affected `admin_passkeys` records.
-2. Visit `/dashboard/passkeys/setup`.
-3. Register a new passkey with an allowlisted email and
-   `PASSKEY_BOOTSTRAP_SECRET`.
-
-Keep the bootstrap secret out of client-side variables and rotate it if it is
-shared too widely.
+The `admin_passkeys`, `webauthn_challenges`, and `auth_sessions` tables still
+exist in the database. No code reads or writes them; they are dropped by a
+follow-up cleanup migration.

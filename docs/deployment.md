@@ -10,22 +10,18 @@ everything else — app, database, and media storage — runs on Railway.
 ## Services
 
 - `web`: Next.js app.
-- `db`: Railway Postgres for CMS content, sessions, passkeys, and analytics.
-- `bucket`: Railway Storage Bucket for uploaded media.
+- `db`: Railway Postgres for content, media metadata, and analytics.
+- `bucket`: Railway Storage Bucket for media.
+- A Railway **Cron Job** service that POSTs `/api/jobs/sync-content` on a
+  schedule (see below).
 
 ## Web Service Environment
 
 Configure these variables on the `web` service:
 
 - `DATABASE_URL`: Railway Postgres private database URL.
-- `ADMIN_EMAIL_ALLOWLIST`: comma-separated dashboard admin email allowlist.
-- `PASSKEY_BOOTSTRAP_SECRET`: at least 32 characters, used for initial passkey
-  setup and manual re-bootstrap.
-- `PASSKEY_RP_ID`: optional passkey relying party ID. Defaults to `SITE_URL`
-  hostname with a leading `www.` removed.
-- `SESSION_SECRET`: at least 32 characters, used to sign the session cookie.
 - `ANALYTICS_SALT`: at least 32 characters, used as the HMAC salt for daily
-  visitor hashing. Keep this distinct from `SESSION_SECRET`.
+  visitor hashing.
 - `SITE_URL`: production site origin, for example `https://paulrdrs.com`.
 - `STORAGE_ENDPOINT`: Railway bucket S3-compatible endpoint.
 - `STORAGE_BUCKET`: Railway bucket name.
@@ -86,22 +82,18 @@ Notion rate limit for a full three-database sync.
 
 ## Production Smoke Test
 
-After deploying a change that touches CMS, auth, media, storage, migrations, or
-analytics, smoke test production in this order:
+After deploying a change that touches content, media, storage, migrations,
+analytics, or the sync job, smoke test production in this order:
 
 1. Open `/` and confirm the public homepage loads.
-2. Open `/dashboard/passkeys/setup`, register an allowlisted email with the
-   bootstrap secret, and confirm `/dashboard` loads.
-3. Log out and confirm `/dashboard/login` accepts the registered passkey.
-4. Create or update a post and publish it.
-5. Confirm the published post renders at `/blog/[slug]`.
-6. Upload an image in `/dashboard/media`.
-7. Select uploaded media as a post or project cover and confirm it renders
-   through `/media/[id]`.
-8. Visit a public page and confirm dashboard analytics records the view.
+2. Trigger `POST /api/jobs/sync-content` with the `JOBS_SECRET` (or wait for the
+   cron) and confirm it returns success.
+3. Publish or edit a post in Notion, re-run the sync, and confirm it renders at
+   `/blog/[slug]`.
+4. Confirm a Notion image re-hosts and renders through `/media/[id]`.
+5. Visit a public page and confirm analytics records the view.
 
-## Cookie Settings
+## Analytics Beacon
 
-Session cookies are HTTP-only, same-site lax, path-scoped to `/`, and secure in
-production. Local development keeps the same cookie shape except `secure` is
-disabled for non-HTTPS localhost workflows.
+The public `/api/analytics/events` beacon is unauthenticated and cookieless; it
+records privacy-minimal page views. The app sets no session or auth cookies.

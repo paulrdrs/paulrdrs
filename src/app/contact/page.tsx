@@ -3,7 +3,7 @@ import { trackPageView } from "@/analytics/server"
 import { ContentBody } from "@/components/ContentBody"
 import { PageContainer } from "@/components/PageContainer"
 import { getPublishedPageByKey } from "@/db/content"
-import { blockTreeToPlainText, createExcerpt } from "@/lib/content"
+import { blockTreeToPlainText } from "@/lib/content"
 import { buildContentMetadata } from "@/lib/metadata"
 
 export const dynamic = "force-dynamic"
@@ -12,9 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const contactPage = await getPublishedPageByKey("contact")
   const description = contactPage?.body
     ? blockTreeToPlainText(contactPage.body)
-    : contactPage?.bodyMarkdown
-      ? createExcerpt(contactPage.bodyMarkdown)
-      : undefined
+    : undefined
 
   return buildContentMetadata({
     description,
@@ -39,10 +37,7 @@ export default async function ContactPage() {
       </header>
       {contactPage ? (
         <div>
-          <ContentBody
-            body={contactPage.body}
-            markdown={contactPage.bodyMarkdown}
-          />
+          <ContentBody body={contactPage.body} />
         </div>
       ) : (
         <div className="empty-state">Contact details will live here.</div>

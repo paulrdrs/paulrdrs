@@ -1,6 +1,3 @@
-"use client"
-
-import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
 
 type SiteFrameProps = {
@@ -9,12 +6,6 @@ type SiteFrameProps = {
 }
 
 export const SiteFrame = ({ children, navigation }: SiteFrameProps) => {
-  const pathname = usePathname()
-
-  if (pathname.startsWith("/dashboard")) {
-    return <>{children}</>
-  }
-
   return (
     <div className="flex min-h-screen flex-col">
       {navigation}

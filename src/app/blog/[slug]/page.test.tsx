@@ -73,7 +73,7 @@ describe("BlogPostPage", () => {
     vi.clearAllMocks()
   })
 
-  it("renders Markdown when there is no Notion body", async () => {
+  it("renders the post title without a Notion body", async () => {
     getPublishedPostBySlugMock.mockResolvedValue(buildPost())
 
     render(
@@ -88,9 +88,8 @@ describe("BlogPostPage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Hello Post" })
     ).toBeInTheDocument()
-    expect(
-      screen.getByRole("heading", { level: 1, name: "Body heading" })
-    ).toBeInTheDocument()
+    // Legacy Markdown is no longer rendered; only the Notion block tree is.
+    expect(screen.queryByText("Body heading")).not.toBeInTheDocument()
   })
 
   it("renders Notion blocks when body is present", async () => {

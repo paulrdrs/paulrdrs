@@ -13,14 +13,8 @@ Core local values:
   DNS.
 - `DATABASE_PUBLIC_URL`: public Postgres proxy URL for local development and
   local migrations.
-- `ADMIN_EMAIL_ALLOWLIST`: comma-separated dashboard admin email allowlist.
-- `PASSKEY_BOOTSTRAP_SECRET`: at least 32 characters.
-- `PASSKEY_RP_ID`: optional. Defaults to the `SITE_URL` hostname with leading
-  `www.` removed.
-- `SESSION_SECRET`: at least 32 characters.
 - `ANALYTICS_SALT`: at least 32 characters, HMAC salt for visitor hashing.
-- `SITE_URL`: local or production origin used for passkey origin checks and
-  canonical/sitemap URLs.
+- `SITE_URL`: local or production origin used for canonical/sitemap URLs.
 - `STORAGE_ENDPOINT`
 - `STORAGE_BUCKET`
 - `STORAGE_ACCESS_KEY_ID`

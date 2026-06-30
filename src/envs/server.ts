@@ -1,7 +1,6 @@
 import "server-only"
 import {
   analyticsEnvsSchema,
-  authEnvsSchema,
   notionEnvsSchema,
   serverEnvsSchema,
   siteEnvsSchema,
@@ -21,15 +20,6 @@ export const getServerEnvs = () =>
 
 export const getSiteEnvs = () =>
   siteEnvsSchema.parse({
-    SITE_URL: process.env.SITE_URL
-  })
-
-export const getAuthEnvs = () =>
-  authEnvsSchema.parse({
-    ADMIN_EMAIL_ALLOWLIST: process.env.ADMIN_EMAIL_ALLOWLIST,
-    PASSKEY_BOOTSTRAP_SECRET: process.env.PASSKEY_BOOTSTRAP_SECRET,
-    PASSKEY_RP_ID: process.env.PASSKEY_RP_ID,
-    SESSION_SECRET: process.env.SESSION_SECRET,
     SITE_URL: process.env.SITE_URL
   })
 

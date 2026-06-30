@@ -85,7 +85,7 @@ describe("ProjectPage", () => {
     isProjectCategoryMock.mockReturnValue(true)
   })
 
-  it("renders Markdown when there is no Notion body", async () => {
+  it("renders the project title and links without a Notion body", async () => {
     getPublishedProjectBySlugMock.mockResolvedValue(buildProject())
 
     render(
@@ -105,9 +105,8 @@ describe("ProjectPage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Camera Work" })
     ).toBeInTheDocument()
-    expect(
-      screen.getByRole("heading", { level: 1, name: "Project body" })
-    ).toBeInTheDocument()
+    // Legacy Markdown is no longer rendered; only the Notion block tree is.
+    expect(screen.queryByText("Project body")).not.toBeInTheDocument()
     expect(screen.getByRole("link", { name: "View project" })).toHaveAttribute(
       "href",
       "https://example.com"

@@ -76,7 +76,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         />
       ) : null}
       <div>
-        <ContentBody body={post.body} markdown={post.bodyMarkdown} />
+        <ContentBody body={post.body} />
       </div>
     </PageContainer>
   )

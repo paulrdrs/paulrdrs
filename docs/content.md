@@ -1,6 +1,7 @@
 # Content And Media
 
-The CMS manages posts, projects, keyed pages, and uploaded media.
+Content is authored in **Notion** and synced into Postgres; the public site
+renders from Postgres. There is no dashboard or in-app editor.
 
 ## Content Types
 
@@ -11,55 +12,60 @@ The CMS manages posts, projects, keyed pages, and uploaded media.
 - Media assets store object metadata in Postgres and private objects in Railway
   Storage Bucket.
 
-Posts and projects support title, slug, excerpt, Markdown body, status, publish
-date, SEO fields, and optional cover media. Projects also support category and
-external links.
+Each type maps to a Notion database (Posts, Projects, Pages). Page **properties**
+carry the metadata (title, slug, status, excerpt, SEO fields, cover, publish
+date, and — for projects — category); the Notion **page body** is the long-form
+content. The full property → column contract lives in `agents-plan/notion-schema.md`.
 
-In the dashboard, posts are managed under the blog section. Home and Contact are
-edited as top-level dashboard sections backed by keyed page records.
+## Authoring And Sync
+
+Editing happens in Notion. The cron-triggered `POST /api/jobs/sync-content` job
+reads the three databases and upserts rows into Postgres, keyed by
+`notionPageId`. Public content routes are `force-dynamic`, so a synced change is
+reflected on the next request — there is no separate revalidation step. See
+[Deployment](./deployment.md) for the cron setup.
+
+Slugs come from an explicit Notion `Slug` property, normalized via `createSlug`
+and frozen on publish. Renames record the old slug so the dynamic route can
+301-redirect an old URL to the current one.
 
 ## Publishing
 
-Public reads only query records with `status = "published"`. Draft records stay
-available in the dashboard but do not render on public content routes.
+Public reads only query records with `status = "published"` (Notion `Status` =
+**Published**). Drafts sync but do not render on public routes.
 
-Publishing content makes it available through the matching public route.
+## Rendering
+
+Long-form content is the **Notion block tree** stored as `jsonb` and rendered by
+a custom React block renderer (`NotionBlocks`), not Markdown. The renderer
+supports a fixed whitelist of block types: paragraph, headings, bulleted and
+numbered lists, quote, code, image, divider, callout, and toggle. Unknown block
+types are skipped.
+
+There is no raw HTML and no `dangerouslySetInnerHTML`: React escapes all text,
+so rendering a known set of block components is the content-safety model. The
+renderer reuses the `.markdown-content` typographic styles in
+`src/app/styles/markdown.css`.
 
 ## Homepage Hero
 
-The Home editor can feature a published post, a published software or
-photography project, or an uploaded image. The selection is stored as a
-validated `{ kind, id }` value in the Home page's JSON metadata.
-
-Selected posts and projects link to their existing public routes. Selected
-media links to `/photo/[id]`, an unlisted image detail page that includes alt
-text and attribution. If the selection becomes unavailable, or no selection is
-made, the published Home title and Markdown become the typographic hero.
+When the Home page has body content it becomes the typographic hero. The
+optional featured-selection (`{ kind, id }` in the Home page's JSON metadata) is
+not modeled in Notion yet; absent a selection, the published Home title and body
+render as the hero.
 
 ## Navigation Visibility
 
-The dashboard settings page can hide the Blog, Projects, Photography, Software,
-and Store links from the public top navigation. These settings only affect link
-visibility. The matching public routes remain accessible by direct URL while
-their navigation links are hidden.
-
-When an admin has a valid session, the public top navigation appends a Dashboard
-link to `/dashboard`. This authenticated link is always last and is not
-controlled by the navigation visibility settings.
-
-## Markdown
-
-Long-form CMS content is Markdown with GitHub-flavored Markdown support. Raw HTML
-and executable MDX are intentionally not enabled.
-
-The dashboard preview and public pages share the same Markdown rendering model.
+Top-navigation link visibility (Blog, Projects, Photography, Software, Store) is
+stored in site settings in Postgres and falls back to defaults when unset. There
+is no in-app editor for it; the matching public routes remain reachable by direct
+URL regardless of link visibility.
 
 ## Media
 
-Media uploads are stored in the Railway Storage Bucket through S3-compatible
-credentials configured on the `web` service. The bucket objects are private.
-
-The app stores media metadata in Postgres and serves public assets through
-`/media/[id]`, which proxies the object by media ID.
-
-Posts and projects can reference uploaded media as cover assets.
+Every image referenced by Notion — uploaded, external, or cover — is re-hosted
+into the Railway Storage Bucket during sync (never hotlinked, since Notion
+presigned URLs expire) and served through `/media/[id]`, which proxies the
+private object by media ID. Re-hosting is idempotent via a stable
+`media_assets.sourceKey`. Media metadata lives in Postgres; the bucket objects
+are private.

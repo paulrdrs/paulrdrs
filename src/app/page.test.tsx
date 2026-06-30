@@ -42,7 +42,7 @@ describe("Home", () => {
     trackPageViewMock.mockReset()
   })
 
-  it("renders published CMS homepage content", async () => {
+  it("renders the homepage title without a Notion body", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
       bodyMarkdown: "Intro **copy**.",
       body: null,
@@ -64,7 +64,8 @@ describe("Home", () => {
     expect(
       screen.getByRole("heading", { name: "Home intro" })
     ).toBeInTheDocument()
-    expect(screen.getByText("copy")).toBeInTheDocument()
+    // Legacy Markdown is no longer rendered; only the Notion block tree is.
+    expect(screen.queryByText("copy")).not.toBeInTheDocument()
   })
 
   it("renders Notion blocks when homepage body is present", async () => {

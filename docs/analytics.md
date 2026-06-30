@@ -20,13 +20,13 @@ URLs in analytics events.
 ## Visitor Hashing
 
 Visitor hashes are derived from the request IP, user agent, event date, and
-`SESSION_SECRET`. Because the date is part of the hash input, visitor counts are
+`ANALYTICS_SALT`. Because the date is part of the hash input, visitor counts are
 useful for short reporting windows without creating a durable cross-day visitor
 identifier.
 
-## Dashboard Reporting
+## Reporting
 
-The `/dashboard` overview shows read-only analytics summaries:
+Aggregate summaries are computed from the stored events:
 
 - recent views
 - recent visitors
@@ -35,4 +35,5 @@ The `/dashboard` overview shows read-only analytics summaries:
 - top projects
 - top paths
 
-Empty analytics states should render without special setup.
+There is no in-app reporting UI; these aggregates are exposed via the analytics
+query layer. Empty analytics states require no special setup.

@@ -1,7 +1,10 @@
 import { z } from "zod"
-import type { ContentStatus } from "@/cms/contentForms"
 import { isPageKey, type PageKey } from "@/cms/pages"
-import { isProjectCategory, type ProjectCategory } from "@/db/contentTypes"
+import {
+  type ContentStatus,
+  isProjectCategory,
+  type ProjectCategory
+} from "@/db/contentTypes"
 import { createSlug } from "@/lib/content"
 import type { NotionImageSource } from "./types"
 

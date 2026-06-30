@@ -1,4 +1,6 @@
-import { projectCategory } from "./schema"
+import { type contentStatus, projectCategory } from "./schema"
+
+export type ContentStatus = (typeof contentStatus.enumValues)[number]
 
 export type ProjectCategory = (typeof projectCategory.enumValues)[number]
 

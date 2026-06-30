@@ -91,7 +91,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         />
       ) : null}
       <div>
-        <ContentBody body={project.body} markdown={project.bodyMarkdown} />
+        <ContentBody body={project.body} />
       </div>
       {project.links.length > 0 ? (
         <ul className="flex flex-wrap gap-4 pt-2">

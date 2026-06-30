@@ -4,7 +4,7 @@ import { ContentBody } from "@/components/ContentBody"
 import { Hero } from "@/components/Hero"
 import { PageContainer } from "@/components/PageContainer"
 import { getFeaturedHeroContent, getPublishedPageByKey } from "@/db/content"
-import { blockTreeToPlainText, createExcerpt } from "@/lib/content"
+import { blockTreeToPlainText } from "@/lib/content"
 import { getHeroSelection } from "@/site/hero"
 
 export const dynamic = "force-dynamic"
@@ -13,9 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const homePage = await getPublishedPageByKey("home")
   const description = homePage?.body
     ? blockTreeToPlainText(homePage.body)
-    : homePage?.bodyMarkdown
-      ? createExcerpt(homePage.bodyMarkdown)
-      : undefined
+    : undefined
 
   return {
     title: { absolute: homePage?.title ?? "paulrdrs" },
@@ -42,12 +40,8 @@ export default async function Home() {
     path: "/"
   })
 
-  const hasBody = Boolean(
-    homePage && (homePage.body?.length || homePage.bodyMarkdown)
-  )
-  const bodyContent = homePage ? (
-    <ContentBody body={homePage.body} markdown={homePage.bodyMarkdown} />
-  ) : null
+  const hasBody = Boolean(homePage?.body?.length)
+  const bodyContent = homePage ? <ContentBody body={homePage.body} /> : null
 
   return (
     <PageContainer>
