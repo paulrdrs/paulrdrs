@@ -1,3 +1,4 @@
+import { isProjectCategory } from "@paulrdrs/content/content"
 import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import { ContentBody } from "@/components/ContentBody"
@@ -9,7 +10,6 @@ import {
   getPublishedProjectBySlug,
   getPublishedProjectPhotos
 } from "@/db/content"
-import { isProjectCategory } from "@/db/contentTypes"
 import { blockTreeToPlainText } from "@/lib/content"
 import { buildContentMetadata } from "@/lib/metadata"
 

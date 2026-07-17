@@ -19,9 +19,9 @@
     "prepare": "is-ci || husky",
     "preview": "pnpm --filter @paulrdrs/web preview",
     "start": "pnpm --filter @paulrdrs/web start",
-    "test": "pnpm --filter @paulrdrs/web test",
+    "test": "pnpm --recursive --if-present test",
     "test:watch": "pnpm --filter @paulrdrs/web test:watch",
-    "typecheck": "pnpm --filter @paulrdrs/web typecheck"
+    "typecheck": "pnpm --recursive --if-present typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.16",

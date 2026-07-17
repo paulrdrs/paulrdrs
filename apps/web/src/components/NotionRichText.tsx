@@ -1,5 +1,5 @@
+import type { RichText } from "@paulrdrs/content/blocks"
 import { Fragment, type ReactNode } from "react"
-import type { RichText } from "@/notion/types"
 
 const applyMarks = (text: string, rich: RichText): ReactNode => {
   let node: ReactNode = text

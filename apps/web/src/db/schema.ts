@@ -1,3 +1,8 @@
+import type { NotionBlockTree } from "@paulrdrs/content/blocks"
+import {
+  contentStatusValues,
+  projectCategoryValues
+} from "@paulrdrs/content/content"
 import { sql } from "drizzle-orm"
 import {
   index,
@@ -6,13 +11,6 @@ import {
   text,
   uniqueIndex
 } from "drizzle-orm/sqlite-core"
-import type { NotionBlockTree } from "../notion/types"
-
-// SQLite (D1) has no native enum type, so the allowed values live in plain
-// const arrays. They drive both the column `enum` option (for type-narrowing)
-// and the public types in `./contentTypes`.
-export const contentStatusValues = ["draft", "published"] as const
-export const projectCategoryValues = ["photography", "software"] as const
 
 // Fresh `created_at` / `updated_at` column builders for tables that track both.
 // Stored as unix-epoch seconds; `updated_at` is bumped explicitly in app code.

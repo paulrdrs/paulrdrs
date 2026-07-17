@@ -1,5 +1,5 @@
+import type { NotionBlock, RichText } from "@paulrdrs/content/blocks"
 import { render, screen } from "@testing-library/react"
-import type { NotionBlock, RichText } from "@/notion/types"
 import { NotionBlocks } from "./NotionBlocks"
 
 let counter = 0

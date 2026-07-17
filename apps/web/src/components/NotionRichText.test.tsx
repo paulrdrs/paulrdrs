@@ -1,5 +1,5 @@
+import type { RichText, RichTextAnnotations } from "@paulrdrs/content/blocks"
 import { render } from "@testing-library/react"
-import type { RichText, RichTextAnnotations } from "@/notion/types"
 import { NotionRichText } from "./NotionRichText"
 
 const annotations = (

@@ -1,7 +1,8 @@
+import { describe, expect, it } from "vitest"
 import { isPageKey, pageKeys } from "./pages"
 
 describe("page keys", () => {
-  it("defines supported keyed pages", () => {
+  it("defines known page keys", () => {
     expect(pageKeys).toEqual(["home", "contact"])
   })
 

@@ -1,10 +1,10 @@
+import type { NotionBlockTree } from "@paulrdrs/content/blocks"
+import type { ProjectCategory } from "@paulrdrs/content/content"
 import { and, desc, eq, sql } from "drizzle-orm"
 import { unstable_cache } from "next/cache"
 import { cache } from "react"
-import type { NotionBlockTree } from "@/notion/types"
 import type { HeroSelection } from "@/site/hero"
 import { getDb } from "./client"
-import type { ProjectCategory } from "./contentTypes"
 import {
   mediaAssets,
   pages,

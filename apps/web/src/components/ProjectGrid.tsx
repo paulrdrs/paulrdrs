@@ -1,5 +1,5 @@
+import type { ProjectCategory } from "@paulrdrs/content/content"
 import Link from "next/link"
-import type { ProjectCategory } from "@/db/contentTypes"
 import { ContentImage } from "./ContentImage"
 
 type ProjectGridItem = {

@@ -10,7 +10,7 @@ import {
   MAX_MEDIA_FILE_SIZE_BYTES,
   validateMediaFile
 } from "@/media/validation"
-import type { NotionImageSource } from "./types"
+import type { NotionImageSource } from "./imageSource"
 
 // Uploaded Notion files are served via short-lived presigned URLs that get
 // re-signed on every fetch, so the query string can't be part of the key.

@@ -1,4 +1,4 @@
-import type { NotionBlock, RichText } from "@/notion/types"
+import type { NotionBlock, RichText } from "@paulrdrs/content/blocks"
 import {
   blockTreeToPlainText,
   createSlug,

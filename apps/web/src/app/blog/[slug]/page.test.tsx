@@ -1,7 +1,7 @@
+import type { NotionBlockTree } from "@paulrdrs/content/blocks"
 import { render, screen } from "@testing-library/react"
 import { notFound, permanentRedirect } from "next/navigation"
 import { getPostSlugByPreviousSlug, getPublishedPostBySlug } from "@/db/content"
-import type { NotionBlockTree } from "@/notion/types"
 import BlogPostPage from "./page"
 
 vi.mock("@/db/content", () => ({

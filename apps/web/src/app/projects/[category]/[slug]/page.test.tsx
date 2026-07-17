@@ -1,3 +1,5 @@
+import type { NotionBlockTree } from "@paulrdrs/content/blocks"
+import { isProjectCategory } from "@paulrdrs/content/content"
 import { render, screen } from "@testing-library/react"
 import { notFound, permanentRedirect } from "next/navigation"
 import {
@@ -5,8 +7,6 @@ import {
   getPublishedProjectBySlug,
   getPublishedProjectPhotos
 } from "@/db/content"
-import { isProjectCategory } from "@/db/contentTypes"
-import type { NotionBlockTree } from "@/notion/types"
 import ProjectPage from "./page"
 
 vi.mock("@/db/content", () => ({
@@ -15,7 +15,7 @@ vi.mock("@/db/content", () => ({
   getPublishedProjectPhotos: vi.fn()
 }))
 
-vi.mock("@/db/contentTypes", () => ({
+vi.mock("@paulrdrs/content/content", () => ({
   isProjectCategory: vi.fn()
 }))
 

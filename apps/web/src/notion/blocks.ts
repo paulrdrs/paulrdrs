@@ -5,14 +5,14 @@ import {
   isFullBlock,
   type RichTextItemResponse
 } from "@notionhq/client"
-import { getNotionClient } from "./client"
-import { getNotionImageSourceKey, rehostImage } from "./media"
 import type {
   NotionBlock,
   NotionBlockTree,
-  NotionImageSource,
   RichText
-} from "./types"
+} from "@paulrdrs/content/blocks"
+import { getNotionClient } from "./client"
+import type { NotionImageSource } from "./imageSource"
+import { getNotionImageSourceKey, rehostImage } from "./media"
 
 const toRichText = (items: readonly RichTextItemResponse[]): RichText[] =>
   items.map((item) => ({

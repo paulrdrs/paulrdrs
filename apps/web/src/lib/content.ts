@@ -1,4 +1,8 @@
-import type { NotionBlock, NotionBlockTree, RichText } from "@/notion/types"
+import type {
+  NotionBlock,
+  NotionBlockTree,
+  RichText
+} from "@paulrdrs/content/blocks"
 
 export const createSlug = (value: string) => {
   return value

@@ -1,5 +1,7 @@
 import "server-only"
 import { collectPaginatedAPI, isFullPage } from "@notionhq/client"
+import type { ImageBlock, NotionBlockTree } from "@paulrdrs/content/blocks"
+import type { ContentStatus } from "@paulrdrs/content/content"
 import {
   type AnyColumn,
   and,
@@ -12,7 +14,6 @@ import {
   sql
 } from "drizzle-orm"
 import { getDb } from "@/db/client"
-import type { ContentStatus } from "@/db/contentTypes"
 import { pages, photoProjects, photos, posts, projects } from "@/db/schema"
 import { getNotionEnvs } from "@/envs/server"
 import { fetchPageBlocks } from "./blocks"
@@ -30,7 +31,6 @@ import {
   type NotionPage
 } from "./mapping"
 import { getNotionImageSourceKey, rehostImage } from "./media"
-import type { ImageBlock, NotionBlockTree } from "./types"
 
 export type NotionSyncTypeSummary = {
   readonly errors: readonly string[]

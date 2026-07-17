@@ -1,4 +1,4 @@
-import type { NotionBlockTree } from "@/notion/types"
+import type { NotionBlockTree } from "@paulrdrs/content/blocks"
 import { NotionBlocks } from "./NotionBlocks"
 
 type ContentBodyProps = {

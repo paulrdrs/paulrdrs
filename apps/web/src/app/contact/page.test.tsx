@@ -1,6 +1,6 @@
+import type { NotionBlockTree } from "@paulrdrs/content/blocks"
 import { render, screen } from "@testing-library/react"
 import { getPublishedPageByKey } from "@/db/content"
-import type { NotionBlockTree } from "@/notion/types"
 import ContactPage from "./page"
 
 const notionBody = (text: string): NotionBlockTree => [

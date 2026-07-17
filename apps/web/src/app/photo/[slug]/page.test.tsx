@@ -1,3 +1,4 @@
+import type { NotionBlockTree } from "@paulrdrs/content/blocks"
 import { render, screen } from "@testing-library/react"
 import { notFound, permanentRedirect } from "next/navigation"
 import {
@@ -5,7 +6,6 @@ import {
   getPhotoSlugByPreviousSlug,
   getPublishedPhotoBySlug
 } from "@/db/content"
-import type { NotionBlockTree } from "@/notion/types"
 import PhotoPage from "./page"
 
 vi.mock("@/db/content", () => ({

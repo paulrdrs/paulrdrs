@@ -1,13 +1,13 @@
-import type { ReactNode } from "react"
-import { ContentImage } from "@/components/ContentImage"
-import { NotionRichText } from "@/components/NotionRichText"
-import { richTextToPlainText } from "@/lib/content"
 import type {
   BulletedListItemBlock,
   NotionBlock,
   NotionBlockTree,
   NumberedListItemBlock
-} from "@/notion/types"
+} from "@paulrdrs/content/blocks"
+import type { ReactNode } from "react"
+import { ContentImage } from "@/components/ContentImage"
+import { NotionRichText } from "@/components/NotionRichText"
+import { richTextToPlainText } from "@/lib/content"
 
 type ListItemBlock = BulletedListItemBlock | NumberedListItemBlock
 

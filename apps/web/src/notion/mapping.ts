@@ -1,12 +1,12 @@
-import { z } from "zod"
-import { isPageKey, type PageKey } from "@/cms/pages"
 import {
   type ContentStatus,
   isProjectCategory,
   type ProjectCategory
-} from "@/db/contentTypes"
+} from "@paulrdrs/content/content"
+import { isPageKey, type PageKey } from "@paulrdrs/content/pages"
+import { z } from "zod"
 import { createSlug } from "@/lib/content"
-import type { NotionImageSource } from "./types"
+import type { NotionImageSource } from "./imageSource"
 
 export type NotionPage = {
   readonly id: string
