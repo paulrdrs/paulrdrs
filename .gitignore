@@ -1,5 +1,6 @@
 # dependencies
 node_modules
+.pnpm-store
 
 # testing
 coverage
@@ -12,6 +13,11 @@ coverage
 out
 next-env.d.ts
 
+# cloudflare / opennext
+.open-next
+.wrangler
+cloudflare-env.d.ts
+
 # production
 build
 target
@@ -22,14 +28,12 @@ dist-ssr
 # misc
 .DS_Store
 *.pem
+*.http
 
-# cloudflare
-.wrangler
-cloudflare.d.ts
-
-# local env files
+# env files
 .env
 .env*.local
+.env.production
 .dev.vars
 
 # temp directory
@@ -48,9 +52,18 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # typescript
 *.tsbuildinfo
 
+# JavaScript source is not part of this TypeScript-first codebase. The one
+# exception is the Next.js PostCSS configuration, which has no TypeScript form.
+*.js
+*.jsx
+*.cjs
+*.mjs
+!apps/web/postcss.config.mjs
+
 # editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo
@@ -74,4 +87,4 @@ lerna-debug.log*
 *.tar.gz
 *.tgz
 *.log
-*.bun
+.cf-deploy.env

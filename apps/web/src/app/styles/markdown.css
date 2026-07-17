@@ -1,0 +1,154 @@
+@layer components {
+  .markdown-content {
+    width: 100%;
+    max-width: 48rem;
+    color: var(--ink);
+    @apply text-base;
+  }
+
+  .markdown-content > * + * {
+    @apply mt-4;
+  }
+
+  .markdown-content h1,
+  .markdown-content h2,
+  .markdown-content h3,
+  .markdown-content h4 {
+    color: var(--ink);
+    font-weight: 800;
+  }
+
+  .markdown-content h1 {
+    @apply text-4xl;
+  }
+  .markdown-content h2 {
+    @apply text-3xl;
+  }
+  .markdown-content h3 {
+    @apply text-2xl;
+  }
+  .markdown-content h4 {
+    @apply text-xl;
+  }
+  .markdown-content :is(h1, h2):not(:first-child) {
+    @apply mt-12;
+  }
+  .markdown-content :is(h3, h4):not(:first-child) {
+    @apply mt-8;
+  }
+  .markdown-content p {
+    max-width: 42rem;
+  }
+
+  .markdown-content a {
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  .markdown-content a:hover {
+    text-decoration-color: var(--ink);
+  }
+  .markdown-content strong {
+    color: var(--ink);
+    font-weight: 800;
+  }
+  .markdown-content em {
+    color: var(--muted);
+  }
+
+  .markdown-content ul,
+  .markdown-content ol {
+    display: flex;
+    max-width: 42rem;
+    flex-direction: column;
+    @apply gap-2 pl-8;
+  }
+
+  .markdown-content ul {
+    list-style-type: disc;
+  }
+  .markdown-content ol {
+    list-style-type: decimal;
+  }
+  .markdown-content li::marker {
+    color: var(--muted);
+  }
+
+  .markdown-content blockquote {
+    max-width: 42rem;
+    border-left: 2px solid var(--ink);
+    @apply py-2 pl-4;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .markdown-content code {
+    color: var(--ink);
+    font-family: var(--font-mono);
+    @apply text-sm;
+  }
+
+  .markdown-content :not(pre) > code {
+    background: var(--surface);
+    @apply px-2 py-1;
+  }
+
+  .markdown-content pre {
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    @apply p-4;
+    color: var(--ink);
+  }
+
+  .markdown-content pre code {
+    background: transparent;
+  }
+
+  .markdown-content table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-top: 1px solid var(--line);
+    text-align: left;
+    @apply text-sm;
+  }
+
+  .markdown-content th,
+  .markdown-content td {
+    border-bottom: 1px solid var(--line);
+    @apply py-4 pr-4;
+    vertical-align: top;
+  }
+  .markdown-content hr {
+    @apply my-12;
+    border-color: var(--line);
+  }
+
+  .markdown-content .callout {
+    display: flex;
+    max-width: 42rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    @apply gap-4 p-4;
+  }
+
+  .markdown-content .callout-icon {
+    line-height: 1;
+  }
+
+  .markdown-content details.toggle {
+    max-width: 42rem;
+  }
+
+  .markdown-content details.toggle > summary {
+    cursor: pointer;
+    color: var(--ink);
+    font-weight: 600;
+  }
+}
