@@ -57,7 +57,7 @@ types are skipped.
 There is no raw HTML and no `dangerouslySetInnerHTML`: React escapes all text,
 so rendering a known set of block components is the content-safety model. The
 renderer reuses the `.markdown-content` typographic styles in
-`src/app/styles/markdown.css`.
+`apps/web/src/app/styles/markdown.css`.
 
 ## Homepage Hero
 

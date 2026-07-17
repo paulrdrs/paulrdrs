@@ -11,7 +11,8 @@
       "**",
       "!**/*.d.ts",
       "!node_modules",
-      "!.next",
+      "!**/.next",
+      "!**/.open-next",
       "!dist",
       "!build",
       "!drizzle"
@@ -78,17 +79,17 @@
   "overrides": [
     {
       "includes": [
-        "src/app/**/page.tsx",
-        "src/app/layout.tsx",
-        "src/app/robots.ts",
-        "src/app/sitemap.ts",
+        "apps/web/src/app/**/page.tsx",
+        "apps/web/src/app/layout.tsx",
+        "apps/web/src/app/robots.ts",
+        "apps/web/src/app/sitemap.ts",
         "commitlint.config.ts",
-        "custom-worker.ts",
+        "apps/web/custom-worker.ts",
         "drizzle.config.ts",
-        "next.config.ts",
-        "open-next.config.ts",
-        "postcss.config.mjs",
-        "vitest.config.ts"
+        "apps/web/next.config.ts",
+        "apps/web/open-next.config.ts",
+        "apps/web/postcss.config.mjs",
+        "apps/web/vitest.config.ts"
       ],
       "linter": {
         "rules": {

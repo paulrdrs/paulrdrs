@@ -4,8 +4,9 @@
 
 Data access (D1, R2) comes from Cloudflare **bindings**, not env vars — locally
 these are provided by Miniflare via `initOpenNextCloudflareForDev()` in
-`next.config.ts`, so `pnpm dev` reaches a local D1/R2 with no connection string.
-Use a local `.env` / `.dev.vars` file only for plain secrets/vars:
+`apps/web/next.config.ts`, so `pnpm dev` reaches a local D1/R2 with no connection
+string. Use a local `apps/web/.env` / `apps/web/.dev.vars` file only for plain
+secrets/vars:
 
 - `SITE_URL`: local or production origin used for canonical/sitemap URLs.
 - `NOTION_TOKEN`: Notion integration token used to read the Posts, Projects,
@@ -28,7 +29,7 @@ The `DB` binding points at a local SQLite database under `.wrangler/` for
 root:
 
 ```sh
-pnpm db:generate        # regenerate SQLite migrations from src/db/schema.ts
+pnpm db:generate        # regenerate from apps/web/src/db/schema.ts
 pnpm db:migrate         # apply to local D1
 pnpm db:migrate:remote  # apply to the remote D1 (deploy)
 ```
@@ -37,18 +38,22 @@ pnpm db:migrate:remote  # apply to the remote D1 (deploy)
 
 Dependencies must pin an **exact** version — never a `^`/`~`/range. `.npmrc` sets
 `save-exact=true` so `pnpm add <pkg>` pins automatically; do not hand-write a
-range. `pnpm check:deps` (run in the pre-commit hook) fails the commit on any
-non-exact specifier.
+range. Add app dependencies with `pnpm --filter @paulrdrs/web add <pkg>`.
+`pnpm check:deps` (run in the pre-commit hook) checks every workspace manifest
+and fails the commit on any non-exact specifier.
 
 ## TypeScript only
 
 All code and scripts are TypeScript (`.ts`/`.tsx`) — Node 24 runs `.ts` files
 directly, so even repo scripts (see `scripts/`) are `.ts`. Plain JavaScript
 (`.js`/`.jsx`/`.cjs`/`.mjs`) is not allowed; the sole exception is a tool config
-with no TypeScript form (e.g. `postcss.config.mjs`), allowlisted in
+with no TypeScript form (e.g. `apps/web/postcss.config.mjs`), allowlisted in
 `scripts/check-no-js.ts`. `pnpm check:no-js` (pre-commit) enforces this.
 
 ## Common Commands
+
+Run these from the repository root; application commands delegate to
+`@paulrdrs/web`:
 
 ```sh
 pnpm dev

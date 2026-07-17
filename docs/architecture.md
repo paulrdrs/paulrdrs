@@ -1,7 +1,8 @@
 # Architecture
 
-This is a Next.js App Router personal site deployed on Cloudflare Workers via
-the OpenNext adapter. Content is authored in Notion and synced into Cloudflare
+This is a pnpm workspace whose web application lives in `apps/web`. The app is
+a Next.js App Router personal site deployed on Cloudflare Workers via the
+OpenNext adapter. Content is authored in Notion and synced into Cloudflare
 D1; the public site renders from D1. There is no dashboard or authenticated
 surface.
 

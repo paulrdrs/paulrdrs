@@ -1,5 +1,5 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "paulrdrs",
   "main": "custom-worker.ts",
   "compatibility_date": "2026-07-17",
@@ -31,7 +31,7 @@
       "binding": "DB",
       "database_name": "paulrdrs",
       "database_id": "c988153c-6cba-4302-869b-1dfae43cbb27",
-      "migrations_dir": "drizzle"
+      "migrations_dir": "../../drizzle"
     }
   ],
   "r2_buckets": [

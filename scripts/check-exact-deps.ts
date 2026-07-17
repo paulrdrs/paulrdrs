@@ -1,7 +1,8 @@
 // Enforces the repo rule: every dependency must pin an exact version.
 // No `^`/`~`/range specifiers. `.npmrc` (save-exact=true) keeps `pnpm add`
 // exact; this guard also catches hand-edited package.json entries.
-import { readFileSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
+import { join } from "node:path"
 
 type DependencyMap = Record<string, string>
 
@@ -11,10 +12,6 @@ type PackageJson = {
   optionalDependencies?: DependencyMap
   peerDependencies?: DependencyMap
 }
-
-const pkg: PackageJson = JSON.parse(
-  readFileSync(new URL("../package.json", import.meta.url), "utf8")
-)
 
 const fields: Array<keyof PackageJson> = [
   "dependencies",
@@ -27,15 +24,52 @@ const fields: Array<keyof PackageJson> = [
 // file:, link:, git…) are allowed and skipped via the ":" check below.
 const exactVersion = /^\d+\.\d+\.\d+(?:[-+].+)?$/
 
-const offenders: string[] = []
-for (const field of fields) {
-  const deps = pkg[field] ?? {}
-  for (const [name, spec] of Object.entries(deps)) {
-    if (spec.includes(":")) {
-      continue
+const repositoryRoot = new URL("..", import.meta.url)
+const packageManifestPaths = ["package.json"]
+
+for (const workspaceDirectory of ["apps", "packages", "workers"]) {
+  const workspaceDirectoryUrl = new URL(
+    `${workspaceDirectory}/`,
+    repositoryRoot
+  )
+
+  try {
+    const workspaceEntries = readdirSync(workspaceDirectoryUrl, {
+      withFileTypes: true
+    })
+    for (const workspaceEntry of workspaceEntries) {
+      if (workspaceEntry.isDirectory()) {
+        packageManifestPaths.push(
+          join(workspaceDirectory, workspaceEntry.name, "package.json")
+        )
+      }
     }
-    if (!exactVersion.test(spec)) {
-      offenders.push(`${field}: "${name}": "${spec}"`)
+  } catch (error) {
+    const missingDirectoryError = error as NodeJS.ErrnoException
+    if (missingDirectoryError.code !== "ENOENT") {
+      throw error
+    }
+  }
+}
+
+const offenders: string[] = []
+for (const packageManifestPath of packageManifestPaths) {
+  const packageManifest: PackageJson = JSON.parse(
+    readFileSync(new URL(packageManifestPath, repositoryRoot), "utf8")
+  )
+  for (const field of fields) {
+    const dependencies = packageManifest[field] ?? {}
+    for (const [dependencyName, versionSpecification] of Object.entries(
+      dependencies
+    )) {
+      if (versionSpecification.includes(":")) {
+        continue
+      }
+      if (!exactVersion.test(versionSpecification)) {
+        offenders.push(
+          `${packageManifestPath} ${field}: "${dependencyName}": "${versionSpecification}"`
+        )
+      }
     }
   }
 }

@@ -13,12 +13,12 @@ in `docs/`.
   migrations, Workflows, or deployment behavior.
 
 ## Repository Shape
-- `src/app/`: Next.js App Router routes and route tests.
-- `src/components/`: shared React components.
-- `src/db/`: Drizzle schema and D1 queries.
-- `src/notion/`: Notion mapping, block fetching, media rehosting, and sync.
-- `src/media/`: media validation and R2 storage.
-- `src/site/`: site-level navigation and hero configuration.
+- `apps/web/src/app/`: Next.js App Router routes and route tests.
+- `apps/web/src/components/`: shared React components.
+- `apps/web/src/db/`: Drizzle schema and D1 queries.
+- `apps/web/src/notion/`: Notion mapping, block fetching, media rehosting, and sync.
+- `apps/web/src/media/`: media validation and R2 storage.
+- `apps/web/src/site/`: site-level navigation and hero configuration.
 - `docs/`: maintained architecture and operating documentation.
 - `drizzle/`: generated D1 migrations and metadata.
 
@@ -65,6 +65,22 @@ in `docs/`.
 - Apply a required remote migration before deploying code that depends on it.
 - Avoid destructive Git or filesystem operations unless the user clearly asks
   for them and the target has been verified.
+
+## Code Review Guidance
+- Prioritize correctness, regressions, security, data integrity, and missing
+  tests.
+- Review changed behavior in the context of its callers, routes, data flow, and
+  deployment environment, not only the edited lines.
+- Verify findings against the repository before reporting them; avoid
+  speculative or purely stylistic feedback.
+- Report actionable findings first, ordered by severity, with precise file and
+  line references.
+- For each finding, explain the failure scenario and its practical impact.
+- Treat missing tests as a finding when they leave meaningful changed behavior
+  unverified.
+- Do not modify code during a review unless explicitly asked to implement fixes.
+- If no actionable findings are found, say so and mention any verification gaps
+  or residual risks.
 
 ## Verification
 For code changes, run:

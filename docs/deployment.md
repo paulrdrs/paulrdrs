@@ -1,10 +1,10 @@
 # Cloudflare Deployment
 
 The site deploys to **Cloudflare Workers** via the OpenNext adapter
-(`@opennextjs/cloudflare`). Configuration lives in `wrangler.jsonc` and
-`open-next.config.ts`; the worker entry is `custom-worker.ts`, which re-uses
-OpenNext's generated fetch handler and adds the cron `scheduled` handler plus the
-Notion sync Workflow.
+(`@opennextjs/cloudflare`). App configuration lives in
+`apps/web/wrangler.jsonc` and `apps/web/open-next.config.ts`; the worker entry is
+`apps/web/custom-worker.ts`, which re-uses OpenNext's generated fetch handler
+and adds the cron `scheduled` handler plus the Notion sync Workflow.
 
 DNS for the domain is already on Cloudflare.
 
@@ -20,8 +20,8 @@ DNS for the domain is already on Cloudflare.
 
 ## Bindings & Vars
 
-Bindings are declared in `wrangler.jsonc`. The following secrets/vars must be set
-on the Worker (via `wrangler secret put <NAME>` or the dashboard):
+Bindings are declared in `apps/web/wrangler.jsonc`. The following secrets/vars
+must be set on the Worker (via `wrangler secret put <NAME>` or the dashboard):
 
 - `NOTION_TOKEN`: Notion integration token.
 - `NOTION_POSTS_DB_ID`, `NOTION_PROJECTS_DB_ID`, `NOTION_PHOTOS_DB_ID`,
@@ -32,13 +32,15 @@ on the Worker (via `wrangler secret put <NAME>` or the dashboard):
 - `CF_BEACON_TOKEN`: Cloudflare Web Analytics site token (from the dashboard after
   enabling Web Analytics for the domain). When unset, the beacon is not rendered.
 
-Local development reads these from `.env` / `.dev.vars`; `next dev` picks up the
-D1/R2 bindings through `initOpenNextCloudflareForDev()` in `next.config.ts`.
+Local development reads these from `apps/web/.env` / `apps/web/.dev.vars`;
+`next dev` picks up the D1/R2 bindings through
+`initOpenNextCloudflareForDev()` in `apps/web/next.config.ts`.
 
 ## First-Time Setup
 
 1. `wrangler d1 create paulrdrs` and copy the returned `database_id` into the
-   `d1_databases` block in `wrangler.jsonc` (replacing the local placeholder).
+   `d1_databases` block in `apps/web/wrangler.jsonc` (replacing the local
+   placeholder).
 2. `wrangler r2 bucket create paulrdrs-media`.
 3. Set the secrets/vars listed above.
 4. Enable Web Analytics for the domain and set `CF_BEACON_TOKEN`.
