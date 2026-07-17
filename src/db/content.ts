@@ -1,4 +1,5 @@
 import { and, desc, eq, sql } from "drizzle-orm"
+import { unstable_cache } from "next/cache"
 import { cache } from "react"
 import type { NotionBlockTree } from "@/notion/types"
 import type { HeroSelection } from "@/site/hero"
@@ -22,21 +23,134 @@ type PublishedPage = {
   title: string
 }
 
-export const getPublishedPosts = async () => {
-  return getDb()
-    .select({
-      id: posts.id,
-      title: posts.title,
-      slug: posts.slug,
-      excerpt: posts.excerpt,
-      publishedAt: posts.publishedAt,
-      createdAt: posts.createdAt
-    })
-    .from(posts)
-    .where(eq(posts.status, "published"))
-    .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
+const contentCacheRevalidateSeconds = 300
+
+const coverSelection = {
+  coverAltText: mediaAssets.altText,
+  coverAttribution: mediaAssets.attribution,
+  coverHeight: mediaAssets.height,
+  coverMediaId: mediaAssets.id,
+  coverWidth: mediaAssets.width
 }
 
+const getPublishedPostsCached = unstable_cache(
+  async () => {
+    const rows = await getDb()
+      .select({
+        id: posts.id,
+        title: posts.title,
+        slug: posts.slug,
+        excerpt: posts.excerpt,
+        publishedAt: posts.publishedAt,
+        createdAt: posts.createdAt
+      })
+      .from(posts)
+      .where(eq(posts.status, "published"))
+      .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
+
+    return rows.map(({ createdAt, publishedAt, ...post }) => ({
+      ...post,
+      createdAt: createdAt.getTime(),
+      publishedAt: publishedAt?.getTime() ?? null
+    }))
+  },
+  ["published-posts"],
+  { revalidate: contentCacheRevalidateSeconds }
+)
+
+export const getPublishedPosts = async () => {
+  const rows = await getPublishedPostsCached()
+
+  return rows.map(({ createdAt, publishedAt, ...post }) => ({
+    ...post,
+    createdAt: new Date(createdAt),
+    publishedAt: publishedAt === null ? null : new Date(publishedAt)
+  }))
+}
+
+const getPublishedProjectsCached = unstable_cache(
+  async (category?: ProjectCategory) => {
+    const rows = await getDb()
+      .select({
+        ...coverSelection,
+        id: projects.id,
+        title: projects.title,
+        slug: projects.slug,
+        category: projects.category,
+        excerpt: projects.excerpt,
+        publishedAt: projects.publishedAt,
+        createdAt: projects.createdAt
+      })
+      .from(projects)
+      .leftJoin(mediaAssets, eq(projects.coverMediaId, mediaAssets.id))
+      .where(
+        category
+          ? and(
+              eq(projects.status, "published"),
+              eq(projects.category, category)
+            )
+          : eq(projects.status, "published")
+      )
+      .orderBy(desc(projects.publishedAt), desc(projects.createdAt))
+
+    return rows.map(({ createdAt, publishedAt, ...project }) => ({
+      ...project,
+      createdAt: createdAt.getTime(),
+      publishedAt: publishedAt?.getTime() ?? null
+    }))
+  },
+  ["published-projects"],
+  { revalidate: contentCacheRevalidateSeconds }
+)
+
+export const getPublishedProjects = async (category?: ProjectCategory) => {
+  const rows = await getPublishedProjectsCached(category)
+
+  return rows.map(({ createdAt, publishedAt, ...project }) => ({
+    ...project,
+    createdAt: new Date(createdAt),
+    publishedAt: publishedAt === null ? null : new Date(publishedAt)
+  }))
+}
+
+const getPublishedPhotosCached = unstable_cache(
+  async () => {
+    const rows = await getDb()
+      .select({
+        ...coverSelection,
+        id: photos.id,
+        title: photos.title,
+        slug: photos.slug,
+        excerpt: photos.excerpt,
+        publishedAt: photos.publishedAt,
+        createdAt: photos.createdAt
+      })
+      .from(photos)
+      .leftJoin(mediaAssets, eq(photos.mediaId, mediaAssets.id))
+      .where(eq(photos.status, "published"))
+      .orderBy(desc(photos.publishedAt), desc(photos.createdAt))
+
+    return rows.map(({ createdAt, publishedAt, ...photo }) => ({
+      ...photo,
+      createdAt: createdAt.getTime(),
+      publishedAt: publishedAt?.getTime() ?? null
+    }))
+  },
+  ["published-photos"],
+  { revalidate: contentCacheRevalidateSeconds }
+)
+
+export const getPublishedPhotos = async () => {
+  const rows = await getPublishedPhotosCached()
+
+  return rows.map(({ createdAt, publishedAt, ...photo }) => ({
+    ...photo,
+    createdAt: new Date(createdAt),
+    publishedAt: publishedAt === null ? null : new Date(publishedAt)
+  }))
+}
+
+/* Detail reads are request-deduplicated below and their routes use ISR. */
 export const getPublishedPostBySlug = cache(async (slug: string) => {
   const rows = await getDb()
     .select({
@@ -58,28 +172,6 @@ export const getPublishedPostBySlug = cache(async (slug: string) => {
 
   return rows.at(0)
 })
-
-export const getPublishedProjects = async (category?: ProjectCategory) => {
-  return getDb()
-    .select({
-      ...coverSelection,
-      id: projects.id,
-      title: projects.title,
-      slug: projects.slug,
-      category: projects.category,
-      excerpt: projects.excerpt,
-      publishedAt: projects.publishedAt,
-      createdAt: projects.createdAt
-    })
-    .from(projects)
-    .leftJoin(mediaAssets, eq(projects.coverMediaId, mediaAssets.id))
-    .where(
-      category
-        ? and(eq(projects.status, "published"), eq(projects.category, category))
-        : eq(projects.status, "published")
-    )
-    .orderBy(desc(projects.publishedAt), desc(projects.createdAt))
-}
 
 export const getPublishedProjectBySlug = cache(
   async (category: ProjectCategory, slug: string) => {
@@ -147,23 +239,6 @@ export const getProjectSlugByPreviousSlug = cache(
     return rows.at(0)?.slug
   }
 )
-
-export const getPublishedPhotos = async () => {
-  return getDb()
-    .select({
-      ...coverSelection,
-      id: photos.id,
-      title: photos.title,
-      slug: photos.slug,
-      excerpt: photos.excerpt,
-      publishedAt: photos.publishedAt,
-      createdAt: photos.createdAt
-    })
-    .from(photos)
-    .leftJoin(mediaAssets, eq(photos.mediaId, mediaAssets.id))
-    .where(eq(photos.status, "published"))
-    .orderBy(desc(photos.publishedAt), desc(photos.createdAt))
-}
 
 export const getPublishedPhotoBySlug = cache(async (slug: string) => {
   const rows = await getDb()
@@ -239,8 +314,8 @@ export const getPhotoSlugByPreviousSlug = cache(async (slug: string) => {
   return rows.at(0)?.slug
 })
 
-export const getPublishedPageByKey = cache(
-  async (key: string): Promise<PublishedPage | undefined> => {
+const getPublishedPageByKeyCached = unstable_cache(
+  async (key: string) => {
     const [page] = await getDb()
       .select({
         body: pages.body,
@@ -255,94 +330,105 @@ export const getPublishedPageByKey = cache(
       .limit(1)
 
     return page
+      ? { ...page, publishedAt: page.publishedAt?.getTime() ?? null }
+      : undefined
+  },
+  ["published-page-by-key"],
+  { revalidate: contentCacheRevalidateSeconds }
+)
+
+export const getPublishedPageByKey = cache(
+  async (key: string): Promise<PublishedPage | undefined> => {
+    const page = await getPublishedPageByKeyCached(key)
+
+    return page
+      ? {
+          ...page,
+          publishedAt:
+            page.publishedAt === null ? null : new Date(page.publishedAt)
+        }
+      : undefined
   }
 )
 
-const coverSelection = {
-  coverAltText: mediaAssets.altText,
-  coverAttribution: mediaAssets.attribution,
-  coverHeight: mediaAssets.height,
-  coverMediaId: mediaAssets.id,
-  coverWidth: mediaAssets.width
-}
+export const getFeaturedHeroContent = unstable_cache(
+  async (selection: HeroSelection) => {
+    if (selection.kind === "post") {
+      const [post] = await getDb()
+        .select({
+          ...coverSelection,
+          excerpt: posts.excerpt,
+          id: posts.id,
+          slug: posts.slug,
+          title: posts.title
+        })
+        .from(posts)
+        .leftJoin(mediaAssets, eq(posts.coverMediaId, mediaAssets.id))
+        .where(and(eq(posts.id, selection.id), eq(posts.status, "published")))
+        .limit(1)
 
-export const getFeaturedHeroContent = async (selection: HeroSelection) => {
-  if (selection.kind === "post") {
-    const [post] = await getDb()
+      return post
+        ? {
+            ...post,
+            href: `/blog/${post.slug}`,
+            kind: "post" as const,
+            label: "From the blog"
+          }
+        : undefined
+    }
+
+    if (selection.kind === "project") {
+      const [project] = await getDb()
+        .select({
+          ...coverSelection,
+          category: projects.category,
+          excerpt: projects.excerpt,
+          id: projects.id,
+          slug: projects.slug,
+          title: projects.title
+        })
+        .from(projects)
+        .leftJoin(mediaAssets, eq(projects.coverMediaId, mediaAssets.id))
+        .where(
+          and(eq(projects.id, selection.id), eq(projects.status, "published"))
+        )
+        .limit(1)
+
+      return project
+        ? {
+            ...project,
+            href: `/projects/${project.category}/${project.slug}`,
+            kind: "project" as const,
+            label: project.category
+          }
+        : undefined
+    }
+
+    const [photo] = await getDb()
       .select({
         ...coverSelection,
-        excerpt: posts.excerpt,
-        id: posts.id,
-        publishedAt: posts.publishedAt,
-        slug: posts.slug,
-        title: posts.title
+        excerpt: photos.excerpt,
+        id: photos.id,
+        slug: photos.slug,
+        title: photos.title
       })
-      .from(posts)
-      .leftJoin(mediaAssets, eq(posts.coverMediaId, mediaAssets.id))
-      .where(and(eq(posts.id, selection.id), eq(posts.status, "published")))
+      .from(photos)
+      .leftJoin(mediaAssets, eq(photos.mediaId, mediaAssets.id))
+      .where(and(eq(photos.id, selection.id), eq(photos.status, "published")))
       .limit(1)
 
-    return post
+    return photo
       ? {
-          ...post,
-          href: `/blog/${post.slug}`,
-          kind: "post" as const,
-          label: "From the blog"
+          ...photo,
+          href: `/photo/${photo.slug}`,
+          kind: "photo" as const,
+          label: "Photograph"
         }
       : undefined
-  }
-
-  if (selection.kind === "project") {
-    const [project] = await getDb()
-      .select({
-        ...coverSelection,
-        category: projects.category,
-        excerpt: projects.excerpt,
-        id: projects.id,
-        publishedAt: projects.publishedAt,
-        slug: projects.slug,
-        title: projects.title
-      })
-      .from(projects)
-      .leftJoin(mediaAssets, eq(projects.coverMediaId, mediaAssets.id))
-      .where(
-        and(eq(projects.id, selection.id), eq(projects.status, "published"))
-      )
-      .limit(1)
-
-    return project
-      ? {
-          ...project,
-          href: `/projects/${project.category}/${project.slug}`,
-          kind: "project" as const,
-          label: project.category
-        }
-      : undefined
-  }
-
-  const [photo] = await getDb()
-    .select({
-      ...coverSelection,
-      excerpt: photos.excerpt,
-      id: photos.id,
-      publishedAt: photos.publishedAt,
-      slug: photos.slug,
-      title: photos.title
-    })
-    .from(photos)
-    .leftJoin(mediaAssets, eq(photos.mediaId, mediaAssets.id))
-    .where(and(eq(photos.id, selection.id), eq(photos.status, "published")))
-    .limit(1)
-
-  return photo
-    ? {
-        ...photo,
-        href: `/photo/${photo.slug}`,
-        kind: "photo" as const,
-        label: "Photograph"
-      }
-    : undefined
-}
+  },
+  ["featured-hero-content"],
+  { revalidate: contentCacheRevalidateSeconds }
+)
 
 export type FeaturedHero = NonNullable<
   Awaited<ReturnType<typeof getFeaturedHeroContent>>

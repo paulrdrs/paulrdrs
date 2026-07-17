@@ -1,17 +1,17 @@
 import { NextRequest } from "next/server"
-import { getDashboardMediaAsset } from "@/db/adminContent"
+import { getMediaAssetLocation } from "@/db/media"
 import { getMediaObject } from "@/media/storage"
 import { GET } from "./route"
 
-vi.mock("@/db/adminContent", () => ({
-  getDashboardMediaAsset: vi.fn()
+vi.mock("@/db/media", () => ({
+  getMediaAssetLocation: vi.fn()
 }))
 
 vi.mock("@/media/storage", () => ({
   getMediaObject: vi.fn()
 }))
 
-const getDashboardMediaAssetMock = vi.mocked(getDashboardMediaAsset)
+const getMediaAssetLocationMock = vi.mocked(getMediaAssetLocation)
 const getMediaObjectMock = vi.mocked(getMediaObject)
 const createBodyStream = (value: string) =>
   new ReadableStream({
@@ -23,20 +23,9 @@ const createBodyStream = (value: string) =>
 
 describe("media proxy route", () => {
   it("returns stored media objects", async () => {
-    getDashboardMediaAssetMock.mockResolvedValue({
-      altText: "A photo",
-      attribution: null,
-      createdAt: new Date("2026-01-01"),
-      filename: "photo.png",
-      height: null,
-      id: "asset-id",
-      metadata: {},
+    getMediaAssetLocationMock.mockResolvedValue({
       mimeType: "image/png",
-      objectKey: "media/photo.png",
-      sourceKey: null,
-      sizeBytes: 5,
-      updatedAt: new Date("2026-01-01"),
-      width: null
+      objectKey: "media/photo.png"
     })
     getMediaObjectMock.mockResolvedValue({
       body: createBodyStream("hello"),
@@ -54,7 +43,7 @@ describe("media proxy route", () => {
   })
 
   it("returns 404 for missing metadata", async () => {
-    getDashboardMediaAssetMock.mockResolvedValue(undefined)
+    getMediaAssetLocationMock.mockResolvedValue(undefined)
 
     const response = await GET(
       new NextRequest("https://paulrdrs.com/media/missing"),

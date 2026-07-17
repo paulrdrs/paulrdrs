@@ -1,6 +1,16 @@
 import "server-only"
 import { collectPaginatedAPI, isFullPage } from "@notionhq/client"
-import { and, eq, inArray, isNull, ne, or } from "drizzle-orm"
+import {
+  type AnyColumn,
+  and,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  ne,
+  or,
+  sql
+} from "drizzle-orm"
 import { getDb } from "@/db/client"
 import type { ContentStatus } from "@/db/contentTypes"
 import { pages, photoProjects, photos, posts, projects } from "@/db/schema"
@@ -284,13 +294,20 @@ const rebuildPhotoProjectLinks = async (
           .limit(projectNotionPageIds.length)
       : []
 
-  await db.delete(photoProjects).where(eq(photoProjects.photoId, photoId))
+  const deleteLinks = db
+    .delete(photoProjects)
+    .where(eq(photoProjects.photoId, photoId))
 
-  if (linkedProjects.length > 0) {
-    await db
-      .insert(photoProjects)
-      .values(linkedProjects.map(({ id }) => ({ photoId, projectId: id })))
+  if (linkedProjects.length === 0) {
+    await deleteLinks
+    return
   }
+
+  const insertLinks = db
+    .insert(photoProjects)
+    .values(linkedProjects.map(({ id }) => ({ photoId, projectId: id })))
+
+  await db.batch([deleteLinks, insertLinks])
 }
 
 const upsertPhoto = async (mapped: MappedPhoto, rawBody: NotionBlockTree) => {
@@ -340,19 +357,14 @@ const upsertPhoto = async (mapped: MappedPhoto, rawBody: NotionBlockTree) => {
     title: mapped.title
   }
 
-  await db
+  const [row] = await db
     .insert(photos)
     .values(values)
     .onConflictDoUpdate({
       set: { ...values, updatedAt: new Date() },
       target: photos.notionPageId
     })
-
-  const [row] = await db
-    .select({ id: photos.id })
-    .from(photos)
-    .where(eq(photos.notionPageId, mapped.notionPageId))
-    .limit(1)
+    .returning({ id: photos.id })
 
   if (row) {
     await rebuildPhotoProjectLinks(row.id, mapped.projectNotionPageIds)
@@ -362,53 +374,176 @@ const upsertPhoto = async (mapped: MappedPhoto, rawBody: NotionBlockTree) => {
 const toErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error)
 
+const syncPreparationBatchSize = 3
+
+type PreparedSyncEntry = {
+  readonly persist: () => Promise<void>
+}
+
+type FailedSyncEntry = {
+  readonly error: string
+}
+
+const isFailedSyncEntry = (
+  entry: PreparedSyncEntry | FailedSyncEntry
+): entry is FailedSyncEntry => "error" in entry
+
+// Reconcile only after a complete Notion query. IDs are taken from the source
+// result, not the successful-entry count, so one malformed entry is preserved
+// for a later retry instead of being mistaken for a deletion.
+const missingNotionPageCondition = (
+  notionPageIds: readonly string[],
+  notionPageIdColumn: AnyColumn<{ data: string }>
+) =>
+  notionPageIds.length > 0
+    ? sql`${notionPageIdColumn} not in (select value from json_each(${JSON.stringify(notionPageIds)}))`
+    : undefined
+
+const markMissingPostsAsDraft = async (notionPageIds: readonly string[]) => {
+  await getDb()
+    .update(posts)
+    .set({ status: "draft", updatedAt: new Date() })
+    .where(
+      and(
+        eq(posts.status, "published"),
+        isNotNull(posts.notionPageId),
+        missingNotionPageCondition(notionPageIds, posts.notionPageId)
+      )
+    )
+}
+
+const markMissingProjectsAsDraft = async (notionPageIds: readonly string[]) => {
+  await getDb()
+    .update(projects)
+    .set({ status: "draft", updatedAt: new Date() })
+    .where(
+      and(
+        eq(projects.status, "published"),
+        isNotNull(projects.notionPageId),
+        missingNotionPageCondition(notionPageIds, projects.notionPageId)
+      )
+    )
+}
+
+const markMissingPagesAsDraft = async (notionPageIds: readonly string[]) => {
+  await getDb()
+    .update(pages)
+    .set({ status: "draft", updatedAt: new Date() })
+    .where(
+      and(
+        eq(pages.status, "published"),
+        isNotNull(pages.notionPageId),
+        missingNotionPageCondition(notionPageIds, pages.notionPageId)
+      )
+    )
+}
+
+const markMissingPhotosAsDraft = async (notionPageIds: readonly string[]) => {
+  await getDb()
+    .update(photos)
+    .set({ status: "draft", updatedAt: new Date() })
+    .where(
+      and(
+        eq(photos.status, "published"),
+        isNotNull(photos.notionPageId),
+        missingNotionPageCondition(notionPageIds, photos.notionPageId)
+      )
+    )
+}
+
 const syncEntries = async (
   databaseId: string,
-  syncPage: (page: NotionPage) => Promise<void>
+  preparePage: (page: NotionPage) => Promise<PreparedSyncEntry>,
+  markMissingAsDraft: (notionPageIds: readonly string[]) => Promise<void>
 ): Promise<NotionSyncTypeSummary> => {
   const notionPages = await queryDatabasePages(databaseId)
   const errors: string[] = []
   let synced = 0
 
-  for (const page of notionPages) {
-    try {
-      await syncPage(page)
-      synced += 1
-    } catch (error) {
-      errors.push(toErrorMessage(error))
+  for (
+    let batchStart = 0;
+    batchStart < notionPages.length;
+    batchStart += syncPreparationBatchSize
+  ) {
+    const batch = notionPages.slice(
+      batchStart,
+      batchStart + syncPreparationBatchSize
+    )
+    const preparedEntries = await Promise.all(
+      batch.map(async (page): Promise<PreparedSyncEntry | FailedSyncEntry> => {
+        try {
+          return await preparePage(page)
+        } catch (error) {
+          return { error: toErrorMessage(error) }
+        }
+      })
+    )
+
+    // Writes remain ordered so slug collisions and duplicate page keys retain
+    // the same deterministic behavior as the original sequential sync.
+    for (const entry of preparedEntries) {
+      if (isFailedSyncEntry(entry)) {
+        errors.push(entry.error)
+        continue
+      }
+
+      try {
+        await entry.persist()
+        synced += 1
+      } catch (error) {
+        errors.push(toErrorMessage(error))
+      }
     }
   }
+
+  await markMissingAsDraft(notionPages.map((page) => page.id))
 
   return { errors, synced }
 }
 
 export const syncPosts = (databaseId: string) =>
-  syncEntries(databaseId, async (page) => {
-    const mapped = mapPostPage(page)
-    const body = await fetchPageBlocks(page.id)
-    await upsertPost(mapped, body)
-  })
+  syncEntries(
+    databaseId,
+    async (page) => {
+      const mapped = mapPostPage(page)
+      const body = await fetchPageBlocks(page.id)
+      return { persist: () => upsertPost(mapped, body) }
+    },
+    markMissingPostsAsDraft
+  )
 
 export const syncProjects = (databaseId: string) =>
-  syncEntries(databaseId, async (page) => {
-    const mapped = mapProjectPage(page)
-    const body = await fetchPageBlocks(page.id)
-    await upsertProject(mapped, body)
-  })
+  syncEntries(
+    databaseId,
+    async (page) => {
+      const mapped = mapProjectPage(page)
+      const body = await fetchPageBlocks(page.id)
+      return { persist: () => upsertProject(mapped, body) }
+    },
+    markMissingProjectsAsDraft
+  )
 
 export const syncPages = (databaseId: string) =>
-  syncEntries(databaseId, async (page) => {
-    const mapped = mapPagePage(page)
-    const body = await fetchPageBlocks(page.id)
-    await upsertPage(mapped, body)
-  })
+  syncEntries(
+    databaseId,
+    async (page) => {
+      const mapped = mapPagePage(page)
+      const body = await fetchPageBlocks(page.id)
+      return { persist: () => upsertPage(mapped, body) }
+    },
+    markMissingPagesAsDraft
+  )
 
 export const syncPhotos = (databaseId: string) =>
-  syncEntries(databaseId, async (page) => {
-    const mapped = mapPhotoPage(page)
-    const body = await fetchPageBlocks(page.id)
-    await upsertPhoto(mapped, body)
-  })
+  syncEntries(
+    databaseId,
+    async (page) => {
+      const mapped = mapPhotoPage(page)
+      const body = await fetchPageBlocks(page.id)
+      return { persist: () => upsertPhoto(mapped, body) }
+    },
+    markMissingPhotosAsDraft
+  )
 
 // Photos sync after projects so their "Projects" relation targets exist.
 export const runNotionSync = async (): Promise<NotionSyncSummary> => {

@@ -5,7 +5,11 @@ import { getDb } from "@/db/client"
 import { mediaAssets } from "@/db/schema"
 import { uploadMediaObject } from "@/media/storage"
 import { buildMediaObjectKey } from "@/media/upload"
-import { validateMediaFile } from "@/media/validation"
+import {
+  isAllowedMediaMimeType,
+  MAX_MEDIA_FILE_SIZE_BYTES,
+  validateMediaFile
+} from "@/media/validation"
 import type { NotionImageSource } from "./types"
 
 // Uploaded Notion files are served via short-lived presigned URLs that get
@@ -22,7 +26,73 @@ const getFilenameFromUrl = (url: string) => {
   return segment || "image"
 }
 
-export const rehostImage = async (url: string, sourceKey: string) => {
+const getContentType = (response: Response) =>
+  response.headers.get("content-type")?.split(";")[0]?.trim() ||
+  "application/octet-stream"
+
+const getDeclaredContentLength = (response: Response) => {
+  const header = response.headers.get("content-length")
+
+  if (!header) {
+    return null
+  }
+
+  const length = Number(header)
+  return Number.isSafeInteger(length) && length >= 0 ? length : null
+}
+
+const readMediaBody = async (response: Response) => {
+  const declaredLength = getDeclaredContentLength(response)
+
+  if (declaredLength !== null && declaredLength > MAX_MEDIA_FILE_SIZE_BYTES) {
+    throw new Error("File is too large")
+  }
+
+  if (!response.body) {
+    return new Uint8Array()
+  }
+
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let totalBytes = 0
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+
+      if (done) {
+        break
+      }
+
+      totalBytes += value.byteLength
+
+      if (totalBytes > MAX_MEDIA_FILE_SIZE_BYTES) {
+        throw new Error("File is too large")
+      }
+
+      chunks.push(value)
+    }
+  } catch (error) {
+    await reader.cancel().catch(() => undefined)
+    throw error
+  } finally {
+    reader.releaseLock()
+  }
+
+  const body = new Uint8Array(totalBytes)
+  let offset = 0
+
+  for (const chunk of chunks) {
+    body.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+
+  return body
+}
+
+const inFlightRehosts = new Map<string, Promise<string>>()
+
+const rehostImageOnce = async (url: string, sourceKey: string) => {
   const db = getDb()
 
   const [existing] = await db
@@ -42,10 +112,13 @@ export const rehostImage = async (url: string, sourceKey: string) => {
   }
 
   const filename = getFilenameFromUrl(url)
-  const contentType =
-    response.headers.get("content-type")?.split(";")[0]?.trim() ||
-    "application/octet-stream"
-  const body = new Uint8Array(await response.arrayBuffer())
+  const contentType = getContentType(response)
+
+  if (!isAllowedMediaMimeType(contentType)) {
+    throw new Error("Unsupported file type")
+  }
+
+  const body = await readMediaBody(response)
   const file = new File([body], filename, { type: contentType })
 
   validateMediaFile(file)
@@ -66,4 +139,19 @@ export const rehostImage = async (url: string, sourceKey: string) => {
     .returning({ id: mediaAssets.id })
 
   return asset.id
+}
+
+export const rehostImage = (url: string, sourceKey: string) => {
+  const inFlight = inFlightRehosts.get(sourceKey)
+
+  if (inFlight) {
+    return inFlight
+  }
+
+  const operation = rehostImageOnce(url, sourceKey).finally(() => {
+    inFlightRehosts.delete(sourceKey)
+  })
+
+  inFlightRehosts.set(sourceKey, operation)
+  return operation
 }

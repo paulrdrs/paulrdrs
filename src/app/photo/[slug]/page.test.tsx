@@ -63,7 +63,7 @@ describe("PhotoPage", () => {
     ).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Pier at Dusk" })).toHaveAttribute(
       "src",
-      expect.stringContaining("/media/media-id")
+      expect.stringContaining("url=%2Fmedia%2Fmedia-id")
     )
   })
 

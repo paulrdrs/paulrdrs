@@ -14,6 +14,8 @@ surface.
 - Vitest for tests.
 - Drizzle ORM with Cloudflare D1 (SQLite) for durable data, via the `DB` binding.
 - Cloudflare R2 for media, via the `BUCKET` binding.
+- Cloudflare Images for responsive media transformations, via the `IMAGES`
+  binding.
 - Cloudflare Workflows + a cron trigger to run the Notion sync durably.
 - `@notionhq/client` for reading the Notion content databases during sync.
 
@@ -47,7 +49,8 @@ The `/store` route is intentionally minimal for now.
 - `/api/jobs/sync-content`: reads the Notion Posts, Projects, Photos, and Pages
   databases and upserts them into D1. Guarded by `JOBS_SECRET`. An optional
   `?type=posts|projects|photos|pages` syncs a single database; this is how the sync
-  Workflow drives one durable step per database (see
+  Workflow drives one durable step per database. Unsupported or repeated `type`
+  parameters return HTTP 400 without starting a sync (see
   [Deployment](./deployment.md)).
 
 The sync itself runs as a Cloudflare Workflow (`NotionSyncWorkflow`) launched by

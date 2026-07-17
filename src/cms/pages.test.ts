@@ -1,12 +1,8 @@
-import { isPageKey, pageKeys, pageLabels } from "./pages"
+import { isPageKey, pageKeys } from "./pages"
 
 describe("page keys", () => {
-  it("defines editable keyed pages", () => {
+  it("defines supported keyed pages", () => {
     expect(pageKeys).toEqual(["home", "contact"])
-    expect(pageLabels).toEqual({
-      contact: "Contact",
-      home: "Home"
-    })
   })
 
   it("recognizes known page keys", () => {

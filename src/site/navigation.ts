@@ -31,13 +31,3 @@ export const defaultSiteNavigationSettings: SiteNavigationSettings = {
   softwareEnabled: true,
   storeEnabled: true
 }
-
-export const parseSiteNavigationSettingsForm = (
-  formData: FormData
-): SiteNavigationSettings => ({
-  blogEnabled: formData.has("blogEnabled"),
-  photographyEnabled: formData.has("photographyEnabled"),
-  projectsEnabled: formData.has("projectsEnabled"),
-  softwareEnabled: formData.has("softwareEnabled"),
-  storeEnabled: formData.has("storeEnabled")
-})

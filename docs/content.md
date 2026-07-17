@@ -30,7 +30,10 @@ photo detail pages.
 Editing happens in Notion. The `POST /api/jobs/sync-content` job reads the four
 databases and upserts rows into D1, keyed by `notionPageId`. It runs as a
 Cloudflare Workflow on a cron trigger (one durable step per database). Content
-indexes are dynamic; post, project, and photo detail pages use five-minute ISR.
+indexes remain dynamically rendered so builds do not require D1, but their
+stable D1 reads are cached for five minutes. Post, project, and photo detail
+pages use five-minute ISR. Sync prepares up to three entries concurrently while
+persisting content rows in source order.
 See
 [Deployment](./deployment.md) for the Workflow and cron setup.
 
@@ -76,4 +79,7 @@ Every image referenced by Notion — uploaded, external, or cover — is re-host
 into the R2 bucket during sync (never hotlinked, since Notion presigned URLs
 expire) and served through `/media/[id]`, which streams the object by media ID.
 Re-hosting is idempotent via a stable `media_assets.sourceKey`. Media metadata
-lives in D1; the R2 objects are served through the app.
+lives in D1; the R2 objects are served through the app. Next.js responsive image
+requests are transformed by the Cloudflare Images binding, so list cards and
+detail views receive appropriately sized variants instead of the original
+object at every viewport size.

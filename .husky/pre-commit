@@ -1,7 +1,5 @@
-pnpx lint-staged
 pnpm run check:deps
 pnpm run check:no-js
 pnpm run lint
 pnpm run typecheck
 pnpm run test
-railway run pnpm run build

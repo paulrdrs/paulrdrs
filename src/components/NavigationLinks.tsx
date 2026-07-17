@@ -26,6 +26,14 @@ export const NavigationLinks = ({ items }: NavigationLinksProps) => {
   const pathname = usePathname() ?? ""
   const currentHref = getCurrentNavigationHref(items, pathname)
 
+  const centerNavigationItem = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.currentTarget.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center"
+    })
+  }
+
   return items.map((item) => {
     return (
       <Link
@@ -33,6 +41,7 @@ export const NavigationLinks = ({ items }: NavigationLinksProps) => {
         className="nav-link"
         href={item.href}
         key={item.href}
+        onClick={centerNavigationItem}
       >
         {item.label}
       </Link>

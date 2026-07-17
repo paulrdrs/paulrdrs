@@ -45,6 +45,9 @@
       "bucket_name": "paulrdrs-inc-cache"
     }
   ],
+  "images": {
+    "binding": "IMAGES"
+  },
   "observability": {
     "enabled": true
   }

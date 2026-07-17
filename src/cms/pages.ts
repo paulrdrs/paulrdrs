@@ -5,8 +5,3 @@ export type PageKey = (typeof pageKeys)[number]
 export const isPageKey = (value: string): value is PageKey => {
   return pageKeys.includes(value as PageKey)
 }
-
-export const pageLabels: Record<PageKey, string> = {
-  contact: "Contact",
-  home: "Home"
-}

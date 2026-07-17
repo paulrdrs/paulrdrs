@@ -1,6 +1,7 @@
 vi.mock("server-only", () => ({}))
 
 import { getDb } from "@/db/client"
+import { pages, photos, posts, projects } from "@/db/schema"
 import { getNotionEnvs } from "@/envs/server"
 import { fetchPageBlocks } from "./blocks"
 import { getNotionClient } from "./client"
@@ -138,19 +139,37 @@ const setupDb = (selectResults: unknown[][]) => {
     select.mockReturnValueOnce(buildSelectChain(result))
   }
 
-  const onConflictDoUpdate = vi.fn().mockResolvedValue(undefined)
+  const returning = vi.fn().mockResolvedValue([{ id: "photo-row-1" }])
+  const onConflictDoUpdate = vi.fn(() => ({ returning }))
   const values = vi.fn(() => ({ onConflictDoUpdate }))
   const insert = vi.fn(() => ({ values }))
   const deleteWhere = vi.fn().mockResolvedValue(undefined)
   const deleteFn = vi.fn(() => ({ where: deleteWhere }))
+  const batch = vi.fn().mockResolvedValue([])
+  const updateWhere = vi.fn().mockResolvedValue(undefined)
+  const set = vi.fn(() => ({ where: updateWhere }))
+  const update = vi.fn(() => ({ set }))
 
   getDbMock.mockReturnValue({
+    batch,
     delete: deleteFn,
     insert,
-    select
+    select,
+    update
   } as unknown as ReturnType<typeof getDb>)
 
-  return { delete: deleteFn, insert, onConflictDoUpdate, select, values }
+  return {
+    batch,
+    delete: deleteFn,
+    insert,
+    onConflictDoUpdate,
+    returning,
+    select,
+    set,
+    update,
+    updateWhere,
+    values
+  }
 }
 
 beforeEach(() => {
@@ -303,6 +322,30 @@ describe("syncPosts", () => {
       expect.objectContaining({ coverMediaId: "media-id-1" })
     )
   })
+
+  it("marks published posts missing from a complete Notion query as draft", async () => {
+    mockNotionClient([])
+    const db = setupDb([])
+
+    const summary = await syncPosts("posts-db-id")
+
+    expect(summary).toEqual({ errors: [], synced: 0 })
+    expect(db.update).toHaveBeenCalledWith(posts)
+    expect(db.set).toHaveBeenCalledWith({
+      status: "draft",
+      updatedAt: expect.any(Date)
+    })
+    expect(db.updateWhere).toHaveBeenCalledTimes(1)
+  })
+
+  it("does not reconcile posts when the Notion database query fails", async () => {
+    const { query } = mockNotionClient([])
+    query.mockRejectedValue(new Error("Notion unavailable"))
+    const db = setupDb([])
+
+    await expect(syncPosts("posts-db-id")).rejects.toThrow("Notion unavailable")
+    expect(db.update).not.toHaveBeenCalled()
+  })
 })
 
 describe("syncProjects", () => {
@@ -314,7 +357,7 @@ describe("syncProjects", () => {
       notionPageId: "project-1",
       slug: "my-project"
     })
-    const { values } = setupDb([[], []])
+    const { update, values } = setupDb([[], []])
 
     const summary = await syncProjects("projects-db-id")
 
@@ -322,6 +365,7 @@ describe("syncProjects", () => {
     expect(values).toHaveBeenCalledWith(
       expect.objectContaining({ category: "software" })
     )
+    expect(update).toHaveBeenCalledWith(projects)
   })
 })
 
@@ -336,7 +380,7 @@ describe("syncPages", () => {
       status: "draft",
       title: "Home"
     })
-    const { insert, values } = setupDb([])
+    const { insert, update, values } = setupDb([])
 
     const summary = await syncPages("pages-db-id")
 
@@ -350,6 +394,54 @@ describe("syncPages", () => {
       status: "draft",
       title: "Home"
     })
+    expect(update).toHaveBeenCalledWith(pages)
+  })
+
+  it("prepares at most three pages concurrently and persists them all", async () => {
+    mockNotionClient(["page-1", "page-2", "page-3", "page-4"])
+    mapPagePageMock.mockImplementation((page) => ({
+      key: "home",
+      notionPageId: page.id,
+      publishedAt: null,
+      status: "draft",
+      title: page.id
+    }))
+    const db = setupDb([])
+    let activePreparations = 0
+    let maximumActivePreparations = 0
+    let preparationCalls = 0
+    let releaseFirstBatch: () => void = () => {}
+    const firstBatchGate = new Promise<void>((resolve) => {
+      releaseFirstBatch = resolve
+    })
+
+    fetchPageBlocksMock.mockImplementation(async () => {
+      preparationCalls += 1
+      const callNumber = preparationCalls
+      activePreparations += 1
+      maximumActivePreparations = Math.max(
+        maximumActivePreparations,
+        activePreparations
+      )
+
+      if (callNumber <= 3) {
+        await firstBatchGate
+      }
+
+      activePreparations -= 1
+      return []
+    })
+
+    const sync = syncPages("pages-db-id")
+
+    await vi.waitFor(() => expect(fetchPageBlocksMock).toHaveBeenCalledTimes(3))
+    expect(db.insert).not.toHaveBeenCalled()
+    releaseFirstBatch()
+
+    await expect(sync).resolves.toEqual({ errors: [], synced: 4 })
+    expect(fetchPageBlocksMock).toHaveBeenCalledTimes(4)
+    expect(maximumActivePreparations).toBe(3)
+    expect(db.insert).toHaveBeenCalledTimes(4)
   })
 })
 
@@ -390,7 +482,6 @@ describe("syncPhotos", () => {
     const db = setupDb([
       [], // no existing row by notionPageId
       [], // no slug collision
-      [{ id: "photo-row-1" }], // row id after upsert
       [{ id: "project-row-1" }] // resolved linked project
     ])
 
@@ -406,9 +497,12 @@ describe("syncPhotos", () => {
       })
     )
     expect(db.delete).toHaveBeenCalledTimes(1)
+    expect(db.batch).toHaveBeenCalledTimes(1)
+    expect(db.returning).toHaveBeenCalledWith({ id: photos.id })
     expect(db.values).toHaveBeenCalledWith([
       { photoId: "photo-row-1", projectId: "project-row-1" }
     ])
+    expect(db.update).toHaveBeenCalledWith(photos)
   })
 
   it("fails a photo page without an image block and continues", async () => {
@@ -431,14 +525,31 @@ describe("syncPhotos", () => {
       ...basePhoto,
       projectNotionPageIds: []
     })
-    const db = setupDb([[], [], [{ id: "photo-row-1" }]])
+    const db = setupDb([[], []])
 
     const summary = await syncPhotos("photos-db-id")
 
     expect(summary).toEqual({ errors: [], synced: 1 })
     expect(db.delete).toHaveBeenCalledTimes(1)
+    expect(db.batch).not.toHaveBeenCalled()
     // Only the photo upsert insert — no link rows inserted.
     expect(db.insert).toHaveBeenCalledTimes(1)
+  })
+
+  it("reports an atomic project-link replacement failure", async () => {
+    mockNotionClient(["photo-1"])
+    fetchPageBlocksMock.mockResolvedValue([imageBlock])
+    mapPhotoPageMock.mockReturnValue(basePhoto)
+    const db = setupDb([[], [], [{ id: "project-row-1" }]])
+    db.batch.mockRejectedValueOnce(new Error("Project link insert failed"))
+
+    const summary = await syncPhotos("photos-db-id")
+
+    expect(summary).toEqual({
+      errors: ["Project link insert failed"],
+      synced: 0
+    })
+    expect(db.batch).toHaveBeenCalledTimes(1)
   })
 })
 
@@ -477,8 +588,7 @@ describe("runNotionSync", () => {
       [], // projects: existing
       [], // projects: collision
       [], // photos: existing
-      [], // photos: collision
-      [{ id: "photo-row-1" }] // photos: row id after upsert
+      [] // photos: collision
     ])
 
     const summary = await runNotionSync()

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getDashboardMediaAsset } from "@/db/adminContent"
+import { getMediaAssetLocation } from "@/db/media"
 import { getMediaObject } from "@/media/storage"
 
 export const dynamic = "force-dynamic"
@@ -15,7 +15,7 @@ export const GET = async (
   { params }: MediaRouteProps
 ) => {
   const { id } = await params
-  const asset = await getDashboardMediaAsset(id)
+  const asset = await getMediaAssetLocation(id)
 
   if (!asset) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })

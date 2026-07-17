@@ -24,7 +24,6 @@ export const ContentImage = ({
         priority={priority}
         sizes="(min-width: 1024px) 60vw, 100vw"
         src={`/media/${id}`}
-        unoptimized
       />
     </div>
     {attribution ? (

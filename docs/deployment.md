@@ -13,6 +13,7 @@ DNS for the domain is already on Cloudflare.
 - **Worker** `paulrdrs`: the Next.js app plus the sync Workflow and cron handler.
 - **D1** database `paulrdrs` (binding `DB`): content, media metadata, site settings.
 - **R2** bucket `paulrdrs-media` (binding `BUCKET`): media objects.
+- **Cloudflare Images** (binding `IMAGES`): responsive variants of media objects.
 - **Workflow** `NotionSyncWorkflow` (binding `SYNC_WORKFLOW`): durable Notion sync.
 - **Cron trigger** `*/15 * * * *`: launches a sync Workflow instance.
 - **Web Analytics**: enabled on the zone; the beacon renders from the root layout.
@@ -57,14 +58,18 @@ and applied by wrangler (not `drizzle-kit migrate`).
 `POST /api/jobs/sync-content` reads the Posts, Projects, Photos, and Pages Notion
 databases and upserts them into D1, keyed by `notionPageId`. It is guarded by
 `JOBS_SECRET`. An optional `?type=posts|projects|photos|pages` syncs a single
-database.
+database. The response always includes the per-database sync summary; if any
+entry fails, the route returns HTTP 500 so the Workflow step is marked failed
+instead of silently accepting a partial sync. Unsupported or repeated `type`
+parameters return HTTP 400 without running any database sync.
 
 The primary trigger is the **cron trigger**, whose `scheduled` handler creates a
 `NotionSyncWorkflow` instance. The Workflow runs one durable, independently
 retried step per database, each calling the route through the worker's own
 `WORKER_SELF_REFERENCE` service binding, so the sync always runs inside a real
-request context. The route can still be POSTed manually with the secret to force
-a sync.
+request context. Two-second pauses separate the database steps to moderate
+Notion request bursts; there is no pause after the final step. The route can
+still be POSTed manually with the secret to force a sync.
 
 ## Production Smoke Test
 

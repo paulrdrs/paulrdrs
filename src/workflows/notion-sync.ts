@@ -3,6 +3,8 @@ import {
   type WorkflowEvent,
   type WorkflowStep
 } from "cloudflare:workers"
+import { notionSyncStages } from "./notion-sync-plan"
+import { readNotionSyncStageResponse } from "./notion-sync-response"
 
 // The sync core (getDb/R2/Notion) relies on OpenNext's per-request Cloudflare
 // context, which only exists inside the fetch handler. So instead of running
@@ -12,9 +14,6 @@ import {
 // context, gets its own subrequest budget, and is retried independently.
 type Params = Record<string, never>
 
-// Photos after projects so their "Projects" relation targets exist.
-const SYNC_TYPES = ["posts", "projects", "photos", "pages"] as const
-
 export class NotionSyncWorkflow extends WorkflowEntrypoint<
   CloudflareEnv,
   Params
@@ -22,7 +21,10 @@ export class NotionSyncWorkflow extends WorkflowEntrypoint<
   async run(_event: WorkflowEvent<Params>, step: WorkflowStep) {
     const summary: Record<string, unknown> = {}
 
-    for (const type of SYNC_TYPES) {
+    // Photos remain after projects so relation targets exist. Pauses occur only
+    // between stages; sleeping after the final page sync adds no rate-limit
+    // protection because the Workflow performs no subsequent Notion request.
+    for (const { pauseAfter, type } of notionSyncStages) {
       summary[type] = await step.do(`sync-${type}`, async () => {
         // Cast avoids a circular binding type (WORKER_SELF_REFERENCE → this
         // worker → this workflow); a plain Fetcher is all we need here.
@@ -34,20 +36,13 @@ export class NotionSyncWorkflow extends WorkflowEntrypoint<
           })
         )
 
-        if (!response.ok) {
-          throw new Error(
-            `Notion sync (${type}) failed: ${response.status} ${await response.text()}`
-          )
-        }
-
-        return (await response.json()) as Record<
-          string,
-          { errors: string[]; synced: number }
-        >
+        return readNotionSyncStageResponse(response, type)
       })
 
-      // Space databases out to stay comfortably under Notion's ~3 req/s limit.
-      await step.sleep(`pause-after-${type}`, "2 seconds")
+      if (pauseAfter) {
+        // Space databases out to stay comfortably under Notion's ~3 req/s limit.
+        await step.sleep(`pause-after-${type}`, "2 seconds")
+      }
     }
 
     return summary

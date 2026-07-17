@@ -1,10 +1,10 @@
 vi.mock("server-only", () => ({}))
+vi.mock("next/cache", () => ({
+  unstable_cache: (callback: unknown) => callback
+}))
 
 import { getDb } from "./client"
-import {
-  getSiteNavigationSettings,
-  upsertSiteNavigationSettings
-} from "./siteSettings"
+import { getSiteNavigationSettings } from "./siteSettings"
 
 vi.mock("./client", () => ({
   getDb: vi.fn()
@@ -32,32 +32,5 @@ describe("site settings queries", () => {
       softwareEnabled: true,
       storeEnabled: true
     })
-  })
-
-  it("upserts the singleton navigation settings row", async () => {
-    const returning = vi.fn().mockResolvedValue([{ id: "main" }])
-    const onConflictDoUpdate = vi.fn(() => ({ returning }))
-    const values = vi.fn(() => ({ onConflictDoUpdate }))
-    const insert = vi.fn(() => ({ values }))
-
-    getDbMock.mockReturnValue({ insert } as unknown as ReturnType<typeof getDb>)
-
-    const settings = {
-      blogEnabled: true,
-      photographyEnabled: false,
-      projectsEnabled: true,
-      softwareEnabled: false,
-      storeEnabled: true
-    }
-
-    await expect(upsertSiteNavigationSettings(settings)).resolves.toEqual({
-      id: "main"
-    })
-    expect(values).toHaveBeenCalledWith({ ...settings, id: "main" })
-    expect(onConflictDoUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        set: expect.objectContaining(settings)
-      })
-    )
   })
 })

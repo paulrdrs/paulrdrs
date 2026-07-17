@@ -25,6 +25,21 @@ type RawImage =
   | { type: "external"; external: { url: string } }
   | { type: "file"; file: { url: string } }
 
+const supportedBlockTypes: ReadonlySet<string> = new Set<NotionBlock["type"]>([
+  "paragraph",
+  "heading_1",
+  "heading_2",
+  "heading_3",
+  "bulleted_list_item",
+  "numbered_list_item",
+  "quote",
+  "code",
+  "image",
+  "divider",
+  "callout",
+  "toggle"
+])
+
 const toImageSource = (image: RawImage): NotionImageSource =>
   image.type === "external"
     ? { type: "external", url: image.external.url }
@@ -56,6 +71,10 @@ const fetchChildren = async (blockId: string): Promise<NotionBlockTree> => {
 const toNotionBlock = async (
   block: BlockObjectResponse
 ): Promise<NotionBlock | null> => {
+  if (!supportedBlockTypes.has(block.type)) {
+    return null
+  }
+
   const children = block.has_children ? await fetchChildren(block.id) : []
 
   switch (block.type) {

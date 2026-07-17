@@ -1,8 +1,4 @@
-import {
-  getHeroSelection,
-  getHeroSelectionValue,
-  parseHeroSelectionValue
-} from "./hero"
+import { getHeroSelection } from "./hero"
 
 describe("hero selection", () => {
   it("reads a valid selection from page metadata", () => {
@@ -15,19 +11,5 @@ describe("hero selection", () => {
     expect(getHeroSelection(undefined)).toBeNull()
     expect(getHeroSelection({ hero: { id: "", kind: "post" } })).toBeNull()
     expect(getHeroSelection({ hero: { id: "id", kind: "unknown" } })).toBeNull()
-  })
-
-  it("parses and serializes form values", () => {
-    const selection = parseHeroSelectionValue("photo:asset-id")
-
-    expect(selection).toEqual({ id: "asset-id", kind: "photo" })
-    expect(getHeroSelectionValue(selection)).toBe("photo:asset-id")
-    expect(parseHeroSelectionValue("")).toBeNull()
-  })
-
-  it("rejects tampered form values", () => {
-    expect(() => parseHeroSelectionValue("unknown:id")).toThrow(
-      "Invalid hero selection"
-    )
   })
 })

@@ -107,6 +107,24 @@ describe("sync-content job route", () => {
     expect(runNotionSyncMock).not.toHaveBeenCalled()
   })
 
+  it("returns a failure response with the summary when an entry fails", async () => {
+    const postsSummary = {
+      errors: ["Malformed Notion post page post-2"],
+      synced: 2
+    }
+    syncPostsMock.mockResolvedValue(postsSummary)
+
+    const response = await POST(
+      createRequest(
+        { "x-jobs-secret": secret },
+        "https://paulrdrs.com/api/jobs/sync-content?type=posts"
+      )
+    )
+
+    expect(response.status).toBe(500)
+    await expect(response.json()).resolves.toEqual({ posts: postsSummary })
+  })
+
   it("syncs only photos when type=photos is provided", async () => {
     const photosSummary = { errors: [], synced: 2 }
     syncPhotosMock.mockResolvedValue(photosSummary)
@@ -122,5 +140,35 @@ describe("sync-content job route", () => {
     await expect(response.json()).resolves.toEqual({ photos: photosSummary })
     expect(syncPhotosMock).toHaveBeenCalledWith("photos-db")
     expect(runNotionSyncMock).not.toHaveBeenCalled()
+  })
+
+  it("rejects an unsupported sync type without running a sync", async () => {
+    const response = await POST(
+      createRequest(
+        { "x-jobs-secret": secret },
+        "https://paulrdrs.com/api/jobs/sync-content?type=post"
+      )
+    )
+
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({
+      error: "Invalid sync type"
+    })
+    expect(runNotionSyncMock).not.toHaveBeenCalled()
+    expect(syncPostsMock).not.toHaveBeenCalled()
+  })
+
+  it("rejects repeated sync types without running a sync", async () => {
+    const response = await POST(
+      createRequest(
+        { "x-jobs-secret": secret },
+        "https://paulrdrs.com/api/jobs/sync-content?type=posts&type=photos"
+      )
+    )
+
+    expect(response.status).toBe(400)
+    expect(runNotionSyncMock).not.toHaveBeenCalled()
+    expect(syncPostsMock).not.toHaveBeenCalled()
+    expect(syncPhotosMock).not.toHaveBeenCalled()
   })
 })

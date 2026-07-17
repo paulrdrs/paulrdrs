@@ -74,7 +74,7 @@ describe("fetchPageBlocks", () => {
                 type: "toggle"
               },
               {
-                has_children: false,
+                has_children: true,
                 id: "table-1",
                 object: "block",
                 table: {},
@@ -139,6 +139,9 @@ describe("fetchPageBlocks", () => {
       }
     ])
     expect(listMock).toHaveBeenCalledTimes(3)
+    expect(listMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ block_id: "table-1" })
+    )
   })
 
   it("re-hosts image blocks via media.ts and preserves the caption", async () => {
