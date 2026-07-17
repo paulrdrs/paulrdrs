@@ -1,0 +1,51 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "paulrdrs",
+  "main": "custom-worker.ts",
+  "compatibility_date": "2026-07-17",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // Self-reference so the sync Workflow can call the app's own route (and thus
+  // run the sync inside a real request context).
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "paulrdrs"
+    }
+  ],
+  "workflows": [
+    {
+      "name": "notion-sync",
+      "binding": "SYNC_WORKFLOW",
+      "class_name": "NotionSyncWorkflow"
+    }
+  ],
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "paulrdrs",
+      "database_id": "c988153c-6cba-4302-869b-1dfae43cbb27",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "paulrdrs-media"
+    },
+    {
+      // OpenNext ISR incremental cache (cached page HTML + fetch cache).
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "paulrdrs-inc-cache"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
