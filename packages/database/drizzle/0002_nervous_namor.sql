@@ -1,0 +1,1 @@
+ALTER TABLE `site_navigation_settings` DROP COLUMN `projects_enabled`;

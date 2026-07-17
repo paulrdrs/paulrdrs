@@ -1,0 +1,18 @@
+{
+  "name": "@paulrdrs/content",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./blocks": "./src/blocks.ts",
+    "./content": "./src/content.ts",
+    "./pages": "./src/pages.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "vitest": "4.1.8"
+  }
+}
