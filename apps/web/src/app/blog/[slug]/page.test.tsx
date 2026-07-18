@@ -33,9 +33,7 @@ const buildPost = (overrides: Record<string, unknown> = {}) => ({
   seoDescription: null,
   coverAltText: null,
   coverAttribution: null,
-  coverHeight: null,
   coverMediaId: null,
-  coverWidth: null,
   publishedAt: new Date("2026-01-01"),
   createdAt: new Date("2026-01-01"),
   ...overrides

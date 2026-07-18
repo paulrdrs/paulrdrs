@@ -28,9 +28,7 @@ const contentCacheRevalidateSeconds = 300
 const coverSelection = {
   coverAltText: mediaAssets.altText,
   coverAttribution: mediaAssets.attribution,
-  coverHeight: mediaAssets.height,
-  coverMediaId: mediaAssets.id,
-  coverWidth: mediaAssets.width
+  coverMediaId: mediaAssets.id
 }
 
 const getPublishedPostsCached = unstable_cache(

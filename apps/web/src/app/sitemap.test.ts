@@ -40,9 +40,7 @@ describe("sitemap", () => {
         excerpt: null,
         coverAltText: null,
         coverAttribution: null,
-        coverHeight: null,
         coverMediaId: null,
-        coverWidth: null,
         publishedAt: null,
         createdAt: new Date("2025-11-01")
       }
@@ -55,9 +53,7 @@ describe("sitemap", () => {
         excerpt: null,
         coverAltText: null,
         coverAttribution: null,
-        coverHeight: null,
         coverMediaId: null,
-        coverWidth: null,
         publishedAt: new Date("2026-02-01"),
         createdAt: new Date("2025-10-01")
       }

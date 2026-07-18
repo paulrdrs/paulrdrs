@@ -18,9 +18,7 @@ describe("ProjectsPage", () => {
         category: "photography",
         coverAltText: null,
         coverAttribution: null,
-        coverHeight: null,
         coverMediaId: null,
-        coverWidth: null,
         excerpt: "A published project.",
         publishedAt: new Date("2026-01-01"),
         createdAt: new Date("2026-01-01")

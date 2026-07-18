@@ -42,9 +42,7 @@ const buildProject = (overrides: Record<string, unknown> = {}) => ({
   category: "photography" as const,
   coverAltText: null,
   coverAttribution: null,
-  coverHeight: null,
   coverMediaId: null,
-  coverWidth: null,
   excerpt: "A published project.",
   body: null as NotionBlockTree | null,
   seoTitle: null,
@@ -130,9 +128,7 @@ describe("ProjectPage", () => {
         excerpt: null,
         coverAltText: null,
         coverAttribution: null,
-        coverHeight: null,
-        coverMediaId: "media-id",
-        coverWidth: null
+        coverMediaId: "media-id"
       }
     ])
 

@@ -37,9 +37,7 @@ const buildPhoto = (overrides: Record<string, unknown> = {}) => ({
   body: null as NotionBlockTree | null,
   coverAltText: null,
   coverAttribution: null,
-  coverHeight: null,
   coverMediaId: "media-id",
-  coverWidth: null,
   publishedAt: new Date("2026-01-01"),
   createdAt: new Date("2026-01-01"),
   ...overrides
