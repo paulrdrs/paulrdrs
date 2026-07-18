@@ -9,13 +9,7 @@ import {
   validateMediaFile
 } from "./validation"
 
-const getExtension = (filename: string) => {
-  const extension = filename.split(".").pop()
-  return extension ? `.${extension.toLowerCase()}` : ""
-}
-
-export const buildMediaObjectKey = (filename: string) =>
-  `media/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}${getExtension(filename)}`
+const buildMediaObjectKey = (sourceKey: string) => `media/notion/${sourceKey}`
 
 // Uploaded Notion files are served via short-lived presigned URLs that get
 // re-signed on every fetch, so the query string can't be part of the key.
@@ -97,21 +91,29 @@ const readMediaBody = async (response: Response) => {
 
 const inFlightRehosts = new Map<string, Promise<string>>()
 
+const findMediaAssetId = async (
+  runtime: NotionSyncRuntime,
+  sourceKey: string
+) => {
+  const [asset] = await runtime.db
+    .select({ id: mediaAssets.id })
+    .from(mediaAssets)
+    .where(eq(mediaAssets.sourceKey, sourceKey))
+    .limit(1)
+
+  return asset?.id
+}
+
 const rehostImageOnce = async (
   runtime: NotionSyncRuntime,
   url: string,
   sourceKey: string
 ) => {
   const { bucket, db } = runtime
+  const existingId = await findMediaAssetId(runtime, sourceKey)
 
-  const [existing] = await db
-    .select({ id: mediaAssets.id })
-    .from(mediaAssets)
-    .where(eq(mediaAssets.sourceKey, sourceKey))
-    .limit(1)
-
-  if (existing) {
-    return existing.id
+  if (existingId) {
+    return existingId
   }
 
   const response = await fetch(url)
@@ -132,24 +134,38 @@ const rehostImageOnce = async (
 
   validateMediaFile(file)
 
-  const objectKey = buildMediaObjectKey(filename)
+  const objectKey = buildMediaObjectKey(sourceKey)
 
   await bucket.put(objectKey, body, {
     httpMetadata: { contentType }
   })
 
-  const [asset] = await db
-    .insert(mediaAssets)
-    .values({
-      filename,
-      mimeType: contentType,
-      objectKey,
-      sizeBytes: body.byteLength,
-      sourceKey
-    })
-    .returning({ id: mediaAssets.id })
+  try {
+    const [asset] = await db
+      .insert(mediaAssets)
+      .values({
+        filename,
+        mimeType: contentType,
+        objectKey,
+        sizeBytes: body.byteLength,
+        sourceKey
+      })
+      .returning({ id: mediaAssets.id })
 
-  return asset.id
+    if (!asset) {
+      throw new Error("Media insert did not return an asset")
+    }
+
+    return asset.id
+  } catch (error) {
+    const concurrentAssetId = await findMediaAssetId(runtime, sourceKey)
+
+    if (concurrentAssetId) {
+      return concurrentAssetId
+    }
+
+    throw error
+  }
 }
 
 export const rehostImage = (

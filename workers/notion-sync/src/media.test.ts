@@ -11,13 +11,15 @@ const runtime = {
 
 const setDatabase = (db: object) => Object.assign(runtime, { db })
 
-const mockSelectExisting = (existing: { id: string }[]) => {
+const buildSelectChain = (existing: { id: string }[]) => {
   const limit = vi.fn().mockResolvedValue(existing)
   const where = vi.fn(() => ({ limit }))
   const from = vi.fn(() => ({ where }))
-  const select = vi.fn(() => ({ from }))
-  return select
+  return { from }
 }
+
+const mockSelectExisting = (existing: { id: string }[]) =>
+  vi.fn(() => buildSelectChain(existing))
 
 const mockInsertReturning = (asset: { id: string }) => {
   const returning = vi.fn().mockResolvedValue([asset])
@@ -95,11 +97,38 @@ describe("rehostImage", () => {
 
     expect(id).toBe("new-id")
     expect(bucketPut).toHaveBeenCalledWith(
-      expect.stringMatching(/^media\/\d{4}-\d{2}-\d{2}\/.+\.png$/),
+      "media/notion/source-key",
       expect.any(Uint8Array),
       { httpMetadata: { contentType: "image/png" } }
     )
     expect(insert).toHaveBeenCalledTimes(1)
+  })
+
+  it("uses the asset inserted by another isolate when its insert loses the race", async () => {
+    const select = vi
+      .fn()
+      .mockReturnValueOnce(buildSelectChain([]))
+      .mockReturnValueOnce(buildSelectChain([{ id: "concurrent-id" }]))
+    const returning = vi.fn().mockRejectedValue(new Error("UNIQUE constraint"))
+    const values = vi.fn(() => ({ returning }))
+    const insert = vi.fn(() => ({ values }))
+    setDatabase({ insert, select })
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response(new Uint8Array([1, 2, 3]), {
+        headers: { "content-type": "image/png" },
+        status: 200
+      })
+    )
+
+    await expect(
+      rehostImage(runtime, "https://example.com/image.png", "race-source-key")
+    ).resolves.toBe("concurrent-id")
+    expect(bucketPut).toHaveBeenCalledWith(
+      "media/notion/race-source-key",
+      expect.any(Uint8Array),
+      { httpMetadata: { contentType: "image/png" } }
+    )
+    expect(select).toHaveBeenCalledTimes(2)
   })
 
   it("shares an in-flight rehost for the same source key", async () => {
