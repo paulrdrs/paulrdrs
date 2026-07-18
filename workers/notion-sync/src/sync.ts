@@ -126,17 +126,20 @@ const upsertPost = async (
     .from(posts)
     .where(
       and(
-        eq(posts.slug, slug),
         or(
           isNull(posts.notionPageId),
           ne(posts.notionPageId, mapped.notionPageId)
+        ),
+        or(
+          eq(posts.slug, slug),
+          sql`exists (select 1 from json_each(${posts.slugHistory}) where value = ${slug})`
         )
       )
     )
     .limit(1)
 
   if (collision) {
-    throw new Error(`Slug "${slug}" is already used by another post`)
+    throw new Error(`Slug "${slug}" is used or reserved by another post`)
   }
 
   const coverMediaId = await rehostCover(runtime, mapped)
@@ -189,10 +192,13 @@ const upsertProject = async (
     .where(
       and(
         eq(projects.category, mapped.category),
-        eq(projects.slug, slug),
         or(
           isNull(projects.notionPageId),
           ne(projects.notionPageId, mapped.notionPageId)
+        ),
+        or(
+          eq(projects.slug, slug),
+          sql`exists (select 1 from json_each(${projects.slugHistory}) where value = ${slug})`
         )
       )
     )
@@ -200,7 +206,7 @@ const upsertProject = async (
 
   if (collision) {
     throw new Error(
-      `Slug "${slug}" is already used by another ${mapped.category} project`
+      `Slug "${slug}" is used or reserved by another ${mapped.category} project`
     )
   }
 
@@ -348,17 +354,20 @@ const upsertPhoto = async (
     .from(photos)
     .where(
       and(
-        eq(photos.slug, slug),
         or(
           isNull(photos.notionPageId),
           ne(photos.notionPageId, mapped.notionPageId)
+        ),
+        or(
+          eq(photos.slug, slug),
+          sql`exists (select 1 from json_each(${photos.slugHistory}) where value = ${slug})`
         )
       )
     )
     .limit(1)
 
   if (collision) {
-    throw new Error(`Slug "${slug}" is already used by another photo`)
+    throw new Error(`Slug "${slug}" is used or reserved by another photo`)
   }
 
   const { body, mediaId } = extractPrimaryPhoto(rawBody)

@@ -270,7 +270,7 @@ describe("syncPosts", () => {
     )
   })
 
-  it("fails a page on a slug collision with a different notionPageId and continues with remaining pages", async () => {
+  it("rejects a slug owned or reserved by another page and continues", async () => {
     mockNotionClient(["post-1", "post-2"])
     fetchPageBlocksMock.mockResolvedValue([])
     mapPostPageMock
@@ -295,7 +295,7 @@ describe("syncPosts", () => {
 
     expect(summary.synced).toBe(1)
     expect(summary.errors).toEqual([
-      'Slug "taken-slug" is already used by another post'
+      'Slug "taken-slug" is used or reserved by another post'
     ])
     expect(values).toHaveBeenCalledTimes(1)
     expect(values).toHaveBeenCalledWith(
