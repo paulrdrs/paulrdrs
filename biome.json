@@ -84,7 +84,6 @@
         "apps/web/src/app/robots.ts",
         "apps/web/src/app/sitemap.ts",
         "commitlint.config.ts",
-        "apps/web/custom-worker.ts",
         "drizzle.config.ts",
         "apps/web/next.config.ts",
         "apps/web/open-next.config.ts",

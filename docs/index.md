@@ -2,12 +2,12 @@
 
 Current project docs live in this directory:
 
-- [Architecture](./architecture.md): app shape, routes, major domains, and
-  framework choices.
-- [Local Development](./local-development.md): local env files, D1/R2 bindings,
-  database access, migrations, and common commands.
-- [Deployment](./deployment.md): Cloudflare Workers/OpenNext, bindings and vars,
-  D1 migrations, the sync Workflow, and smoke tests.
+- [Architecture](./architecture.md): workspace boundaries, Worker roles, routes,
+  major domains, and framework choices.
+- [Local Development](./local-development.md): package commands, local Worker
+  configuration, D1/R2 bindings, and migrations.
+- [Deployment](./deployment.md): independent web/sync Worker deployments,
+  bindings and variables, the sync Workflow, cutover, and smoke tests.
 - [Auth](./auth.md): no authenticated surface — the dashboard and passkey auth
   were removed in favor of Notion.
 - [Content](./content.md): Notion-authored content, block-tree rendering, media,

@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "pnpm --filter @paulrdrs/web build",
+    "build:sync": "pnpm --filter @paulrdrs/notion-sync build",
+    "build:web": "pnpm --filter @paulrdrs/web build",
     "build:worker": "pnpm --filter @paulrdrs/web build:worker",
     "cf-typegen": "pnpm --filter @paulrdrs/web cf-typegen",
     "check:deps": "node scripts/check-exact-deps.ts",
@@ -13,15 +15,21 @@
     "db:migrate": "wrangler d1 migrations apply DB --config apps/web/wrangler.jsonc --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --config apps/web/wrangler.jsonc --remote",
     "deploy": "pnpm --filter @paulrdrs/web deploy",
+    "deploy:sync": "pnpm --filter @paulrdrs/notion-sync deploy",
+    "deploy:web": "pnpm --filter @paulrdrs/web deploy",
     "dev": "pnpm --filter @paulrdrs/web dev",
+    "dev:sync": "pnpm --filter @paulrdrs/notion-sync dev",
+    "dev:web": "pnpm --filter @paulrdrs/web dev",
     "format": "biome format --write",
     "lint": "biome check",
     "prepare": "is-ci || husky",
     "preview": "pnpm --filter @paulrdrs/web preview",
     "start": "pnpm --filter @paulrdrs/web start",
-    "test": "pnpm --recursive --if-present test",
+    "sync:instances": "pnpm --filter @paulrdrs/notion-sync instances",
+    "sync:trigger": "pnpm --filter @paulrdrs/notion-sync trigger",
+    "test": "pnpm --filter @paulrdrs/content test && pnpm --filter @paulrdrs/database test && pnpm --filter @paulrdrs/web test && pnpm --filter @paulrdrs/notion-sync test",
     "test:watch": "pnpm --filter @paulrdrs/web test:watch",
-    "typecheck": "pnpm --recursive --if-present typecheck"
+    "typecheck": "pnpm --filter @paulrdrs/content typecheck && pnpm --filter @paulrdrs/database typecheck && pnpm --filter @paulrdrs/web typecheck && pnpm --filter @paulrdrs/notion-sync typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.16",

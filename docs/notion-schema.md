@@ -12,7 +12,7 @@ the sync reads only database entries and their page bodies.
 - `Status` must contain the options **Draft** and **Published**. Draft entries
   sync to D1 but are excluded from public queries.
 - `Published` is optional. Public lists sort by it, then by creation time.
-- `Slug` is normalized by the application. When empty, it falls back to a
+- `Slug` is normalized by the sync Worker. When empty, it falls back to a
   slugified title. Previous published slugs are retained for permanent redirects.
 - `notionPageId` is the stable internal identity used for upserts and never
   appears in a public URL.
@@ -64,7 +64,7 @@ is reported as a per-entry sync error. Photos render in `/photo` and at
 `/photo/[slug]`.
 
 The reciprocal `Photos` relation in the Projects database is useful for Notion
-authoring but is not read by the application.
+authoring but is not read by the sync Worker.
 
 ## Pages
 

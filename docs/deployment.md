@@ -1,89 +1,106 @@
 # Cloudflare Deployment
 
-The site deploys to **Cloudflare Workers** via the OpenNext adapter
-(`@opennextjs/cloudflare`). App configuration lives in
-`apps/web/wrangler.jsonc` and `apps/web/open-next.config.ts`; the worker entry is
-`apps/web/custom-worker.ts`, which re-uses OpenNext's generated fetch handler
-and adds the cron `scheduled` handler plus the Notion sync Workflow.
+The public site and Notion synchronization deploy as independent Cloudflare
+Workers that share the existing D1 database and media R2 bucket.
 
-DNS for the domain is already on Cloudflare.
+## Workers And Resources
 
-## Cloudflare Resources
+- `apps/web` (`@paulrdrs/web`) deploys through OpenNext as Worker `paulrdrs`.
+  Its entrypoint is the generated `apps/web/.open-next/worker.js`. It reads D1
+  through `DB`, reads media through `BUCKET`, uses `IMAGES` for responsive
+  variants, and stores ISR data in `NEXT_INC_CACHE_R2_BUCKET`.
+- `workers/notion-sync` (`@paulrdrs/notion-sync`) deploys as Worker
+  `paulrdrs-notion-sync`. It owns the `*/15 * * * *` cron, the existing
+  `notion-sync` Workflow resource through `SYNC_WORKFLOW`, D1 writes through
+  `DB`, and media uploads through `BUCKET`.
 
-- **Worker** `paulrdrs`: the Next.js app plus the sync Workflow and cron handler.
-- **D1** database `paulrdrs` (binding `DB`): content, media metadata, site settings.
-- **R2** bucket `paulrdrs-media` (binding `BUCKET`): media objects.
-- **Cloudflare Images** (binding `IMAGES`): responsive variants of media objects.
-- **Workflow** `NotionSyncWorkflow` (binding `SYNC_WORKFLOW`): durable Notion sync.
-- **Cron trigger** `*/15 * * * *`: launches a sync Workflow instance.
-- **Web Analytics**: enabled on the zone; the beacon renders from the root layout.
+The sync Worker explicitly disables `workers_dev` and preview URLs and has no
+route, custom domain, `fetch` handler, or binding from the web app. HTTP ingress,
+webhooks, and sync-specific analytics are out of scope. The public site's
+Cloudflare Web Analytics beacon remains external to this synchronization
+architecture.
 
-## Bindings & Vars
+## Configuration Ownership
 
-Bindings are declared in `apps/web/wrangler.jsonc`. The following secrets/vars
-must be set on the Worker (via `wrangler secret put <NAME>` or the dashboard):
+Web Worker configuration lives in `apps/web/wrangler.jsonc`. Its runtime
+variables are:
 
-- `NOTION_TOKEN`: Notion integration token.
-- `NOTION_POSTS_DB_ID`, `NOTION_PROJECTS_DB_ID`, `NOTION_PHOTOS_DB_ID`,
-  `NOTION_PAGES_DB_ID`: Notion database IDs.
-- `JOBS_SECRET`: at least 32 chars, authorizes `/api/jobs/sync-content`. Also read
-  by the sync Workflow to call that route through the self service-binding.
-- `SITE_URL`: production origin, e.g. `https://paulrdrs.com`.
-- `CF_BEACON_TOKEN`: Cloudflare Web Analytics site token (from the dashboard after
-  enabling Web Analytics for the domain). When unset, the beacon is not rendered.
+- `SITE_URL`: production origin, for example `https://paulrdrs.com`.
+- `CF_BEACON_TOKEN`: optional Cloudflare Web Analytics site token. The beacon is
+  omitted when this is unset.
 
-Local development reads these from `apps/web/.env` / `apps/web/.dev.vars`;
-`next dev` picks up the D1/R2 bindings through
-`initOpenNextCloudflareForDev()` in `apps/web/next.config.ts`.
+Sync Worker configuration lives in `workers/notion-sync/wrangler.jsonc`. Set
+these only on `paulrdrs-notion-sync`:
 
-## First-Time Setup
+- Secret `NOTION_TOKEN`: the Notion integration token.
+- Variables `NOTION_POSTS_DB_ID`, `NOTION_PROJECTS_DB_ID`,
+  `NOTION_PHOTOS_DB_ID`, and `NOTION_PAGES_DB_ID`: the four Notion database IDs.
 
-1. `wrangler d1 create paulrdrs` and copy the returned `database_id` into the
-   `d1_databases` block in `apps/web/wrangler.jsonc` (replacing the local
-   placeholder).
-2. `wrangler r2 bucket create paulrdrs-media`.
-3. Set the secrets/vars listed above.
-4. Enable Web Analytics for the domain and set `CF_BEACON_TOKEN`.
+The sync Workflow validates all five values plus its D1 and R2 bindings when it
+starts. The web Worker does not own Notion configuration, `JOBS_SECRET`, a
+Workflow binding, or a service binding to the sync Worker.
 
-## Build, Migrate, Deploy
+## Build, Migrate, And Deploy
 
-- Build (worker bundle): `pnpm build:worker` (or `pnpm build` for a plain Next build).
-- Apply migrations to remote D1: `pnpm db:migrate:remote`
-  (`wrangler d1 migrations apply DB --remote`). Local: `pnpm db:migrate`.
-- Deploy: `pnpm deploy` (`opennextjs-cloudflare build && ... deploy`).
+Run commands from the repository root:
 
-Migrations are SQLite files under `drizzle/`, generated with `pnpm db:generate`
-and applied by wrangler (not `drizzle-kit migrate`).
+```sh
+pnpm build:worker    # OpenNext dry-run build of the public app Worker
+pnpm build:sync      # Wrangler dry-run build of the sync Worker
+pnpm deploy          # public app only (same as deploy:web)
+pnpm deploy:sync     # sync Worker only
+pnpm db:migrate      # local D1 migrations
+pnpm db:migrate:remote
+```
 
-## Notion Content Sync
+Migrations remain SQLite files under `drizzle/`, generated with
+`pnpm db:generate`. Apply a required remote migration before deploying code that
+depends on it. This Worker split itself requires no migration.
 
-`POST /api/jobs/sync-content` reads the Posts, Projects, Photos, and Pages Notion
-databases and upserts them into D1, keyed by `notionPageId`. It is guarded by
-`JOBS_SECRET`. An optional `?type=posts|projects|photos|pages` syncs a single
-database. The response always includes the per-database sync summary; if any
-entry fails, the route returns HTTP 500 so the Workflow step is marked failed
-instead of silently accepting a partial sync. Unsupported or repeated `type`
-parameters return HTTP 400 without running any database sync.
+## Notion Content Sync And Recovery
 
-The primary trigger is the **cron trigger**, whose `scheduled` handler creates a
-`NotionSyncWorkflow` instance. The Workflow runs one durable, independently
-retried step per database, each calling the route through the worker's own
-`WORKER_SELF_REFERENCE` service binding, so the sync always runs inside a real
-request context. Two-second pauses separate the database steps to moderate
-Notion request bursts; there is no pause after the final step. The route can
-still be POSTed manually with the secret to force a sync.
+Every 15 minutes the sync Worker's `scheduled` handler creates one
+parameterless full-sync Workflow. It runs posts, projects, photos, and pages in
+order with a two-second pause between stages. Each stage accesses Notion, D1,
+and R2 directly. Entry failures are logged with the stage summary and thrown so
+Cloudflare records and retries the failed Workflow step.
+
+There is no HTTP or targeted-database trigger. For smoke tests or recovery,
+start a parameterless full sync and inspect instances with Wrangler:
+
+```sh
+pnpm sync:trigger
+pnpm sync:instances
+```
+
+Cron is the primary trigger; the CLI trigger is for recovery and smoke tests.
+
+## App-First Cutover
+
+Avoid overlapping cron producers when moving an existing deployment:
+
+1. Configure `NOTION_TOKEN` and the four `NOTION_*_DB_ID` values on
+   `paulrdrs-notion-sync`.
+2. Wait for any Workflow instance created by the old app deployment to finish.
+3. Deploy the public app with `pnpm deploy`; this removes its old cron, Workflow,
+   job route, and self-service binding.
+4. Deploy the scheduled Worker with `pnpm deploy:sync`; it reuses the existing
+   `notion-sync` Workflow resource and enables the 15-minute cron.
+5. Confirm the sync Worker has no public URL or `fetch` handler and that
+   `workers_dev` and `preview_urls` remain `false`.
+6. Run `pnpm sync:trigger`, inspect the instance summaries, and smoke-test the
+   public content and media paths below.
+7. Remove `JOBS_SECRET` and all Notion configuration from the deployed web
+   Worker. Do not delete the existing `notion-sync` Workflow resource.
 
 ## Production Smoke Test
 
-After deploying a change that touches content, media, migrations, or the sync:
-
 1. Open `/` and confirm the public homepage loads.
-2. Trigger `POST /api/jobs/sync-content` with the `JOBS_SECRET` (or run the
-   Workflow) and confirm it upserts content.
-3. Publish or edit a post in Notion, re-run the sync, and confirm it renders at
-   `/blog/[slug]`.
-4. Confirm a Notion image re-hosts to R2 and renders through `/media/[id]`.
-5. Confirm `/photo` lists published photos, `/photo/[slug]` renders the image and
-   story, and linked photography projects show their photo grids.
-6. Confirm the Web Analytics beacon loads (not blocked by CSP) and views appear
-   in the Cloudflare dashboard.
+2. Trigger one full Workflow and confirm posts, projects, photos, and pages each
+   report a successful stage summary.
+3. Publish or edit a post in Notion, run another full sync, and confirm it
+   renders at `/blog/[slug]`.
+4. Confirm a Notion image is re-hosted into R2 and renders through `/media/[id]`.
+5. Confirm `/photo`, `/photo/[slug]`, and linked photography project grids.
+6. Confirm the public Web Analytics beacon loads and views appear in the
+   Cloudflare dashboard.

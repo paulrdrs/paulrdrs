@@ -27,15 +27,18 @@ photo detail pages.
 
 ## Authoring And Sync
 
-Editing happens in Notion. The `POST /api/jobs/sync-content` job reads the four
-databases and upserts rows into D1, keyed by `notionPageId`. It runs as a
-Cloudflare Workflow on a cron trigger (one durable step per database). Content
-indexes remain dynamically rendered so builds do not require D1, but their
-stable D1 reads are cached for five minutes. Post, project, and photo detail
-pages use five-minute ISR. Sync prepares up to three entries concurrently while
-persisting content rows in source order.
-See
-[Deployment](./deployment.md) for the Workflow and cron setup.
+Editing happens in Notion. The private `@paulrdrs/notion-sync` Worker reads the
+four databases and upserts rows directly into D1, keyed by `notionPageId`, while
+re-hosting media directly into R2. Its 15-minute cron creates a Cloudflare
+Workflow with one durable step per database. Content indexes remain dynamically
+rendered so builds do not require D1, but their stable D1 reads are cached for
+five minutes. Post, project, and photo detail pages use five-minute ISR. Sync
+prepares up to three entries concurrently while persisting content rows in
+source order. See [Deployment](./deployment.md) for the Workflow and cron setup.
+
+The normalized block-tree and content contracts live in
+`@paulrdrs/content`; the Drizzle schema lives in `@paulrdrs/database`. The web
+app reads those shared contracts but contains no Notion client or sync writer.
 
 Slugs come from an explicit Notion `Slug` property, normalized via `createSlug`
 and frozen on publish. Renames record the old slug so the dynamic route can

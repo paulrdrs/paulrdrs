@@ -1,10 +1,18 @@
 # Architecture
 
-This is a pnpm workspace whose web application lives in `apps/web`. The app is
-a Next.js App Router personal site deployed on Cloudflare Workers via the
-OpenNext adapter. Content is authored in Notion and synced into Cloudflare
-D1; the public site renders from D1. There is no dashboard or authenticated
-surface.
+This is a pnpm workspace with four runtime-focused packages:
+
+- `apps/web` (`@paulrdrs/web`) is the public Next.js/OpenNext application,
+  deployed as the Cloudflare Worker `paulrdrs`.
+- `workers/notion-sync` (`@paulrdrs/notion-sync`) is the private scheduled
+  Worker that reads Notion and writes content to Cloudflare D1 and R2.
+- `packages/content` (`@paulrdrs/content`) owns runtime-neutral normalized block
+  trees and shared content contracts.
+- `packages/database` (`@paulrdrs/database`) owns the Drizzle schema and depends
+  on `@paulrdrs/content` for persisted content types.
+
+The web app reads D1 and serves media directly from R2. Notion is never on the
+visitor request path, and there is no dashboard or authenticated surface.
 
 ## Stack
 
@@ -17,7 +25,8 @@ surface.
 - Cloudflare R2 for media, via the `BUCKET` binding.
 - Cloudflare Images for responsive media transformations, via the `IMAGES`
   binding.
-- Cloudflare Workflows + a cron trigger to run the Notion sync durably.
+- A separate Cloudflare Worker, Workflows, and a cron trigger to run the Notion
+  sync durably.
 - `@notionhq/client` for reading the Notion content databases during sync.
 
 ## Data Domains
@@ -45,18 +54,18 @@ surface.
 
 The `/store` route is intentionally minimal for now.
 
-## Job Routes
+## Synchronization Boundary
 
-- `/api/jobs/sync-content`: reads the Notion Posts, Projects, Photos, and Pages
-  databases and upserts them into D1. Guarded by `JOBS_SECRET`. An optional
-  `?type=posts|projects|photos|pages` syncs a single database; this is how the sync
-  Workflow drives one durable step per database. Unsupported or repeated `type`
-  parameters return HTTP 400 without starting a sync (see
-  [Deployment](./deployment.md)).
+The sync Worker has no `fetch` handler, public route, custom domain, or service
+binding to the web app. Every 15 minutes its cron handler creates one
+parameterless `NotionSyncWorkflow`. The Workflow constructs its Notion, D1, and
+R2 dependencies directly from Worker bindings and runs posts, projects, photos,
+and pages in order. Wrangler's Workflow trigger provides full-sync recovery;
+there is no HTTP sync endpoint or targeted public trigger.
 
-The sync itself runs as a Cloudflare Workflow (`NotionSyncWorkflow`) launched by
-a cron trigger, which calls this route per database through the worker's own
-service binding.
+The two Workers deploy independently. HTTP ingress and webhooks for the sync
+Worker are out of scope. Analytics remains the existing external Cloudflare Web
+Analytics integration and is not part of the sync architecture.
 
 There are no authenticated routes; the dashboard and passkey auth were removed
 in favor of Notion authoring (see [Auth](./auth.md)).
