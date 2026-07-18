@@ -79,10 +79,10 @@ pnpm typegen          # regenerate both Workers' Cloudflare types
 pnpm check:deps
 pnpm check:no-js
 pnpm preview:web      # production-like local web Worker
-pnpm deploy:web       # public app only
-pnpm deploy:sync      # sync Worker only
-pnpm sync:trigger     # parameterless full-sync recovery
-pnpm sync:instances   # inspect Workflow instances
+pnpm run deploy:web   # public app only
+pnpm run deploy:sync  # sync Worker only
+pnpm run sync:trigger # parameterless full-sync recovery
+pnpm sync:instances  # inspect Workflow instances
 ```
 
 `pnpm dev` is sufficient for ordinary web development and does not require a

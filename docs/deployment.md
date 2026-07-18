@@ -52,18 +52,39 @@ authenticated accounts in a non-interactive deployment.
 Run commands from the repository root:
 
 ```sh
-pnpm build:web       # OpenNext dry-run build of the public app Worker
-pnpm build:sync      # Wrangler dry-run build of the sync Worker
-pnpm deploy:web      # public app only
-pnpm deploy:sync     # sync Worker only
-pnpm db:generate     # generate migrations in the database package
-pnpm db:migrate      # local D1 migrations
+pnpm build:web           # OpenNext dry-run build of the public app Worker
+pnpm build:sync          # Wrangler dry-run build of the sync Worker
+pnpm run deploy:web      # public app only
+pnpm run deploy:sync     # sync Worker only
+pnpm db:generate         # generate migrations in the database package
+pnpm db:migrate          # local D1 migrations
 pnpm db:migrate:remote
 ```
 
 Migrations are generated under `packages/database/drizzle/` with
 `pnpm db:generate`. Apply a required remote migration before deploying code
 that depends on it.
+
+## Automatic Production Deployments
+
+Cloudflare Workers Builds connects the `web` Worker directly to the GitHub
+repository. A push to the production branch `feat/cloudflare` runs one ordered
+release for both Workers; GitHub Actions is not involved. Non-production branch
+builds are disabled.
+
+The dashboard build configuration uses repository root `/` and these commands:
+
+```sh
+# Build command
+pnpm lint && pnpm typecheck && pnpm test
+
+# Deploy command
+pnpm run deploy:sync && pnpm run sync:trigger && pnpm run deploy:web && (pnpm run check:production || (sleep 20 && pnpm run check:production))
+```
+
+The verification retry allows the newly deployed Worker to finish propagating.
+A second failure fails the Cloudflare build. Keep the release ordered so sync
+behavior and content reach production before the web Worker that consumes them.
 
 ## Notion Content Sync And Recovery
 
@@ -77,7 +98,7 @@ There is no HTTP or targeted-database trigger. For smoke tests or recovery,
 start a parameterless full sync and inspect instances with Wrangler:
 
 ```sh
-pnpm sync:trigger
+pnpm run sync:trigger
 pnpm sync:instances
 ```
 
@@ -89,11 +110,11 @@ A content-contract release is not complete when only the web Worker deploys.
 Use this order whenever web rendering depends on new sync behavior:
 
 ```sh
-pnpm deploy:sync
-pnpm sync:trigger
+pnpm run deploy:sync
+pnpm run sync:trigger
 pnpm sync:instances  # wait for the new instance to complete successfully
-pnpm deploy:web
-pnpm check:production
+pnpm run deploy:web
+pnpm run check:production
 ```
 
 `check:production` is read-only. It checks production D1 and the deployed HTML
@@ -104,7 +125,7 @@ from the site alone is not a sufficient release check.
 
 ## Production Smoke Test
 
-1. Run `pnpm check:production` and require it to pass.
+1. Run `pnpm run check:production` and require it to pass.
 2. Trigger one full Workflow and confirm posts, projects, photos, and pages each
    report a successful stage summary.
 3. Publish or edit a post in Notion, run another full sync, and confirm it
