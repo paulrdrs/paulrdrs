@@ -3,7 +3,7 @@ export const MAX_MEDIA_FILE_SIZE_BYTES = 5 * 1024 * 1024
 // SVG is intentionally excluded: it can embed scripts, and media is served
 // from the site's own origin via /media/[id], which would make a malicious SVG
 // a stored-XSS vector.
-export const allowedMediaMimeTypes = [
+const allowedMediaMimeTypes = [
   "image/jpeg",
   "image/png",
   "image/webp",

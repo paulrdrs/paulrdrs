@@ -1,6 +1,6 @@
-export const heroKinds = ["post", "project", "photo"] as const
+const heroKinds = ["post", "project", "photo"] as const
 
-export type HeroKind = (typeof heroKinds)[number]
+type HeroKind = (typeof heroKinds)[number]
 
 export type HeroSelection = {
   id: string

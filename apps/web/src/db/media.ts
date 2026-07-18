@@ -2,7 +2,7 @@ import { mediaAssets } from "@paulrdrs/database/schema"
 import { eq } from "drizzle-orm"
 import { getDb } from "./client"
 
-export type MediaAssetLocation = {
+type MediaAssetLocation = {
   readonly mimeType: string
   readonly objectKey: string
 }
