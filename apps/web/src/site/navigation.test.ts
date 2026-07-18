@@ -5,7 +5,6 @@ describe("site navigation settings", () => {
     expect(defaultSiteNavigationSettings).toEqual({
       blogEnabled: true,
       photographyEnabled: true,
-      projectsEnabled: true,
       softwareEnabled: true,
       storeEnabled: true
     })

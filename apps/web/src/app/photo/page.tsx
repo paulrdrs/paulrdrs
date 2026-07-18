@@ -1,5 +1,5 @@
 import { PageContainer } from "@/components/PageContainer"
-import { PhotoGrid } from "@/components/PhotoGrid"
+import { PhotoList } from "@/components/PhotoList"
 import { getPublishedPhotos } from "@/db/content"
 
 export const dynamic = "force-dynamic"
@@ -14,7 +14,7 @@ export default async function PhotoGalleryPage() {
       </header>
 
       {photos.length > 0 ? (
-        <PhotoGrid photos={photos} />
+        <PhotoList photos={photos} />
       ) : (
         <div className="empty-state">No photographs published yet.</div>
       )}

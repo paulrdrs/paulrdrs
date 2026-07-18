@@ -1,10 +1,9 @@
-import { isProjectCategory } from "@paulrdrs/content/content"
 import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import { ContentBody } from "@/components/ContentBody"
 import { ContentImage } from "@/components/ContentImage"
 import { PageContainer } from "@/components/PageContainer"
-import { PhotoGrid } from "@/components/PhotoGrid"
+import { PhotoList } from "@/components/PhotoList"
 import {
   getProjectSlugByPreviousSlug,
   getPublishedProjectBySlug,
@@ -15,29 +14,19 @@ import { buildContentMetadata } from "@/lib/metadata"
 
 export const revalidate = 300
 
-// Empty params so nothing prerenders at build (D1 is unavailable there); pages
-// render on the first request and are then cached (ISR).
 export function generateStaticParams() {
   return []
 }
 
-type ProjectPageProps = {
-  params: Promise<{
-    category: string
-    slug: string
-  }>
+type PhotographyProjectPageProps = {
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({
   params
-}: ProjectPageProps): Promise<Metadata> {
-  const { category, slug } = await params
-
-  if (!isProjectCategory(category)) {
-    return {}
-  }
-
-  const project = await getPublishedProjectBySlug(category, slug)
+}: PhotographyProjectPageProps): Promise<Metadata> {
+  const { slug } = await params
+  const project = await getPublishedProjectBySlug("photography", slug)
 
   if (!project) {
     return {}
@@ -49,39 +38,32 @@ export async function generateMetadata({
       project.seoDescription ??
       project.excerpt ??
       (project.body ? blockTreeToPlainText(project.body) : null),
-    path: `/projects/${project.category}/${project.slug}`,
+    path: `/photography/${project.slug}`,
     title: project.seoTitle ?? project.title
   })
 }
 
-export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { category, slug } = await params
-
-  if (!isProjectCategory(category)) {
-    notFound()
-  }
-
-  const project = await getPublishedProjectBySlug(category, slug)
+export default async function PhotographyProjectPage({
+  params
+}: PhotographyProjectPageProps) {
+  const { slug } = await params
+  const project = await getPublishedProjectBySlug("photography", slug)
 
   if (!project) {
-    const currentSlug = await getProjectSlugByPreviousSlug(category, slug)
+    const currentSlug = await getProjectSlugByPreviousSlug("photography", slug)
     if (currentSlug) {
-      permanentRedirect(`/projects/${category}/${currentSlug}`)
+      permanentRedirect(`/photography/${currentSlug}`)
     }
     notFound()
   }
 
-  // Photography projects double as albums: show the photos linked to them.
-  const photos =
-    project.category === "photography"
-      ? await getPublishedProjectPhotos(project.id)
-      : []
+  const photos = await getPublishedProjectPhotos(project.id)
 
   return (
     <PageContainer>
-      <header className="grid gap-8 pb-2 lg:grid-cols-12">
-        <div className="flex flex-col gap-4 lg:col-span-10">
-          <p className="eyebrow">Project · {project.category}</p>
+      <header className="pb-2">
+        <div className="flex flex-col gap-4 lg:w-5/6">
+          <p className="eyebrow">Photography</p>
           <h1 className="page-title">{project.title}</h1>
           {project.excerpt ? (
             <p className="max-w-2xl text-muted text-xl">{project.excerpt}</p>
@@ -97,10 +79,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           priority
         />
       ) : null}
-      <div>
-        <ContentBody body={project.body} />
-      </div>
-      {photos.length > 0 ? <PhotoGrid photos={photos} /> : null}
+      <ContentBody body={project.body} />
+      {photos.length > 0 ? <PhotoList photos={photos} /> : null}
     </PageContainer>
   )
 }

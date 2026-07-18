@@ -1,8 +1,4 @@
-import {
-  type ContentStatus,
-  isProjectCategory,
-  type ProjectCategory
-} from "@paulrdrs/content/content"
+import type { ContentStatus, ProjectCategory } from "@paulrdrs/content/content"
 import { isPageKey, type PageKey } from "@paulrdrs/content/pages"
 import { z } from "zod"
 
@@ -51,7 +47,7 @@ export type MappedPage = {
 export type MappedPhoto = {
   readonly excerpt: string | null
   readonly notionPageId: string
-  readonly projectNotionPageIds: readonly string[]
+  readonly photographyProjectNotionPageIds: readonly string[]
   readonly publishedAt: Date | null
   readonly slug: string
   readonly status: ContentStatus
@@ -127,19 +123,9 @@ const getTags = (page: NotionPage): string[] =>
     .parse(page.properties.Tags)
     .multi_select.map((option) => option.name)
 
-const getCategory = (page: NotionPage): ProjectCategory => {
-  const name = selectPropertySchema.parse(page.properties.Category).select?.name
-
-  if (!name || !isProjectCategory(name)) {
-    throw new Error(`Invalid project category: ${name ?? "(none)"}`)
-  }
-
-  return name
-}
-
-const getProjectRelationIds = (page: NotionPage): string[] =>
+const getPhotographyProjectRelationIds = (page: NotionPage): string[] =>
   relationPropertySchema
-    .parse(page.properties.Projects)
+    .parse(page.properties["Photography Projects"])
     .relation.map((item) => item.id)
 
 const getKey = (page: NotionPage): PageKey => {
@@ -186,10 +172,13 @@ export const mapPostPage = (page: NotionPage): MappedPost =>
     tags: getTags(page)
   }))
 
-export const mapProjectPage = (page: NotionPage): MappedProject =>
+export const mapProjectPage = (
+  page: NotionPage,
+  category: ProjectCategory
+): MappedProject =>
   withMalformedPageError("project", page, () => ({
     ...mapContentProperties(page),
-    category: getCategory(page)
+    category
   }))
 
 export const mapPagePage = (page: NotionPage): MappedPage =>
@@ -208,7 +197,7 @@ export const mapPhotoPage = (page: NotionPage): MappedPhoto =>
     return {
       excerpt: getNullableRichText(page, "Excerpt"),
       notionPageId: page.id,
-      projectNotionPageIds: getProjectRelationIds(page),
+      photographyProjectNotionPageIds: getPhotographyProjectRelationIds(page),
       publishedAt: getPublishedAt(page),
       slug: getSlug(page, title),
       status: getStatus(page),

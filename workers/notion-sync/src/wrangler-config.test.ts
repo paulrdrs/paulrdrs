@@ -33,7 +33,8 @@ describe("private sync Worker configuration", () => {
       required: [
         "NOTION_TOKEN",
         "NOTION_POSTS_DB_ID",
-        "NOTION_PROJECTS_DB_ID",
+        "NOTION_PHOTOGRAPHY_PROJECTS_DB_ID",
+        "NOTION_SOFTWARE_PROJECTS_DB_ID",
         "NOTION_PHOTOS_DB_ID",
         "NOTION_PAGES_DB_ID"
       ]

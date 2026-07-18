@@ -15,15 +15,15 @@ const imagePresentations = {
     sizes:
       "(min-width: 1024px) 960px, (min-width: 640px) calc(100vw - 4rem), calc(100vw - 2rem)"
   },
+  contentCard: {
+    className: "aspect-4/3",
+    sizes:
+      "(min-width: 1024px) 464px, (min-width: 640px) calc(50vw - 3rem), calc(100vw - 2rem)"
+  },
   hero: {
     className: "aspect-4/3 lg:aspect-5/4",
     sizes:
       "(min-width: 1024px) 547px, (min-width: 640px) calc(100vw - 4rem), calc(100vw - 2rem)"
-  },
-  homeCard: {
-    className: "aspect-4/3",
-    sizes:
-      "(min-width: 1024px) 299px, (min-width: 640px) calc(50vw - 3rem), calc(100vw - 2rem)"
   },
   photo: {
     className: "aspect-auto min-h-96",
@@ -34,16 +34,6 @@ const imagePresentations = {
     className: "aspect-4/3",
     sizes:
       "(min-width: 1024px) 299px, (min-width: 640px) calc(50vw - 3rem), calc(100vw - 2rem)"
-  },
-  postCard: {
-    className: "aspect-4/3",
-    sizes:
-      "(min-width: 1024px) 299px, (min-width: 640px) 33vw, calc(100vw - 2rem)"
-  },
-  projectCard: {
-    className: "aspect-4/3",
-    sizes:
-      "(min-width: 1024px) 464px, (min-width: 640px) calc(50vw - 3rem), calc(100vw - 2rem)"
   },
   wide: {
     className: "aspect-video",
@@ -76,7 +66,7 @@ export const ContentImage = ({
       <div className={`media-frame relative ${className}`}>
         <Image
           alt={alt ?? ""}
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          className="object-cover"
           fill
           priority={priority}
           sizes={sizes}

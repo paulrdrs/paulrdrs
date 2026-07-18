@@ -6,16 +6,18 @@ renders from D1. There is no dashboard or in-app editor.
 ## Content Types
 
 - Posts use a unique slug and render at `/blog/[slug]`.
-- Projects use a category plus slug and render at
-  `/projects/[category]/[slug]`.
+- Photography projects render at `/photography/[slug]`.
+- Software projects render at `/software/[slug]`.
 - Photos render in the `/photo` gallery and at `/photo/[slug]`. Each photo can
   relate to multiple photography projects.
 - Pages are keyed records, currently used for `home` and `contact`.
 - Media assets store object metadata in D1 and objects in the R2 bucket.
 
-Each type maps to a Notion database (Posts, Projects, Photos, Pages). Page
+Each type maps to a Notion database (Posts, Photography Projects, Software
+Projects, Photos, Pages). Page
 **properties** carry the metadata (title, slug, status, excerpt, SEO fields,
-publish date, and — for projects — category); the Notion **page body** is the
+publish date); the source project database defines whether a project is
+photography or software. The Notion **page body** is the
 long-form content. See the [Notion Schema](./notion-schema.md) for the exact
 property contract.
 
@@ -27,14 +29,14 @@ are ignored.
 
 For Photos, the first image block in the Notion page body is the photograph and
 is removed from the stored story body during sync. Remaining blocks become the
-photo story. The `Projects` relation is stored as a many-to-many relationship;
+photo story. The `Photography Projects` relation is stored as a many-to-many relationship;
 linked photos appear on photography project pages and linked projects appear on
 photo detail pages.
 
 ## Authoring And Sync
 
 Editing happens in Notion. The private `@paulrdrs/notion-sync` Worker reads the
-four databases and upserts rows directly into D1, keyed by `notionPageId`, while
+five databases and upserts rows directly into D1, keyed by `notionPageId`, while
 re-hosting media directly into R2. Its five-minute cron creates a Cloudflare
 Workflow with one durable step per database. Content indexes remain dynamically
 rendered so builds do not require D1, but their stable D1 reads are cached for
@@ -74,7 +76,8 @@ renderer reuses the `.markdown-content` typographic styles in
 
 The Notion Home page is a curated configuration surface, not visitor-facing
 copy. Add zero to three Notion page links—either native **Link to page** blocks
-or linked text—that target published Posts or Projects. Their Notion order
+or linked text—that target published Posts, Photography Projects, or Software
+Projects. Their Notion order
 becomes the homepage order. During sync,
 the links are resolved to an ordered `featuredContent` array in the Home row's
 JSON metadata, and the Home body is stored as an empty block tree.
@@ -84,7 +87,8 @@ image, content label, title, excerpt, and public URL. The first position is kept
 explicit in markup so it can receive a distinct highlighted presentation later.
 Duplicate links, more than three links, and links to missing, draft, or
 unsupported targets fail that Home entry's sync and preserve its last valid D1
-row. `/blog` and the project indexes remain the complete content archives.
+row. `/blog`, `/photography`, and `/software` remain the complete content
+archives.
 
 The Blog index uses the same post preview image derived from the first body
 image. Posts without a first image render as text-only entries; there is no
@@ -92,7 +96,7 @@ separate cover field or fallback artwork.
 
 ## Navigation Visibility
 
-Top-navigation link visibility (Blog, Projects, Photography, Software, Store) is
+Top-navigation link visibility (Blog, Photography, Software, Store) is
 stored in site settings in D1 and falls back to defaults when unset. There
 is no in-app editor for it; the matching public routes remain reachable by direct
 URL regardless of link visibility.

@@ -4,17 +4,19 @@ import type { NotionSyncTypeSummary } from "./sync"
 const runtime = {
   databaseIds: {
     pages: "pages-db",
+    photographyProjects: "photography-projects-db",
     photos: "photos-db",
     posts: "posts-db",
-    projects: "projects-db"
+    softwareProjects: "software-projects-db"
   }
 }
 
 const syncMethods = {
   syncPages: vi.fn(),
+  syncPhotographyProjects: vi.fn(),
   syncPhotos: vi.fn(),
   syncPosts: vi.fn(),
-  syncProjects: vi.fn()
+  syncSoftwareProjects: vi.fn()
 }
 
 vi.mock("cloudflare:workers", () => ({
@@ -74,29 +76,33 @@ describe("NotionSyncWorkflow", () => {
       createWorkflow().run({ payload: {} } as never, step as never)
     ).resolves.toEqual({
       pages: successfulSummary,
+      photographyProjects: successfulSummary,
       photos: successfulSummary,
       posts: successfulSummary,
-      projects: successfulSummary
+      softwareProjects: successfulSummary
     })
 
     expect(calls).toEqual([
       "sync-posts",
       "pause-after-posts",
-      "sync-projects",
-      "pause-after-projects",
+      "sync-photographyProjects",
+      "pause-after-photographyProjects",
+      "sync-softwareProjects",
+      "pause-after-softwareProjects",
       "sync-photos",
       "pause-after-photos",
       "sync-pages"
     ])
     expect(syncMethods.syncPosts).toHaveBeenCalledWith()
-    expect(syncMethods.syncProjects).toHaveBeenCalledWith()
+    expect(syncMethods.syncPhotographyProjects).toHaveBeenCalledWith()
+    expect(syncMethods.syncSoftwareProjects).toHaveBeenCalledWith()
     expect(syncMethods.syncPhotos).toHaveBeenCalledWith()
     expect(syncMethods.syncPages).toHaveBeenCalledWith()
   })
 
   it("logs and throws entry errors from their Workflow step", async () => {
     const errorLog = vi.spyOn(console, "error").mockImplementation(() => {})
-    syncMethods.syncProjects.mockResolvedValue({
+    syncMethods.syncPhotographyProjects.mockResolvedValue({
       errors: ["Malformed project"],
       synced: 1
     })
@@ -104,11 +110,13 @@ describe("NotionSyncWorkflow", () => {
 
     await expect(
       createWorkflow().run({ payload: {} } as never, step as never)
-    ).rejects.toThrow("Notion projects sync failed: Malformed project")
+    ).rejects.toThrow(
+      "Notion photographyProjects sync failed: Malformed project"
+    )
 
     expect(errorLog).toHaveBeenCalledWith("Notion sync stage failed", {
       errors: ["Malformed project"],
-      stage: "projects",
+      stage: "photographyProjects",
       synced: 1
     })
     expect(syncMethods.syncPhotos).not.toHaveBeenCalled()
@@ -128,6 +136,6 @@ describe("NotionSyncWorkflow", () => {
       stage: "posts",
       synced: 0
     })
-    expect(syncMethods.syncProjects).not.toHaveBeenCalled()
+    expect(syncMethods.syncPhotographyProjects).not.toHaveBeenCalled()
   })
 })

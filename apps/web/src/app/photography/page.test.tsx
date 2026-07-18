@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { getPublishedProjects } from "@/db/content"
-import ProjectsPage from "./page"
+import PhotographyPage from "./page"
 
 vi.mock("@/db/content", () => ({
   getPublishedProjects: vi.fn()
@@ -8,8 +8,8 @@ vi.mock("@/db/content", () => ({
 
 const getPublishedProjectsMock = vi.mocked(getPublishedProjects)
 
-describe("ProjectsPage", () => {
-  it("renders published projects returned by the content query", async () => {
+describe("PhotographyPage", () => {
+  it("renders photography projects at their top-level route", async () => {
     getPublishedProjectsMock.mockResolvedValue([
       {
         id: "project-id",
@@ -25,15 +25,15 @@ describe("ProjectsPage", () => {
       }
     ])
 
-    render(await ProjectsPage())
+    render(await PhotographyPage())
 
     expect(
-      screen.getByRole("heading", { name: "Projects" })
+      screen.getByRole("heading", { name: "Photography" })
     ).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Camera Work" })).toHaveAttribute(
       "href",
-      "/projects/photography/camera-work"
+      "/photography/camera-work"
     )
-    expect(screen.getByText("A published project.")).toBeInTheDocument()
+    expect(getPublishedProjectsMock).toHaveBeenCalledWith("photography")
   })
 })

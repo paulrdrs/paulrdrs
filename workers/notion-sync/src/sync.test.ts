@@ -31,9 +31,10 @@ const runtime = {
   bucket: {},
   databaseIds: {
     pages: "pages-db",
+    photographyProjects: "photography-projects-db",
     photos: "photos-db",
     posts: "posts-db",
-    projects: "projects-db"
+    softwareProjects: "software-projects-db"
   }
 } as unknown as NotionSyncRuntime
 
@@ -66,7 +67,7 @@ const baseProject = {
 const basePhoto = {
   excerpt: null,
   notionPageId: "photo-1",
-  projectNotionPageIds: ["notion-project-1"],
+  photographyProjectNotionPageIds: ["notion-project-1"],
   publishedAt: null,
   slug: "photo-slug",
   status: "published" as const,
@@ -358,7 +359,7 @@ describe("syncPosts", () => {
   })
 })
 
-describe("syncProjects", () => {
+describe("project sync", () => {
   it("scopes the slug collision check to the project category", async () => {
     mockNotionClient(["project-1"])
     fetchPageBlocksMock.mockResolvedValue([])
@@ -369,7 +370,7 @@ describe("syncProjects", () => {
     })
     const { update, values } = setupDb([[], []])
 
-    const summary = await sync.syncProjects()
+    const summary = await sync.syncSoftwareProjects()
 
     expect(summary).toEqual({ errors: [], synced: 1 })
     expect(values).toHaveBeenCalledWith(
@@ -384,7 +385,7 @@ describe("syncProjects", () => {
     mapProjectPageMock.mockReturnValue(baseProject)
     const { values } = setupDb([[], []])
 
-    await sync.syncProjects()
+    await sync.syncSoftwareProjects()
 
     expect(values).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -679,12 +680,12 @@ describe("syncPhotos", () => {
     expect(db.values).not.toHaveBeenCalled()
   })
 
-  it("clears links when the Projects relation is empty", async () => {
+  it("clears links when the Photography Projects relation is empty", async () => {
     mockNotionClient(["photo-1"])
     fetchPageBlocksMock.mockResolvedValue([imageBlock])
     mapPhotoPageMock.mockReturnValue({
       ...basePhoto,
-      projectNotionPageIds: []
+      photographyProjectNotionPageIds: []
     })
     const db = setupDb([[], []])
 

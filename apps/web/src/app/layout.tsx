@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { Geist, Inconsolata } from "next/font/google"
 import "./globals.css"
-import { SiteFrame } from "@/components/SiteFrame"
 import { TopNavBar } from "@/components/TopNavBar"
 import { getSiteEnvs } from "@/envs/server"
 
@@ -58,7 +57,11 @@ export default function RootLayout({
         ) : null}
       </head>
       <body>
-        <SiteFrame navigation={<TopNavBar />}>{children}</SiteFrame>
+        <TopNavBar />
+        {children}
+        <footer className="site-shell flex items-end justify-end py-8 font-mono text-muted text-xs uppercase tracking-wider">
+          <span>{"paulrdrs.com"}</span>
+        </footer>
       </body>
     </html>
   )

@@ -1,5 +1,4 @@
 import type { NotionBlockTree } from "@paulrdrs/content/blocks"
-import { isProjectCategory } from "@paulrdrs/content/content"
 import { render, screen } from "@testing-library/react"
 import { notFound, permanentRedirect } from "next/navigation"
 import {
@@ -7,16 +6,12 @@ import {
   getPublishedProjectBySlug,
   getPublishedProjectPhotos
 } from "@/db/content"
-import ProjectPage from "./page"
+import PhotographyProjectPage from "./page"
 
 vi.mock("@/db/content", () => ({
   getProjectSlugByPreviousSlug: vi.fn(),
   getPublishedProjectBySlug: vi.fn(),
   getPublishedProjectPhotos: vi.fn()
-}))
-
-vi.mock("@paulrdrs/content/content", () => ({
-  isProjectCategory: vi.fn()
 }))
 
 vi.mock("next/navigation", () => ({
@@ -31,7 +26,6 @@ vi.mock("next/navigation", () => ({
 const getPublishedProjectBySlugMock = vi.mocked(getPublishedProjectBySlug)
 const getProjectSlugByPreviousSlugMock = vi.mocked(getProjectSlugByPreviousSlug)
 const getPublishedProjectPhotosMock = vi.mocked(getPublishedProjectPhotos)
-const isProjectCategoryMock = vi.mocked(isProjectCategory)
 const permanentRedirectMock = vi.mocked(permanentRedirect)
 const notFoundMock = vi.mocked(notFound)
 
@@ -52,73 +46,13 @@ const buildProject = (overrides: Record<string, unknown> = {}) => ({
   ...overrides
 })
 
-const notionBody = (text: string): NotionBlockTree => [
-  {
-    id: "b1",
-    type: "heading_2",
-    richText: [
-      {
-        text,
-        href: null,
-        annotations: {
-          bold: false,
-          italic: false,
-          strikethrough: false,
-          underline: false,
-          code: false,
-          color: "default"
-        }
-      }
-    ],
-    children: []
-  }
-]
-
-describe("ProjectPage", () => {
+describe("PhotographyProjectPage", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    isProjectCategoryMock.mockReturnValue(true)
     getPublishedProjectPhotosMock.mockResolvedValue([])
   })
 
-  it("renders the project title without a Notion body", async () => {
-    getPublishedProjectBySlugMock.mockResolvedValue(buildProject())
-
-    render(
-      await ProjectPage({
-        params: Promise.resolve({
-          category: "photography",
-          slug: "camera-work"
-        })
-      })
-    )
-
-    expect(
-      screen.getByRole("heading", { level: 1, name: "Camera Work" })
-    ).toBeInTheDocument()
-  })
-
-  it("renders Notion blocks when body is present", async () => {
-    getPublishedProjectBySlugMock.mockResolvedValue(
-      buildProject({ body: notionBody("From Notion") })
-    )
-
-    render(
-      await ProjectPage({
-        params: Promise.resolve({
-          category: "photography",
-          slug: "camera-work"
-        })
-      })
-    )
-
-    expect(
-      screen.getByRole("heading", { level: 2, name: "From Notion" })
-    ).toBeInTheDocument()
-    expect(screen.queryByText("Project body")).not.toBeInTheDocument()
-  })
-
-  it("renders linked photos for photography projects", async () => {
+  it("renders linked photos", async () => {
     getPublishedProjectBySlugMock.mockResolvedValue(buildProject())
     getPublishedProjectPhotosMock.mockResolvedValue([
       {
@@ -133,43 +67,38 @@ describe("ProjectPage", () => {
     ])
 
     render(
-      await ProjectPage({
-        params: Promise.resolve({
-          category: "photography",
-          slug: "camera-work"
-        })
+      await PhotographyProjectPage({
+        params: Promise.resolve({ slug: "camera-work" })
       })
     )
 
-    for (const link of screen.getAllByRole("link", {
-      name: "Pier at Dusk"
-    })) {
-      expect(link).toHaveAttribute("href", "/photo/pier-at-dusk")
-    }
+    expect(getPublishedProjectBySlugMock).toHaveBeenCalledWith(
+      "photography",
+      "camera-work"
+    )
+    expect(
+      screen.getAllByRole("link", { name: "Pier at Dusk" })[0]
+    ).toHaveAttribute("href", "/photo/pier-at-dusk")
   })
 
-  it("redirects an old slug to the current one", async () => {
+  it("redirects an old slug within photography", async () => {
     getPublishedProjectBySlugMock.mockResolvedValue(undefined)
     getProjectSlugByPreviousSlugMock.mockResolvedValue("camera-work")
 
     await expect(
-      ProjectPage({
-        params: Promise.resolve({ category: "photography", slug: "old-slug" })
-      })
+      PhotographyProjectPage({ params: Promise.resolve({ slug: "old-slug" }) })
     ).rejects.toThrow("NEXT_REDIRECT")
     expect(permanentRedirectMock).toHaveBeenCalledWith(
-      "/projects/photography/camera-work"
+      "/photography/camera-work"
     )
   })
 
-  it("returns 404 for an unknown slug with no history", async () => {
+  it("returns 404 for an unknown slug", async () => {
     getPublishedProjectBySlugMock.mockResolvedValue(undefined)
     getProjectSlugByPreviousSlugMock.mockResolvedValue(undefined)
 
     await expect(
-      ProjectPage({
-        params: Promise.resolve({ category: "photography", slug: "missing" })
-      })
+      PhotographyProjectPage({ params: Promise.resolve({ slug: "missing" }) })
     ).rejects.toThrow("NEXT_NOT_FOUND")
     expect(notFoundMock).toHaveBeenCalled()
   })

@@ -15,7 +15,6 @@ const getCachedSiteNavigationSettings = unstable_cache(
       .select({
         blogEnabled: siteNavigationSettings.blogEnabled,
         photographyEnabled: siteNavigationSettings.photographyEnabled,
-        projectsEnabled: siteNavigationSettings.projectsEnabled,
         softwareEnabled: siteNavigationSettings.softwareEnabled,
         storeEnabled: siteNavigationSettings.storeEnabled
       })

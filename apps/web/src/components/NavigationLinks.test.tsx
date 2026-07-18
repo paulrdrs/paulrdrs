@@ -23,16 +23,16 @@ describe("NavigationLinks", () => {
       <NavigationLinks
         items={[
           { href: "/", label: "Home" },
-          { href: "/projects", label: "Projects" }
+          { href: "/software", label: "Software" }
         ]}
       />
     )
 
-    const projectsLink = screen.getByRole("link", { name: "Projects" })
-    projectsLink.addEventListener("click", (event) => event.preventDefault())
-    projectsLink.scrollIntoView = scrollIntoView
+    const softwareLink = screen.getByRole("link", { name: "Software" })
+    softwareLink.addEventListener("click", (event) => event.preventDefault())
+    softwareLink.scrollIntoView = scrollIntoView
 
-    await user.click(projectsLink)
+    await user.click(softwareLink)
 
     expect(scrollIntoView).toHaveBeenCalledWith({
       behavior: "smooth",

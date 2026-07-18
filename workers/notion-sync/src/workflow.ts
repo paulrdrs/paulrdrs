@@ -14,7 +14,8 @@ export type NotionSyncWorkflowParams = Record<string, never>
 
 export const notionSyncStages = [
   { pauseAfter: true, type: "posts" },
-  { pauseAfter: true, type: "projects" },
+  { pauseAfter: true, type: "photographyProjects" },
+  { pauseAfter: true, type: "softwareProjects" },
   { pauseAfter: true, type: "photos" },
   { pauseAfter: false, type: "pages" }
 ] as const
@@ -73,9 +74,10 @@ export class NotionSyncWorkflow extends WorkflowEntrypoint<
       NotionSyncTypeSummary | undefined
     > = {
       pages: undefined,
+      photographyProjects: undefined,
       photos: undefined,
       posts: undefined,
-      projects: undefined
+      softwareProjects: undefined
     }
 
     for (const { pauseAfter, type } of notionSyncStages) {
@@ -90,9 +92,16 @@ export class NotionSyncWorkflow extends WorkflowEntrypoint<
 
     return {
       pages: requireStageSummary(stageSummaries.pages, "pages"),
+      photographyProjects: requireStageSummary(
+        stageSummaries.photographyProjects,
+        "photographyProjects"
+      ),
       photos: requireStageSummary(stageSummaries.photos, "photos"),
       posts: requireStageSummary(stageSummaries.posts, "posts"),
-      projects: requireStageSummary(stageSummaries.projects, "projects")
+      softwareProjects: requireStageSummary(
+        stageSummaries.softwareProjects,
+        "softwareProjects"
+      )
     }
   }
 }
@@ -114,8 +123,10 @@ const syncStage = (sync: NotionSync, stage: NotionSyncStageType) => {
   switch (stage) {
     case "posts":
       return sync.syncPosts()
-    case "projects":
-      return sync.syncProjects()
+    case "photographyProjects":
+      return sync.syncPhotographyProjects()
+    case "softwareProjects":
+      return sync.syncSoftwareProjects()
     case "photos":
       return sync.syncPhotos()
     case "pages":

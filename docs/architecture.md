@@ -32,7 +32,8 @@ visitor request path, and there is no dashboard or authenticated surface.
 
 ## Data Domains
 
-- Content: posts, projects, photos, keyed pages, project-photo relationships,
+- Content: posts, photography projects, software projects, photos, keyed pages,
+  photography-project/photo relationships,
   and media metadata, synced from Notion and keyed by `notionPageId`.
 - Analytics: handled externally by Cloudflare Web Analytics (a beacon in the
   root layout); there is no analytics data stored in the app.
@@ -43,10 +44,10 @@ visitor request path, and there is no dashboard or authenticated surface.
 - `/`
 - `/blog`
 - `/blog/[slug]`
-- `/projects`
-- `/projects/photography`
-- `/projects/software`
-- `/projects/[category]/[slug]`
+- `/photography`
+- `/photography/[slug]`
+- `/software`
+- `/software/[slug]`
 - `/store`
 - `/contact`
 - `/photo`
@@ -62,25 +63,29 @@ The `/store` route is intentionally minimal for now.
 The sync Worker has no `fetch` handler, public route, custom domain, or service
 binding to the web app. Every five minutes its cron handler creates one
 parameterless `NotionSyncWorkflow`. The Workflow constructs its Notion, D1, and
-R2 dependencies directly from Worker bindings and runs posts, projects, photos,
-and pages in order. Wrangler's Workflow trigger provides full-sync recovery;
+R2 dependencies directly from Worker bindings and runs posts, photography
+projects, software projects, photos, and pages in order. Wrangler's Workflow
+trigger provides full-sync recovery;
 there is no HTTP sync endpoint or targeted public trigger.
 
 The two Workers deploy independently. HTTP ingress and webhooks for the sync
 Worker are out of scope. Analytics uses the external Cloudflare Web Analytics
 integration and is not part of the sync architecture.
 
-Posts and Projects derive their preview and detail hero from the first image
+Posts, Photography Projects, and Software Projects derive their preview and
+detail hero from the first image
 block in the Notion page body. The sync rehosts that image, stores its media ID
 on the content row, and removes the block from the normalized body to prevent a
 duplicate image on detail pages. No Notion `Cover` property or page-level cover
 participates in this flow.
 
 The Notion Home page contains up to three ordered native page links or linked
-page mentions targeting published Posts or Projects. Page sync resolves those Notion identities to D1
+page mentions targeting published Posts, Photography Projects, or Software
+Projects. Page sync resolves those Notion identities to D1
 content identities and stores them in `pages.metadata.featuredContent`; the Home
-body is not rendered. This keeps the homepage curated while the Blog and Project
-routes remain full archives. Invalid Home selections preserve the last valid
+body is not rendered. This keeps the homepage curated while the Blog,
+Photography, and Software routes remain full archives. Invalid Home selections
+preserve the last valid
 page row instead of partially updating its configuration.
 
 There are no authenticated routes. Content editing happens in Notion (see

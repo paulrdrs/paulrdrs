@@ -8,9 +8,10 @@ const validEnvironment = {
   BUCKET: bucket,
   DB: database,
   NOTION_PAGES_DB_ID: "pages-db",
+  NOTION_PHOTOGRAPHY_PROJECTS_DB_ID: "photography-projects-db",
   NOTION_PHOTOS_DB_ID: "photos-db",
   NOTION_POSTS_DB_ID: "posts-db",
-  NOTION_PROJECTS_DB_ID: "projects-db",
+  NOTION_SOFTWARE_PROJECTS_DB_ID: "software-projects-db",
   NOTION_TOKEN: "notion-token"
 }
 
@@ -23,16 +24,18 @@ describe("createNotionSyncRuntime", () => {
     expect(runtime.notion).toBeInstanceOf(Client)
     expect(runtime.databaseIds).toEqual({
       pages: "pages-db",
+      photographyProjects: "photography-projects-db",
       photos: "photos-db",
       posts: "posts-db",
-      projects: "projects-db"
+      softwareProjects: "software-projects-db"
     })
   })
 
   it.each([
     "NOTION_TOKEN",
     "NOTION_POSTS_DB_ID",
-    "NOTION_PROJECTS_DB_ID",
+    "NOTION_PHOTOGRAPHY_PROJECTS_DB_ID",
+    "NOTION_SOFTWARE_PROJECTS_DB_ID",
     "NOTION_PHOTOS_DB_ID",
     "NOTION_PAGES_DB_ID"
   ] as const)("rejects a missing or empty %s", (name) => {

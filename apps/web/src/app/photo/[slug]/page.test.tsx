@@ -80,7 +80,7 @@ describe("PhotoPage", () => {
     expect(screen.getByText("Appears in")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Coastline" })).toHaveAttribute(
       "href",
-      "/projects/photography/coastline"
+      "/photography/coastline"
     )
   })
 

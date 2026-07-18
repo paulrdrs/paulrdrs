@@ -1,5 +1,6 @@
 import { collectPaginatedAPI, isFullPage } from "@notionhq/client"
 import type { ImageBlock, NotionBlockTree } from "@paulrdrs/content/blocks"
+import type { ProjectCategory } from "@paulrdrs/content/content"
 import {
   pages,
   photoProjects,
@@ -39,9 +40,10 @@ export type NotionSyncTypeSummary = {
 
 export type NotionSyncSummary = {
   readonly pages: NotionSyncTypeSummary
+  readonly photographyProjects: NotionSyncTypeSummary
   readonly photos: NotionSyncTypeSummary
   readonly posts: NotionSyncTypeSummary
-  readonly projects: NotionSyncTypeSummary
+  readonly softwareProjects: NotionSyncTypeSummary
 }
 
 const queryDatabasePages = async (
@@ -421,17 +423,24 @@ export const extractPrimaryPhoto = (
 const rebuildPhotoProjectLinks = async (
   runtime: NotionSyncRuntime,
   photoId: string,
-  projectNotionPageIds: readonly string[]
+  photographyProjectNotionPageIds: readonly string[]
 ) => {
   const { db } = runtime
 
   const linkedProjects =
-    projectNotionPageIds.length > 0
+    photographyProjectNotionPageIds.length > 0
       ? await db
           .select({ id: projects.id })
           .from(projects)
-          .where(inArray(projects.notionPageId, [...projectNotionPageIds]))
-          .limit(projectNotionPageIds.length)
+          .where(
+            and(
+              eq(projects.category, "photography"),
+              inArray(projects.notionPageId, [
+                ...photographyProjectNotionPageIds
+              ])
+            )
+          )
+          .limit(photographyProjectNotionPageIds.length)
       : []
 
   const deleteLinks = db
@@ -513,7 +522,11 @@ const upsertPhoto = async (
     .returning({ id: photos.id })
 
   if (row) {
-    await rebuildPhotoProjectLinks(runtime, row.id, mapped.projectNotionPageIds)
+    await rebuildPhotoProjectLinks(
+      runtime,
+      row.id,
+      mapped.photographyProjectNotionPageIds
+    )
   }
 }
 
@@ -563,6 +576,7 @@ const markMissingPostsAsDraft = async (
 
 const markMissingProjectsAsDraft = async (
   runtime: NotionSyncRuntime,
+  category: ProjectCategory,
   notionPageIds: readonly string[]
 ) => {
   await runtime.db
@@ -571,6 +585,7 @@ const markMissingProjectsAsDraft = async (
     .where(
       and(
         eq(projects.status, "published"),
+        eq(projects.category, category),
         isNotNull(projects.notionPageId),
         missingNotionPageCondition(notionPageIds, projects.notionPageId)
       )
@@ -672,17 +687,24 @@ export const createNotionSync = (runtime: NotionSyncRuntime) => {
       (notionPageIds) => markMissingPostsAsDraft(runtime, notionPageIds)
     )
 
-  const syncProjects = () =>
+  const syncProjects = (category: ProjectCategory, databaseId: string) =>
     syncEntries(
       runtime,
-      runtime.databaseIds.projects,
+      databaseId,
       async (page) => {
-        const mapped = mapProjectPage(page)
+        const mapped = mapProjectPage(page, category)
         const body = await fetchPageBlocks(runtime, page.id)
         return { persist: () => upsertProject(runtime, mapped, body) }
       },
-      (notionPageIds) => markMissingProjectsAsDraft(runtime, notionPageIds)
+      (notionPageIds) =>
+        markMissingProjectsAsDraft(runtime, category, notionPageIds)
     )
+
+  const syncPhotographyProjects = () =>
+    syncProjects("photography", runtime.databaseIds.photographyProjects)
+
+  const syncSoftwareProjects = () =>
+    syncProjects("software", runtime.databaseIds.softwareProjects)
 
   const syncPages = () =>
     syncEntries(
@@ -708,5 +730,11 @@ export const createNotionSync = (runtime: NotionSyncRuntime) => {
       (notionPageIds) => markMissingPhotosAsDraft(runtime, notionPageIds)
     )
 
-  return { syncPages, syncPhotos, syncPosts, syncProjects }
+  return {
+    syncPages,
+    syncPhotographyProjects,
+    syncPhotos,
+    syncPosts,
+    syncSoftwareProjects
+  }
 }

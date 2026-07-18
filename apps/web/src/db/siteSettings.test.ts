@@ -28,7 +28,6 @@ describe("site settings queries", () => {
     await expect(getSiteNavigationSettings()).resolves.toEqual({
       blogEnabled: true,
       photographyEnabled: true,
-      projectsEnabled: true,
       softwareEnabled: true,
       storeEnabled: true
     })

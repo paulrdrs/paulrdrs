@@ -42,7 +42,7 @@
   }
 
   body {
-    @apply min-h-screen bg-canvas font-sans text-ink antialiased;
+    @apply min-h-screen bg-canvas font-sans text-ink antialiased flex flex-col items-center;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -80,14 +80,6 @@
     @apply mx-auto w-full max-w-5xl px-4 sm:px-8;
   }
 
-  .content-shell {
-    @apply mx-auto w-full max-w-5xl px-4 sm:px-8;
-  }
-
-  .page-stack {
-    @apply flex w-full flex-col gap-4 pt-4 pb-12;
-  }
-
   .display-title {
     @apply max-w-5xl text-5xl font-black text-balance sm:text-7xl lg:text-8xl;
   }
@@ -110,15 +102,6 @@
 
   .nav-link {
     @apply relative shrink-0 py-2 font-mono text-sm tracking-wider text-muted uppercase hover:text-ink;
-  }
-
-  .nav-link[aria-current="page"] {
-    @apply text-ink;
-  }
-
-  .nav-link[aria-current="page"]::after {
-    content: "";
-    @apply absolute right-0 bottom-0 left-0 h-px bg-ink;
   }
 
   .button {

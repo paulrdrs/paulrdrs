@@ -201,9 +201,6 @@ export const siteNavigationSettings = sqliteTable("site_navigation_settings", {
   blogEnabled: integer("blog_enabled", { mode: "boolean" })
     .notNull()
     .default(true),
-  projectsEnabled: integer("projects_enabled", { mode: "boolean" })
-    .notNull()
-    .default(true),
   photographyEnabled: integer("photography_enabled", { mode: "boolean" })
     .notNull()
     .default(true),

@@ -1,23 +1,20 @@
 import { PageContainer } from "@/components/PageContainer"
-import { ProjectGrid } from "@/components/ProjectGrid"
+import { ProjectList } from "@/components/ProjectList"
 import { getPublishedProjects } from "@/db/content"
 
 export const dynamic = "force-dynamic"
 
-export default async function SoftwareProjectsPage() {
+export default async function SoftwarePage() {
   const projects = await getPublishedProjects("software")
 
   return (
     <PageContainer>
       <header className="pb-2">
-        <div>
-          <p className="eyebrow mb-4">Projects</p>
-          <h1 className="page-title">Software</h1>
-        </div>
+        <h1 className="page-title">Software</h1>
       </header>
 
       {projects.length > 0 ? (
-        <ProjectGrid projects={projects} />
+        <ProjectList projects={projects} />
       ) : (
         <div className="empty-state">No software projects published yet.</div>
       )}

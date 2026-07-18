@@ -87,10 +87,10 @@ export default async function PhotoPage({ params }: PhotoPageProps) {
           <p className="eyebrow">Appears in</p>
           <ul className="flex flex-col gap-1">
             {projects.map((project) => (
-              <li key={`${project.category}/${project.slug}`}>
+              <li key={project.slug}>
                 <Link
                   className="hover:text-muted"
-                  href={`/projects/${project.category}/${project.slug}`}
+                  href={`/photography/${project.slug}`}
                 >
                   {project.title}
                 </Link>

@@ -57,8 +57,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <PageContainer>
-      <header className="grid gap-8 pb-2 lg:grid-cols-12">
-        <div className="flex flex-col gap-4 lg:col-span-10">
+      <header className="pb-2">
+        <div className="flex flex-col gap-4 lg:w-5/6">
           <p className="eyebrow">Blog</p>
           <h1 className="page-title">{post.title}</h1>
           {post.excerpt ? (

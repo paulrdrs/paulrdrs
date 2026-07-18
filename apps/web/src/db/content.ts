@@ -24,6 +24,10 @@ type PublishedPage = {
 }
 
 const contentCacheRevalidateSeconds = 300
+const featuredProjectLabels = {
+  photography: "Photography Project",
+  software: "Software Project"
+} satisfies Record<ProjectCategory, string>
 
 const coverSelection = {
   coverAltText: mediaAssets.altText,
@@ -372,7 +376,7 @@ export const getFeaturedHomeContentItem = unstable_cache(
             ...post,
             href: `/blog/${post.slug}`,
             kind: "post" as const,
-            label: "From the blog"
+            label: "Blog Post"
           }
         : undefined
     }
@@ -397,9 +401,9 @@ export const getFeaturedHomeContentItem = unstable_cache(
       return project
         ? {
             ...project,
-            href: `/projects/${project.category}/${project.slug}`,
+            href: `/${project.category}/${project.slug}`,
             kind: "project" as const,
-            label: project.category
+            label: featuredProjectLabels[project.category]
           }
         : undefined
     }

@@ -1,7 +1,6 @@
 export type SiteNavigationSettings = {
   blogEnabled: boolean
   photographyEnabled: boolean
-  projectsEnabled: boolean
   softwareEnabled: boolean
   storeEnabled: boolean
 }
@@ -14,12 +13,11 @@ type NavigationSection = {
 
 export const siteNavigationSections = [
   { field: "blogEnabled", href: "/blog", label: "Blog" },
-  { field: "projectsEnabled", href: "/projects", label: "Projects" },
-  { field: "softwareEnabled", href: "/projects/software", label: "Software" },
+  { field: "softwareEnabled", href: "/software", label: "Software" },
   {
     field: "photographyEnabled",
-    href: "/photo",
-    label: "Photos"
+    href: "/photography",
+    label: "Photography"
   },
   { field: "storeEnabled", href: "/store", label: "Store" }
 ] satisfies NavigationSection[]
@@ -27,7 +25,6 @@ export const siteNavigationSections = [
 export const defaultSiteNavigationSettings: SiteNavigationSettings = {
   blogEnabled: true,
   photographyEnabled: true,
-  projectsEnabled: true,
   softwareEnabled: true,
   storeEnabled: true
 }

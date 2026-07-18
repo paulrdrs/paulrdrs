@@ -14,7 +14,7 @@ export const TopNavBar = async () => {
   ]
 
   return (
-    <header className="sticky top-0 z-40 bg-canvas/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full bg-canvas/90 backdrop-blur-md">
       <nav aria-label="Main navigation" className="mx-auto w-full max-w-5xl">
         <div className="no-scrollbar flex h-12 items-center justify-between gap-8 overflow-x-auto px-4">
           <NavigationLinks items={items} />

@@ -16,8 +16,7 @@ describe("TopNavBar", () => {
   it("renders fixed links and enabled section links", async () => {
     getSiteNavigationSettingsMock.mockResolvedValue({
       blogEnabled: true,
-      photographyEnabled: false,
-      projectsEnabled: true,
+      photographyEnabled: true,
       softwareEnabled: false,
       storeEnabled: true
     })
@@ -32,10 +31,6 @@ describe("TopNavBar", () => {
       "href",
       "/blog"
     )
-    expect(screen.getByRole("link", { name: "Projects" })).toHaveAttribute(
-      "href",
-      "/projects"
-    )
     expect(screen.getByRole("link", { name: "Store" })).toHaveAttribute(
       "href",
       "/store"
@@ -44,9 +39,10 @@ describe("TopNavBar", () => {
       "href",
       "/contact"
     )
-    expect(
-      screen.queryByRole("link", { name: "Photos" })
-    ).not.toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Photography" })).toHaveAttribute(
+      "href",
+      "/photography"
+    )
     expect(
       screen.queryByRole("link", { name: "Software" })
     ).not.toBeInTheDocument()

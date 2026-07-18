@@ -124,28 +124,23 @@ describe("mapPostPage", () => {
 describe("mapProjectPage", () => {
   const baseProjectProperties = (overrides: Record<string, unknown> = {}) => ({
     ...basePostProperties(),
-    Category: select("software"),
     ...overrides
   })
 
-  it("maps category and carries no tags or links", () => {
+  it("takes the category from the source database", () => {
     const page = buildPage(baseProjectProperties(), "project-1")
-    const mapped = mapProjectPage(page)
+    const mapped = mapProjectPage(page, "software")
 
     expect(mapped.category).toBe("software")
+    expect(mapped.status).toBe("published")
     expect(mapped).not.toHaveProperty("tags")
     expect(mapped).not.toHaveProperty("links")
   })
 
-  it("throws a malformed-page error for an invalid category", () => {
-    const page = buildPage(
-      baseProjectProperties({ Category: select("not-a-category") }),
-      "project-2"
-    )
+  it("does not require a Category property", () => {
+    const page = buildPage(baseProjectProperties(), "project-2")
 
-    expect(() => mapProjectPage(page)).toThrow(
-      /Malformed Notion project page project-2/
-    )
+    expect(mapProjectPage(page, "photography").category).toBe("photography")
   })
 })
 
@@ -156,7 +151,7 @@ describe("mapPhotoPage", () => {
 
   const basePhotoProperties = (overrides: Record<string, unknown> = {}) => ({
     Excerpt: richText("Golden hour at the pier"),
-    Projects: relation(["notion-project-1", "notion-project-2"]),
+    "Photography Projects": relation(["notion-project-1", "notion-project-2"]),
     Published: date("2024-06-01T00:00:00.000Z"),
     Slug: richText("pier-at-dusk"),
     Status: status("Published"),
@@ -170,7 +165,7 @@ describe("mapPhotoPage", () => {
     expect(mapPhotoPage(page)).toEqual({
       excerpt: "Golden hour at the pier",
       notionPageId: "photo-1",
-      projectNotionPageIds: ["notion-project-1", "notion-project-2"],
+      photographyProjectNotionPageIds: ["notion-project-1", "notion-project-2"],
       publishedAt: new Date("2024-06-01T00:00:00.000Z"),
       slug: "pier-at-dusk",
       status: "published",
@@ -178,10 +173,12 @@ describe("mapPhotoPage", () => {
     })
   })
 
-  it("maps an empty Projects relation to no links", () => {
-    const page = buildPage(basePhotoProperties({ Projects: relation([]) }))
+  it("maps an empty Photography Projects relation to no links", () => {
+    const page = buildPage(
+      basePhotoProperties({ "Photography Projects": relation([]) })
+    )
 
-    expect(mapPhotoPage(page).projectNotionPageIds).toEqual([])
+    expect(mapPhotoPage(page).photographyProjectNotionPageIds).toEqual([])
   })
 
   it("falls back to the title-derived slug when Slug is blank", () => {
@@ -192,9 +189,9 @@ describe("mapPhotoPage", () => {
     expect(mapPhotoPage(page).slug).toBe("morning-fog")
   })
 
-  it("throws a malformed-page error when the Projects property is missing", () => {
+  it("throws when the Photography Projects property is missing", () => {
     const page = buildPage(
-      basePhotoProperties({ Projects: undefined }),
+      basePhotoProperties({ "Photography Projects": undefined }),
       "photo-2"
     )
 

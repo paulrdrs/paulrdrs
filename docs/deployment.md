@@ -36,10 +36,11 @@ Sync Worker configuration lives in `workers/notion-sync/wrangler.jsonc`. Set
 these only on `notion-sync`:
 
 - Secret `NOTION_TOKEN`: the Notion integration token.
-- Variables `NOTION_POSTS_DB_ID`, `NOTION_PROJECTS_DB_ID`,
-  `NOTION_PHOTOS_DB_ID`, and `NOTION_PAGES_DB_ID`: the four Notion database IDs.
+- Variables `NOTION_POSTS_DB_ID`, `NOTION_PHOTOGRAPHY_PROJECTS_DB_ID`,
+  `NOTION_SOFTWARE_PROJECTS_DB_ID`, `NOTION_PHOTOS_DB_ID`, and
+  `NOTION_PAGES_DB_ID`: the five Notion database IDs.
 
-The sync Workflow validates all five values plus its D1 and R2 bindings when it
+The sync Workflow validates all six values plus its D1 and R2 bindings when it
 starts. The web Worker has no Notion configuration, Workflow binding, or service
 binding to the sync Worker.
 
@@ -67,30 +68,38 @@ that depends on it.
 
 ## Automatic Production Deployments
 
-Cloudflare Workers Builds connects the `web` Worker directly to the GitHub
-repository. A push to the production branch `feat/cloudflare` runs one ordered
-release for both Workers; GitHub Actions is not involved. Non-production branch
+Cloudflare Workers Builds connects both Workers directly to the GitHub
+repository. Each Worker has its own build connection because Cloudflare scopes
+a connected build to that Worker. Both connections watch the production branch
+`feat/cloudflare`; GitHub Actions is not involved and non-production branch
 builds are disabled.
 
 The dashboard build configuration uses repository root `/` and these commands:
 
 ```sh
-# Build command
+# web build command
 pnpm lint && pnpm typecheck && pnpm test
 
-# Deploy command
-pnpm run deploy:sync && pnpm run sync:trigger && pnpm run deploy:web && (pnpm run check:production || (sleep 20 && pnpm run check:production))
+# web deploy command
+pnpm run deploy:web
+
+# notion-sync build command
+pnpm run build:sync
+
+# notion-sync deploy command
+pnpm run deploy:sync && pnpm run sync:trigger
 ```
 
-The verification retry allows the newly deployed Worker to finish propagating.
-A second failure fails the Cloudflare build. Keep the release ordered so sync
-behavior and content reach production before the web Worker that consumes them.
+The sync connection owns sync deployment and the recovery trigger. The web
+connection owns the public application deployment. Do not deploy one Worker
+through the other Worker's connected build.
 
 ## Notion Content Sync And Recovery
 
 Every five minutes the sync Worker's `scheduled` handler creates one
-parameterless full-sync Workflow. It runs posts, projects, photos, and pages in
-order with a two-second pause between stages. Each stage accesses Notion, D1,
+parameterless full-sync Workflow. It runs posts, photography projects, software
+projects, photos, and pages in order with a two-second pause between stages.
+Each stage accesses Notion, D1,
 and R2 directly. Entry failures are logged with the stage summary and thrown so
 Cloudflare records and retries the failed Workflow step.
 
@@ -114,23 +123,16 @@ pnpm run deploy:sync
 pnpm run sync:trigger
 pnpm sync:instances  # wait for the new instance to complete successfully
 pnpm run deploy:web
-pnpm run check:production
 ```
-
-`check:production` is read-only. It checks production D1 and the deployed HTML
-together: Home must have curated metadata, both routes must expose the current
-build markers, configured features must render, expected preview images must be
-present, and a sampled `/media/[id]` response must be an image. A 200 response
-from the site alone is not a sufficient release check.
 
 ## Production Smoke Test
 
-1. Run `pnpm run check:production` and require it to pass.
-2. Trigger one full Workflow and confirm posts, projects, photos, and pages each
-   report a successful stage summary.
-3. Publish or edit a post in Notion, run another full sync, and confirm it
+1. Trigger one full Workflow and confirm posts, photography projects, software
+   projects, photos, and pages each report a successful stage summary.
+2. Publish or edit a post in Notion, run another full sync, and confirm it
    renders at `/blog/[slug]`.
-4. Confirm a Notion image is re-hosted into R2 and renders through `/media/[id]`.
-5. Confirm `/photo`, `/photo/[slug]`, and linked photography project grids.
-6. Confirm the public Web Analytics beacon loads and views appear in the
+3. Confirm a Notion image is re-hosted into R2 and renders through `/media/[id]`.
+4. Confirm `/photo`, `/photo/[slug]`, `/photography`, `/photography/[slug]`,
+   `/software`, `/software/[slug]`, and linked photography project grids.
+5. Confirm the public Web Analytics beacon loads and views appear in the
    Cloudflare dashboard.

@@ -45,7 +45,7 @@ describe("Home", () => {
         href: "/blog/post-slug",
         id: "post-id",
         kind: "post",
-        label: "From the blog",
+        label: "Blog Post",
         slug: "post-slug",
         title: "Featured post"
       })
@@ -55,41 +55,37 @@ describe("Home", () => {
         coverAttribution: null,
         coverMediaId: null,
         excerpt: "A project excerpt.",
-        href: "/projects/software/project-slug",
+        href: "/software/project-slug",
         id: "project-id",
         kind: "project",
-        label: "software",
+        label: "Software Project",
         slug: "project-slug",
         title: "Featured project"
       })
 
-    render(await Home())
+    const { container } = render(await Home())
 
     expect(
-      screen.getByRole("heading", { level: 1, name: "paulrdrs" })
-    ).toBeInTheDocument()
-    expect(screen.getByRole("list")).toHaveAttribute(
-      "data-content-list",
-      "home-features"
-    )
-    expect(screen.getByRole("link", { name: "Featured post" })).toHaveAttribute(
-      "href",
-      "/blog/post-slug"
-    )
+      container.querySelector('[data-feature-position="1"]')
+    ).toHaveAttribute("href", "/blog/post-slug")
     expect(
-      screen.getByRole("link", { name: "Featured project" })
-    ).toHaveAttribute("href", "/projects/software/project-slug")
+      container.querySelector('[data-feature-position="2"]')
+    ).toHaveAttribute("href", "/software/project-slug")
+    expect(
+      screen.getByRole("heading", { name: "Featured post" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "Featured project" })
+    ).toBeInTheDocument()
     expect(screen.queryByText("Home copy title")).not.toBeInTheDocument()
   })
 
-  it("renders the site title when Home has no valid selections", async () => {
+  it("renders the empty state when Home has no valid selections", async () => {
     getPublishedPageByKeyMock.mockResolvedValue(undefined)
 
     render(await Home())
 
-    expect(
-      screen.getByRole("heading", { name: "paulrdrs" })
-    ).toBeInTheDocument()
+    expect(screen.getByText("nothing to see here")).toBeInTheDocument()
     expect(getFeaturedHomeContentItemMock).not.toHaveBeenCalled()
   })
 })
