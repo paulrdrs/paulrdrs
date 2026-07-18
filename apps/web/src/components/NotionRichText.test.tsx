@@ -49,6 +49,15 @@ describe("NotionRichText", () => {
     expect(link).toHaveTextContent("a link")
   })
 
+  it("renders links with unsafe protocols as plain text", () => {
+    const { container } = render(
+      <NotionRichText richText={[rt("unsafe", {}, "javascript:alert(1)")]} />
+    )
+
+    expect(container.querySelector("a")).not.toBeInTheDocument()
+    expect(container).toHaveTextContent("unsafe")
+  })
+
   it("nests combined marks", () => {
     const { container } = render(
       <NotionRichText richText={[rt("both", { bold: true, italic: true })]} />

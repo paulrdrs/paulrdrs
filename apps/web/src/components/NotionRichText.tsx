@@ -27,6 +27,20 @@ type NotionRichTextProps = {
   richText: readonly RichText[]
 }
 
+const safeLinkProtocols = new Set(["http:", "https:", "mailto:", "tel:"])
+
+const getSafeHref = (href: string | null) => {
+  if (!href) {
+    return null
+  }
+
+  try {
+    return safeLinkProtocols.has(new URL(href).protocol) ? href : null
+  } catch {
+    return null
+  }
+}
+
 export const NotionRichText = ({ richText }: NotionRichTextProps) => {
   // Notion rich-text segments have no id; key on a running text offset, which is
   // stable for static content and unique among siblings.
@@ -41,14 +55,15 @@ export const NotionRichText = ({ richText }: NotionRichTextProps) => {
     <>
       {segments.map(({ key, segment }) => {
         const content = applyMarks(segment.text, segment)
+        const href = getSafeHref(segment.href)
         const colorClass =
           segment.annotations.color === "default"
             ? undefined
             : `notion-color-${segment.annotations.color}`
 
-        if (segment.href) {
+        if (href) {
           return (
-            <a className={colorClass} href={segment.href} key={key}>
+            <a className={colorClass} href={href} key={key}>
               {content}
             </a>
           )
