@@ -5,7 +5,8 @@
 - `apps/web` (`@paulrdrs/web`): public Next.js/OpenNext application.
 - `workers/notion-sync` (`@paulrdrs/notion-sync`): private scheduled sync Worker.
 - `packages/content` (`@paulrdrs/content`): runtime-neutral content contracts.
-- `packages/database` (`@paulrdrs/database`): shared Drizzle schema.
+- `packages/database` (`@paulrdrs/database`): Drizzle schema, configuration,
+  migrations, and generation tooling.
 
 Root scripts orchestrate these packages without making the root an application
 package.
@@ -30,8 +31,8 @@ local values in `workers/notion-sync/.dev.vars`:
 - `NOTION_PAGES_DB_ID`
 
 The Worker receives D1 as `DB` and R2 as `BUCKET` and constructs its clients
-directly from those bindings. Do not put Notion values or `JOBS_SECRET` in the
-web app, and do not expose secrets through `NEXT_PUBLIC_*` variables.
+directly from those bindings. Do not put Notion values in the web app, and do
+not expose secrets through `NEXT_PUBLIC_*` variables.
 
 ## Local Database (D1)
 
@@ -39,7 +40,7 @@ The `DB` binding points at local SQLite state under `.wrangler/`. Generate and
 apply migrations from the repository root:
 
 ```sh
-pnpm db:generate        # config and output: packages/database/
+pnpm db:generate        # writes packages/database/drizzle/
 pnpm db:migrate         # apply to local D1
 pnpm db:migrate:remote  # explicit production operation
 ```

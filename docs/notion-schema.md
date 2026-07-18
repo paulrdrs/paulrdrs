@@ -13,7 +13,8 @@ the sync reads only database entries and their page bodies.
   sync to D1 but are excluded from public queries.
 - `Published` is optional. Public lists sort by it, then by creation time.
 - `Slug` is normalized by the sync Worker. When empty, it falls back to a
-  slugified title. Previous published slugs are retained for permanent redirects.
+  slugified title. Previous slugs are retained for permanent redirects and
+  reserved against reuse by another entry.
 - `notionPageId` is the stable internal identity used for upserts and never
   appears in a public URL.
 - Property values carry metadata; the Notion page body carries long-form content.
@@ -94,6 +95,8 @@ Every uploaded or externally referenced Notion image, including post and project
 covers, is downloaded during sync and copied unchanged into Cloudflare R2. The
 site serves it through `/media/[id]`; Notion is never on the visitor request
 path. Rehosting is idempotent via `media_assets.sourceKey`.
+Concurrent syncs use the same deterministic R2 object key and recover the media
+row created by another Worker isolate.
 
 Accepted media types are JPEG, PNG, WebP, and GIF, with a maximum size of 5 MiB.
 SVG is intentionally rejected because it can contain executable content.

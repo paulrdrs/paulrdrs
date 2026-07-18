@@ -40,9 +40,10 @@ The normalized block-tree and content contracts live in
 `@paulrdrs/content`; the Drizzle schema lives in `@paulrdrs/database`. The web
 app reads those shared contracts but contains no Notion client or sync writer.
 
-Slugs come from an explicit Notion `Slug` property, normalized via `createSlug`
-and frozen on publish. Renames record the old slug so the dynamic route can
-301-redirect an old URL to the current one.
+Slugs come from an explicit Notion `Slug` property and fall back to the title.
+Every rename records the previous slug for a permanent redirect, including
+renames made while content is a draft. Historical slugs remain reserved so a
+different entry cannot reuse an old public URL.
 
 ## Publishing
 
@@ -58,7 +59,8 @@ numbered lists, quote, code, image, divider, callout, and toggle. Unknown block
 types are skipped.
 
 There is no raw HTML and no `dangerouslySetInnerHTML`: React escapes all text,
-so rendering a known set of block components is the content-safety model. The
+and rich-text links are limited to HTTP, HTTPS, `mailto`, and `tel` protocols.
+Rendering a known set of block components is the content-safety model. The
 renderer reuses the `.markdown-content` typographic styles in
 `apps/web/src/app/styles/markdown.css`.
 
@@ -82,7 +84,7 @@ Every image referenced by Notion — uploaded, external, or cover — is re-host
 into the R2 bucket during sync (never hotlinked, since Notion presigned URLs
 expire) and served through `/media/[id]`, which streams the object by media ID.
 Re-hosting is idempotent via a stable `media_assets.sourceKey`. Media metadata
-lives in D1; the R2 objects are served through the app. Next.js responsive image
-requests are transformed by the Cloudflare Images binding, so list cards and
-detail views receive appropriately sized variants instead of the original
-object at every viewport size.
+lives in D1, and deterministic object keys make concurrent syncs converge on
+the same R2 object. The app serves those objects through its media route.
+Next.js responsive image requests are transformed by the Cloudflare Images
+binding, so each layout receives appropriately sized variants.

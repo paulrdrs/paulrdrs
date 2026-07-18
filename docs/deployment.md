@@ -1,7 +1,7 @@
 # Cloudflare Deployment
 
 The public site and Notion synchronization deploy as independent Cloudflare
-Workers that share the existing D1 database and media R2 bucket.
+Workers that share the D1 database and media R2 bucket.
 
 ## Workers And Resources
 
@@ -10,9 +10,9 @@ Workers that share the existing D1 database and media R2 bucket.
   through `DB`, reads media through `BUCKET`, uses `IMAGES` for responsive
   variants, and stores ISR data in `NEXT_INC_CACHE_R2_BUCKET`.
 - `workers/notion-sync` (`@paulrdrs/notion-sync`) deploys as Worker
-  `paulrdrs-notion-sync`. It owns the `*/15 * * * *` cron, the existing
-  `notion-sync` Workflow resource through `SYNC_WORKFLOW`, D1 writes through
-  `DB`, and media uploads through `BUCKET`.
+  `paulrdrs-notion-sync`. It owns the `*/15 * * * *` cron, the `notion-sync`
+  Workflow resource through `SYNC_WORKFLOW`, D1 writes through `DB`, and media
+  uploads through `BUCKET`.
 
 The sync Worker explicitly disables `workers_dev` and preview URLs and has no
 route, custom domain, `fetch` handler, or binding from the web app. HTTP ingress,
@@ -37,8 +37,8 @@ these only on `paulrdrs-notion-sync`:
   `NOTION_PHOTOS_DB_ID`, and `NOTION_PAGES_DB_ID`: the four Notion database IDs.
 
 The sync Workflow validates all five values plus its D1 and R2 bindings when it
-starts. The web Worker does not own Notion configuration, `JOBS_SECRET`, a
-Workflow binding, or a service binding to the sync Worker.
+starts. The web Worker has no Notion configuration, Workflow binding, or service
+binding to the sync Worker.
 
 ## Build, Migrate, And Deploy
 
@@ -49,13 +49,14 @@ pnpm build:worker    # OpenNext dry-run build of the public app Worker
 pnpm build:sync      # Wrangler dry-run build of the sync Worker
 pnpm deploy          # public app only (same as deploy:web)
 pnpm deploy:sync     # sync Worker only
+pnpm db:generate     # generate migrations in the database package
 pnpm db:migrate      # local D1 migrations
 pnpm db:migrate:remote
 ```
 
 Migrations are generated under `packages/database/drizzle/` with
 `pnpm db:generate`. Apply a required remote migration before deploying code
-that depends on it. This Worker split itself requires no migration.
+that depends on it.
 
 ## Notion Content Sync And Recovery
 
@@ -74,24 +75,6 @@ pnpm sync:instances
 ```
 
 Cron is the primary trigger; the CLI trigger is for recovery and smoke tests.
-
-## App-First Cutover
-
-Avoid overlapping cron producers when moving an existing deployment:
-
-1. Configure `NOTION_TOKEN` and the four `NOTION_*_DB_ID` values on
-   `paulrdrs-notion-sync`.
-2. Wait for any Workflow instance created by the old app deployment to finish.
-3. Deploy the public app with `pnpm deploy`; this removes its old cron, Workflow,
-   job route, and self-service binding.
-4. Deploy the scheduled Worker with `pnpm deploy:sync`; it reuses the existing
-   `notion-sync` Workflow resource and enables the 15-minute cron.
-5. Confirm the sync Worker has no public URL or `fetch` handler and that
-   `workers_dev` and `preview_urls` remain `false`.
-6. Run `pnpm sync:trigger`, inspect the instance summaries, and smoke-test the
-   public content and media paths below.
-7. Remove `JOBS_SECRET` and all Notion configuration from the deployed web
-   Worker. Do not delete the existing `notion-sync` Workflow resource.
 
 ## Production Smoke Test
 

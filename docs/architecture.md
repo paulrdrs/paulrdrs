@@ -1,6 +1,6 @@
 # Architecture
 
-This is a pnpm workspace with four runtime-focused packages:
+This is a pnpm workspace with four application and shared packages:
 
 - `apps/web` (`@paulrdrs/web`) is the public Next.js/OpenNext application,
   deployed as the Cloudflare Worker `paulrdrs`.
@@ -9,8 +9,8 @@ This is a pnpm workspace with four runtime-focused packages:
 - `packages/content` (`@paulrdrs/content`) owns runtime-neutral normalized block
   trees and shared content contracts.
 - `packages/database` (`@paulrdrs/database`) owns the Drizzle schema,
-  configuration, and migrations, and depends on `@paulrdrs/content` for
-  persisted content types.
+  configuration, migration history, and generation tooling. It depends on
+  `@paulrdrs/content` for persisted content types.
 
 The web app reads D1 and serves media directly from R2. Notion is never on the
 visitor request path, and there is no dashboard or authenticated surface.
@@ -52,6 +52,8 @@ visitor request path, and there is no dashboard or authenticated surface.
 - `/photo`
 - `/photo/[slug]`
 - `/media/[id]`
+- `/robots.txt`
+- `/sitemap.xml`
 
 The `/store` route is intentionally minimal for now.
 
@@ -65,11 +67,11 @@ and pages in order. Wrangler's Workflow trigger provides full-sync recovery;
 there is no HTTP sync endpoint or targeted public trigger.
 
 The two Workers deploy independently. HTTP ingress and webhooks for the sync
-Worker are out of scope. Analytics remains the existing external Cloudflare Web
-Analytics integration and is not part of the sync architecture.
+Worker are out of scope. Analytics uses the external Cloudflare Web Analytics
+integration and is not part of the sync architecture.
 
-There are no authenticated routes; the dashboard and passkey auth were removed
-in favor of Notion authoring (see [Auth](./auth.md)).
+There are no authenticated routes. Content editing happens in Notion (see
+[Auth](./auth.md)).
 
 ## Content Safety
 

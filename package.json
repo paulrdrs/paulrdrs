@@ -32,6 +32,7 @@
     "typecheck": "pnpm --filter @paulrdrs/content typecheck && pnpm --filter @paulrdrs/database typecheck && pnpm --filter @paulrdrs/web typecheck && pnpm --filter @paulrdrs/notion-sync typecheck"
   },
   "devDependencies": {
+    "@types/node": "24.13.3",
     "@biomejs/biome": "2.4.16",
     "@commitlint/cli": "21.0.2",
     "@commitlint/config-conventional": "21.0.2",

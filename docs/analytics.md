@@ -1,7 +1,7 @@
 # Analytics
 
-Analytics are handled entirely by **Cloudflare Web Analytics** — the app no
-longer records or stores any analytics data of its own.
+Analytics are handled entirely by **Cloudflare Web Analytics**. The app does
+not record or store analytics data of its own.
 
 ## How It Works
 
@@ -11,8 +11,9 @@ runtime var is set. The beacon is cookieless and privacy-first, and reports
 per-path page views to the Cloudflare dashboard. The Content-Security-Policy in
 `apps/web/next.config.ts` allowlists the beacon script and its POST endpoint.
 
-Because each post and project has its own URL, per-path reporting is effectively
-per-content. There is no in-app reporting UI and no analytics tables.
+Because each content detail page has its own URL, per-path reporting is
+effectively per-content. There is no in-app reporting UI and no analytics
+tables.
 
 ## Setup
 
