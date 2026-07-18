@@ -33,7 +33,7 @@ describe("ContentImage", () => {
   })
 
   it("bypasses optimization for local media routes", () => {
-    process.env.SITE_URL = "http://localhost:3000"
+    vi.stubEnv("SITE_URL", "http://localhost:3000")
 
     try {
       render(<ContentImage alt="Local image" id="local-media-id" />)
@@ -43,7 +43,7 @@ describe("ContentImage", () => {
       expect(image).toHaveAttribute("src", "/media/local-media-id")
       expect(image).not.toHaveAttribute("srcset")
     } finally {
-      process.env.SITE_URL = "https://web.paulrdrs.workers.dev"
+      vi.unstubAllEnvs()
     }
   })
 })
