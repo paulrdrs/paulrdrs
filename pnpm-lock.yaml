@@ -161,9 +161,6 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@cloudflare/workers-types':
-        specifier: 5.20260718.1
-        version: 5.20260718.1
       '@types/node':
         specifier: 24.13.1
         version: 24.13.1
@@ -173,6 +170,9 @@ importers:
       vitest:
         specifier: 4.1.8
         version: 4.1.8(@types/node@24.13.1)(jsdom@29.1.1(@noble/hashes@1.8.0))(vite@8.0.16(@types/node@24.13.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.16.9)(tsx@4.22.4)(yaml@2.9.0))
+      wrangler:
+        specifier: 4.105.0
+        version: 4.105.0
 
 packages:
 
@@ -4646,7 +4646,8 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260625.1':
     optional: true
 
-  '@cloudflare/workers-types@5.20260718.1': {}
+  '@cloudflare/workers-types@5.20260718.1':
+    optional: true
 
   '@commitlint/cli@21.0.2(@types/node@24.13.1)(conventional-commits-parser@6.4.0)(typescript@6.0.3)':
     dependencies:

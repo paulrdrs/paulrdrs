@@ -7,7 +7,14 @@
     "./sync": "./src/sync.ts"
   },
   "scripts": {
+    "build": "wrangler deploy --dry-run --config wrangler.jsonc",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts --config wrangler.jsonc",
+    "deploy": "wrangler deploy --config wrangler.jsonc",
+    "dev": "wrangler dev --config wrangler.jsonc",
+    "instances": "wrangler workflows instances list notion-sync --config wrangler.jsonc",
+    "pretypecheck": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts --config wrangler.jsonc",
     "test": "vitest run",
+    "trigger": "wrangler workflows trigger notion-sync --config wrangler.jsonc",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -18,9 +25,9 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20260718.1",
     "@types/node": "24.13.1",
     "typescript": "6.0.3",
-    "vitest": "4.1.8"
+    "vitest": "4.1.8",
+    "wrangler": "4.105.0"
   }
 }

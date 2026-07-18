@@ -90,6 +90,7 @@
         "apps/web/open-next.config.ts",
         "apps/web/postcss.config.mjs",
         "apps/web/vitest.config.ts",
+        "workers/notion-sync/src/index.ts",
         "workers/notion-sync/vitest.config.ts"
       ],
       "linter": {

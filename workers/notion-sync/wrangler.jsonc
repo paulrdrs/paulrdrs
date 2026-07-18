@@ -1,0 +1,46 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "paulrdrs-notion-sync",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "keep_vars": true,
+  "secrets": {
+    "required": [
+      "NOTION_TOKEN",
+      "NOTION_POSTS_DB_ID",
+      "NOTION_PROJECTS_DB_ID",
+      "NOTION_PHOTOS_DB_ID",
+      "NOTION_PAGES_DB_ID"
+    ]
+  },
+  "workflows": [
+    {
+      "name": "notion-sync",
+      "binding": "SYNC_WORKFLOW",
+      "class_name": "NotionSyncWorkflow"
+    }
+  ],
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "paulrdrs",
+      "database_id": "c988153c-6cba-4302-869b-1dfae43cbb27",
+      "migrations_dir": "../../drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "paulrdrs-media"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

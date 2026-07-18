@@ -12,8 +12,8 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2024",
-    "types": ["@cloudflare/workers-types", "node", "vitest/globals"],
+    "types": ["node", "vitest/globals"],
     "useDefineForClassFields": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["cloudflare-env.d.ts", "src/**/*.ts"]
 }
