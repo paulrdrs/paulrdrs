@@ -10,7 +10,7 @@ Workers that share the D1 database and media R2 bucket.
   through `DB`, reads media through `BUCKET`, uses `IMAGES` for responsive
   variants, and stores ISR data in `NEXT_INC_CACHE_R2_BUCKET`.
 - `workers/notion-sync` (`@paulrdrs/notion-sync`) deploys as Worker
-  `paulrdrs-notion-sync`. It owns the `*/15 * * * *` cron, the `notion-sync`
+  `notion-sync`. It owns the `*/15 * * * *` cron, the `notion-sync`
   Workflow resource through `SYNC_WORKFLOW`, D1 writes through `DB`, and media
   uploads through `BUCKET`.
 
@@ -30,7 +30,7 @@ variables are:
   omitted when this is unset.
 
 Sync Worker configuration lives in `workers/notion-sync/wrangler.jsonc`. Set
-these only on `paulrdrs-notion-sync`:
+these only on `notion-sync`:
 
 - Secret `NOTION_TOKEN`: the Notion integration token.
 - Variables `NOTION_POSTS_DB_ID`, `NOTION_PROJECTS_DB_ID`,

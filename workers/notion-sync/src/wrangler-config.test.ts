@@ -15,7 +15,7 @@ describe("private sync Worker configuration", () => {
   })
 
   it("retains the existing Workflow name and 15-minute cron", () => {
-    expect(config.name).toBe("paulrdrs-notion-sync")
+    expect(config.name).toBe("notion-sync")
     expect(config.compatibility_flags).toContain("global_fetch_strictly_public")
     expect(config.workflows).toEqual([
       {
