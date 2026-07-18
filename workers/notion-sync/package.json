@@ -2,10 +2,6 @@
   "name": "@paulrdrs/notion-sync",
   "private": true,
   "type": "module",
-  "exports": {
-    "./runtime": "./src/runtime.ts",
-    "./sync": "./src/sync.ts"
-  },
   "scripts": {
     "build": "wrangler deploy --dry-run --config wrangler.jsonc",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts --config wrangler.jsonc",

@@ -88,10 +88,10 @@ describe("NotionSyncWorkflow", () => {
       "pause-after-photos",
       "sync-pages"
     ])
-    expect(syncMethods.syncPosts).toHaveBeenCalledWith("posts-db")
-    expect(syncMethods.syncProjects).toHaveBeenCalledWith("projects-db")
-    expect(syncMethods.syncPhotos).toHaveBeenCalledWith("photos-db")
-    expect(syncMethods.syncPages).toHaveBeenCalledWith("pages-db")
+    expect(syncMethods.syncPosts).toHaveBeenCalledWith()
+    expect(syncMethods.syncProjects).toHaveBeenCalledWith()
+    expect(syncMethods.syncPhotos).toHaveBeenCalledWith()
+    expect(syncMethods.syncPages).toHaveBeenCalledWith()
   })
 
   it("logs and throws entry errors from their Workflow step", async () => {

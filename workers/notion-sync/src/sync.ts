@@ -534,10 +534,10 @@ const syncEntries = async (
 }
 
 export const createNotionSync = (runtime: NotionSyncRuntime) => {
-  const syncPosts = (databaseId: string) =>
+  const syncPosts = () =>
     syncEntries(
       runtime,
-      databaseId,
+      runtime.databaseIds.posts,
       async (page) => {
         const mapped = mapPostPage(page)
         const body = await fetchPageBlocks(runtime, page.id)
@@ -546,10 +546,10 @@ export const createNotionSync = (runtime: NotionSyncRuntime) => {
       (notionPageIds) => markMissingPostsAsDraft(runtime, notionPageIds)
     )
 
-  const syncProjects = (databaseId: string) =>
+  const syncProjects = () =>
     syncEntries(
       runtime,
-      databaseId,
+      runtime.databaseIds.projects,
       async (page) => {
         const mapped = mapProjectPage(page)
         const body = await fetchPageBlocks(runtime, page.id)
@@ -558,10 +558,10 @@ export const createNotionSync = (runtime: NotionSyncRuntime) => {
       (notionPageIds) => markMissingProjectsAsDraft(runtime, notionPageIds)
     )
 
-  const syncPages = (databaseId: string) =>
+  const syncPages = () =>
     syncEntries(
       runtime,
-      databaseId,
+      runtime.databaseIds.pages,
       async (page) => {
         const mapped = mapPagePage(page)
         const body = await fetchPageBlocks(runtime, page.id)
@@ -570,10 +570,10 @@ export const createNotionSync = (runtime: NotionSyncRuntime) => {
       (notionPageIds) => markMissingPagesAsDraft(runtime, notionPageIds)
     )
 
-  const syncPhotos = (databaseId: string) =>
+  const syncPhotos = () =>
     syncEntries(
       runtime,
-      databaseId,
+      runtime.databaseIds.photos,
       async (page) => {
         const mapped = mapPhotoPage(page)
         const body = await fetchPageBlocks(runtime, page.id)
@@ -582,20 +582,5 @@ export const createNotionSync = (runtime: NotionSyncRuntime) => {
       (notionPageIds) => markMissingPhotosAsDraft(runtime, notionPageIds)
     )
 
-  // Photos sync after projects so their "Projects" relation targets exist.
-  const runNotionSync = async (): Promise<NotionSyncSummary> => {
-    const postsSummary = await syncPosts(runtime.databaseIds.posts)
-    const projectsSummary = await syncProjects(runtime.databaseIds.projects)
-    const photosSummary = await syncPhotos(runtime.databaseIds.photos)
-    const pagesSummary = await syncPages(runtime.databaseIds.pages)
-
-    return {
-      pages: pagesSummary,
-      photos: photosSummary,
-      posts: postsSummary,
-      projects: projectsSummary
-    }
-  }
-
-  return { runNotionSync, syncPages, syncPhotos, syncPosts, syncProjects }
+  return { syncPages, syncPhotos, syncPosts, syncProjects }
 }

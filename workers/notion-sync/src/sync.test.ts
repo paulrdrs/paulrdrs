@@ -188,7 +188,7 @@ describe("syncPosts", () => {
     })
     const { values } = setupDb([[], []])
 
-    const summary = await sync.syncPosts("posts-db-id")
+    const summary = await sync.syncPosts()
 
     expect(summary).toEqual({ errors: [], synced: 1 })
     expect(values).toHaveBeenCalledWith({
@@ -220,7 +220,7 @@ describe("syncPosts", () => {
       []
     ])
 
-    await sync.syncPosts("posts-db-id")
+    await sync.syncPosts()
 
     expect(values).toHaveBeenCalledWith(
       expect.objectContaining({ slug: "hello-world", slugHistory: [] })
@@ -240,7 +240,7 @@ describe("syncPosts", () => {
       []
     ])
 
-    await sync.syncPosts("posts-db-id")
+    await sync.syncPosts()
 
     expect(values).toHaveBeenCalledWith(
       expect.objectContaining({ slug: "new-slug", slugHistory: ["old-slug"] })
@@ -260,7 +260,7 @@ describe("syncPosts", () => {
       []
     ])
 
-    await sync.syncPosts("posts-db-id")
+    await sync.syncPosts()
 
     expect(values).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -291,7 +291,7 @@ describe("syncPosts", () => {
       [] // post-2: no collision
     ])
 
-    const summary = await sync.syncPosts("posts-db-id")
+    const summary = await sync.syncPosts()
 
     expect(summary.synced).toBe(1)
     expect(summary.errors).toEqual([
@@ -314,7 +314,7 @@ describe("syncPosts", () => {
     rehostImageMock.mockResolvedValue("media-id-1")
     const { values } = setupDb([[], []])
 
-    await sync.syncPosts("posts-db-id")
+    await sync.syncPosts()
 
     expect(rehostImageMock).toHaveBeenCalledWith(
       runtime,
@@ -330,7 +330,7 @@ describe("syncPosts", () => {
     mockNotionClient([])
     const db = setupDb([])
 
-    const summary = await sync.syncPosts("posts-db-id")
+    const summary = await sync.syncPosts()
 
     expect(summary).toEqual({ errors: [], synced: 0 })
     expect(db.update).toHaveBeenCalledWith(posts)
@@ -346,9 +346,7 @@ describe("syncPosts", () => {
     query.mockRejectedValue(new Error("Notion unavailable"))
     const db = setupDb([])
 
-    await expect(sync.syncPosts("posts-db-id")).rejects.toThrow(
-      "Notion unavailable"
-    )
+    await expect(sync.syncPosts()).rejects.toThrow("Notion unavailable")
     expect(db.update).not.toHaveBeenCalled()
   })
 
@@ -362,7 +360,7 @@ describe("syncPosts", () => {
       .mockReturnValueOnce({ ...basePost, notionPageId: "post-2" })
     const db = setupDb([[], []])
 
-    const summary = await sync.syncPosts("posts-db-id")
+    const summary = await sync.syncPosts()
 
     expect(summary).toEqual({
       errors: ["Malformed Notion post page post-1"],
@@ -383,7 +381,7 @@ describe("syncProjects", () => {
     })
     const { update, values } = setupDb([[], []])
 
-    const summary = await sync.syncProjects("projects-db-id")
+    const summary = await sync.syncProjects()
 
     expect(summary).toEqual({ errors: [], synced: 1 })
     expect(values).toHaveBeenCalledWith(
@@ -406,7 +404,7 @@ describe("syncPages", () => {
     })
     const { insert, update, values } = setupDb([])
 
-    const summary = await sync.syncPages("pages-db-id")
+    const summary = await sync.syncPages()
 
     expect(summary).toEqual({ errors: [], synced: 1 })
     expect(insert).toHaveBeenCalledTimes(1)
@@ -456,7 +454,7 @@ describe("syncPages", () => {
       return []
     })
 
-    const syncOperation = sync.syncPages("pages-db-id")
+    const syncOperation = sync.syncPages()
 
     await vi.waitFor(() => expect(fetchPageBlocksMock).toHaveBeenCalledTimes(3))
     expect(db.insert).not.toHaveBeenCalled()
@@ -509,7 +507,7 @@ describe("syncPhotos", () => {
       [{ id: "project-row-1" }] // resolved linked project
     ])
 
-    const summary = await sync.syncPhotos("photos-db-id")
+    const summary = await sync.syncPhotos()
 
     expect(summary).toEqual({ errors: [], synced: 1 })
     expect(db.values).toHaveBeenCalledWith(
@@ -535,7 +533,7 @@ describe("syncPhotos", () => {
     mapPhotoPageMock.mockReturnValue(basePhoto)
     const db = setupDb([[], []])
 
-    const summary = await sync.syncPhotos("photos-db-id")
+    const summary = await sync.syncPhotos()
 
     expect(summary.synced).toBe(0)
     expect(summary.errors).toEqual(["Photo page has no image block"])
@@ -551,7 +549,7 @@ describe("syncPhotos", () => {
     })
     const db = setupDb([[], []])
 
-    const summary = await sync.syncPhotos("photos-db-id")
+    const summary = await sync.syncPhotos()
 
     expect(summary).toEqual({ errors: [], synced: 1 })
     expect(db.delete).toHaveBeenCalledTimes(1)
@@ -567,100 +565,12 @@ describe("syncPhotos", () => {
     const db = setupDb([[], [], [{ id: "project-row-1" }]])
     db.batch.mockRejectedValueOnce(new Error("Project link insert failed"))
 
-    const summary = await sync.syncPhotos("photos-db-id")
+    const summary = await sync.syncPhotos()
 
     expect(summary).toEqual({
       errors: ["Project link insert failed"],
       synced: 0
     })
     expect(db.batch).toHaveBeenCalledTimes(1)
-  })
-})
-
-describe("runNotionSync", () => {
-  it("syncs posts, projects, photos, and pages using their configured database ids", async () => {
-    const { retrieve } = mockNotionClient(["entry-1"])
-    fetchPageBlocksMock.mockResolvedValue([imageBlock])
-    mapPostPageMock.mockReturnValue({ ...basePost, notionPageId: "entry-1" })
-    mapProjectPageMock.mockReturnValue({
-      ...baseProject,
-      notionPageId: "entry-1"
-    })
-    mapPhotoPageMock.mockReturnValue({
-      ...basePhoto,
-      notionPageId: "entry-1",
-      projectNotionPageIds: []
-    })
-    mapPagePageMock.mockReturnValue({
-      key: "home",
-      notionPageId: "entry-1",
-      publishedAt: null,
-      status: "draft",
-      title: "Home"
-    })
-    setupDb([
-      [], // posts: existing
-      [], // posts: collision
-      [], // projects: existing
-      [], // projects: collision
-      [], // photos: existing
-      [] // photos: collision
-    ])
-
-    const summary = await sync.runNotionSync()
-
-    expect(retrieve).toHaveBeenCalledWith({ database_id: "posts-db" })
-    expect(retrieve).toHaveBeenCalledWith({ database_id: "projects-db" })
-    expect(retrieve).toHaveBeenCalledWith({ database_id: "photos-db" })
-    expect(retrieve).toHaveBeenCalledWith({ database_id: "pages-db" })
-    expect(retrieve.mock.calls.map(([request]) => request.database_id)).toEqual(
-      ["posts-db", "projects-db", "photos-db", "pages-db"]
-    )
-    expect(summary).toEqual({
-      pages: { errors: [], synced: 1 },
-      photos: { errors: [], synced: 1 },
-      posts: { errors: [], synced: 1 },
-      projects: { errors: [], synced: 1 }
-    })
-  })
-
-  it("preserves a partial stage summary in the full-sync result", async () => {
-    mockNotionClient(["entry-1"])
-    fetchPageBlocksMock.mockResolvedValue([imageBlock])
-    mapPostPageMock.mockImplementation(() => {
-      throw new Error("Malformed Notion post page entry-1")
-    })
-    mapProjectPageMock.mockReturnValue({
-      ...baseProject,
-      notionPageId: "entry-1"
-    })
-    mapPhotoPageMock.mockReturnValue({
-      ...basePhoto,
-      notionPageId: "entry-1",
-      projectNotionPageIds: []
-    })
-    mapPagePageMock.mockReturnValue({
-      key: "home",
-      notionPageId: "entry-1",
-      publishedAt: null,
-      status: "draft",
-      title: "Home"
-    })
-    setupDb([
-      [], // projects: existing
-      [], // projects: collision
-      [], // photos: existing
-      [] // photos: collision
-    ])
-
-    await expect(sync.runNotionSync()).resolves.toEqual({
-      pages: { errors: [], synced: 1 },
-      photos: { errors: [], synced: 1 },
-      posts: {
-        errors: ["Malformed Notion post page entry-1"],
-        synced: 0
-      },
-      projects: { errors: [], synced: 1 }
-    })
   })
 })

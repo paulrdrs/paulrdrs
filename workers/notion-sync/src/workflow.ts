@@ -80,7 +80,7 @@ export class NotionSyncWorkflow extends WorkflowEntrypoint<
 
     for (const { pauseAfter, type } of notionSyncStages) {
       stageSummaries[type] = await step.do(`sync-${type}`, () =>
-        runStage(type, () => syncStage(sync, runtime.databaseIds, type))
+        runStage(type, () => syncStage(sync, type))
       )
 
       if (pauseAfter) {
@@ -110,19 +110,15 @@ const requireStageSummary = (
 
 type NotionSync = ReturnType<typeof createNotionSync>
 
-const syncStage = (
-  sync: NotionSync,
-  databaseIds: ReturnType<typeof createNotionSyncRuntime>["databaseIds"],
-  stage: NotionSyncStageType
-) => {
+const syncStage = (sync: NotionSync, stage: NotionSyncStageType) => {
   switch (stage) {
     case "posts":
-      return sync.syncPosts(databaseIds.posts)
+      return sync.syncPosts()
     case "projects":
-      return sync.syncProjects(databaseIds.projects)
+      return sync.syncProjects()
     case "photos":
-      return sync.syncPhotos(databaseIds.photos)
+      return sync.syncPhotos()
     case "pages":
-      return sync.syncPages(databaseIds.pages)
+      return sync.syncPages()
   }
 }
