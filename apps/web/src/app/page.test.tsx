@@ -48,7 +48,6 @@ describe("Home", () => {
     expect(
       screen.getByRole("heading", { name: "Home intro" })
     ).toBeInTheDocument()
-    // Legacy Markdown is no longer rendered; only the Notion block tree is.
     expect(screen.queryByText("copy")).not.toBeInTheDocument()
   })
 

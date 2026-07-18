@@ -5,11 +5,8 @@ import type { NextConfig } from "next"
 // spinning up local Miniflare from wrangler.jsonc. No-op for production builds.
 initOpenNextCloudflareForDev()
 
-// Baseline CSP. Next's App Router streams hydration data via inline <script>
-// tags, so `script-src` keeps `'unsafe-inline'`; tightening to nonce-based CSP
-// would require middleware. The high-value SVG/XSS vector is already closed by
-// rejecting SVG during upstream media ingestion. `'unsafe-eval'` is added only
-// in development for Turbopack/HMR.
+// App Router hydration requires inline scripts. Turbopack also requires eval in
+// development; media ingestion rejects SVG separately.
 const isProduction = process.env.NODE_ENV === "production"
 
 // Cloudflare Web Analytics loads its beacon from static.cloudflareinsights.com

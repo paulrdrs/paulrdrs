@@ -158,11 +158,9 @@ export const photos = sqliteTable(
     status: text("status", { enum: contentStatusValues })
       .notNull()
       .default("draft"),
-    // The photograph itself (first image block of the Notion page body).
     mediaId: text("media_id").references(() => mediaAssets.id, {
       onDelete: "set null"
     }),
-    // Story text: the page body with the primary image block removed.
     body: text("body", { mode: "json" }).$type<NotionBlockTree>(),
     publishedAt: integer("published_at", { mode: "timestamp" }),
     notionPageId: text("notion_page_id"),
@@ -179,8 +177,6 @@ export const photos = sqliteTable(
   ]
 )
 
-// Many-to-many: a photo can appear in multiple photography projects. Links are
-// rebuilt from the Notion "Projects" relation on every photo sync.
 export const photoProjects = sqliteTable(
   "photo_projects",
   {

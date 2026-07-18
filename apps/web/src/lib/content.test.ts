@@ -1,9 +1,5 @@
 import type { NotionBlock, RichText } from "@paulrdrs/content/blocks"
-import {
-  blockTreeToPlainText,
-  createSlug,
-  richTextToPlainText
-} from "./content"
+import { blockTreeToPlainText, richTextToPlainText } from "./content"
 
 const text = (value: string): RichText[] => [
   {
@@ -28,20 +24,6 @@ const paragraph = (
   type: "paragraph",
   richText: text(value),
   children
-})
-
-describe("createSlug", () => {
-  it("normalizes text into a URL slug", () => {
-    expect(createSlug("Olá, World! This is Paulo's Site")).toBe(
-      "ola-world-this-is-paulos-site"
-    )
-  })
-
-  it("collapses repeated separators", () => {
-    expect(createSlug("  Software   /   Photography  ")).toBe(
-      "software-photography"
-    )
-  })
 })
 
 describe("richTextToPlainText", () => {

@@ -4,17 +4,6 @@ import type {
   RichText
 } from "@paulrdrs/content/blocks"
 
-export const createSlug = (value: string) => {
-  return value
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/['"]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-}
-
 export const richTextToPlainText = (richText: readonly RichText[]) =>
   richText.map((segment) => segment.text).join("")
 

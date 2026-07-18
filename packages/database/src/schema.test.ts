@@ -11,7 +11,7 @@ import {
 } from "./schema"
 
 describe("database schema", () => {
-  it("defines the planned CMS tables", () => {
+  it("defines the CMS tables", () => {
     expect([
       getTableName(posts),
       getTableName(projects),

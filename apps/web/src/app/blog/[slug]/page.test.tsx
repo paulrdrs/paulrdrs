@@ -78,7 +78,6 @@ describe("BlogPostPage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Hello Post" })
     ).toBeInTheDocument()
-    // Legacy Markdown is no longer rendered; only the Notion block tree is.
     expect(screen.queryByText("Body heading")).not.toBeInTheDocument()
   })
 

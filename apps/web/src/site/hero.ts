@@ -7,10 +7,6 @@ export type HeroSelection = {
   kind: HeroKind
 }
 
-export type HeroMetadata = {
-  hero?: HeroSelection | null
-}
-
 export const getHeroSelection = (
   metadata: Record<string, unknown> | null | undefined
 ): HeroSelection | null => {

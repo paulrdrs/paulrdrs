@@ -48,7 +48,6 @@ describe("ContactPage", () => {
     expect(
       screen.getByRole("heading", { name: "Reach me" })
     ).toBeInTheDocument()
-    // Legacy Markdown is no longer rendered; only the Notion block tree is.
     expect(screen.queryByText("hello@example.com")).not.toBeInTheDocument()
   })
 

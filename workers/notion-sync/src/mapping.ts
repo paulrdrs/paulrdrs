@@ -38,8 +38,6 @@ export type MappedPost = MappedContent & {
   readonly tags: string[]
 }
 
-// Projects intentionally carry no Tags or Links properties — links live inline
-// in the page body (rendered as normal links). See docs/notion-schema.md.
 export type MappedProject = MappedContent & {
   readonly category: ProjectCategory
 }
@@ -52,9 +50,6 @@ export type MappedPage = {
   readonly title: string
 }
 
-// Photos carry no Cover/SEO properties — the photograph is the first image
-// block of the page body (extracted during sync), and the Projects relation
-// links a photo to the photography projects it appears in.
 export type MappedPhoto = {
   readonly excerpt: string | null
   readonly notionPageId: string

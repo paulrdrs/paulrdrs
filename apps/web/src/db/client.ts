@@ -3,10 +3,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare"
 import * as schema from "@paulrdrs/database/schema"
 import { drizzle } from "drizzle-orm/d1"
 
-// The D1 binding lives on the Cloudflare context, populated per request by the
-// OpenNext worker (and by `initOpenNextCloudflareForDev()` during `next dev`).
-// Drizzle wrapping is cheap, so we build it per call rather than caching across
-// requests/isolates.
+// Resolve D1 per request instead of caching a binding across isolates.
 export const getDb = () => {
   const { env } = getCloudflareContext()
 

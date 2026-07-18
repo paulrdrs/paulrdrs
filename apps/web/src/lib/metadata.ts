@@ -8,10 +8,7 @@ type ContentMetadataInput = {
   type?: "article" | "website"
 }
 
-/**
- * Builds page-level metadata from CMS content. URLs are kept relative; Next
- * resolves them against `metadataBase` (set in the root layout).
- */
+// Keep URLs relative so Next resolves them against the root metadataBase.
 export const buildContentMetadata = ({
   coverMediaId,
   description,

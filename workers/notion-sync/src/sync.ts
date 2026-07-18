@@ -291,9 +291,8 @@ export const extractPrimaryPhoto = (
   return { body: removeBlock(body, image.id), mediaId: image.mediaId }
 }
 
-// Links are rebuilt wholesale from the Notion "Projects" relation on every
-// sync; relation targets not yet synced (or unpublished) are silently dropped
-// and heal on the next run.
+// Rebuild links from the Notion relation. Missing project targets are skipped
+// and picked up by a later sync.
 const rebuildPhotoProjectLinks = async (
   runtime: NotionSyncRuntime,
   photoId: string,
@@ -511,8 +510,7 @@ const syncEntries = async (
       })
     )
 
-    // Writes remain ordered so slug collisions and duplicate page keys retain
-    // the same deterministic behavior as the original sequential sync.
+    // Keep writes ordered so collisions resolve deterministically.
     for (const entry of preparedEntries) {
       if (isFailedSyncEntry(entry)) {
         errors.push(entry.error)
