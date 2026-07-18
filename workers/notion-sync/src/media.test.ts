@@ -1,26 +1,15 @@
-vi.mock("server-only", () => ({}))
-
-import { getDb } from "@/db/client"
-import { uploadMediaObject } from "@/media/storage"
-import { buildMediaObjectKey } from "@/media/upload"
-import {
-  MAX_MEDIA_FILE_SIZE_BYTES,
-  validateMediaFile
-} from "@/media/validation"
 import { getNotionImageSourceKey, rehostImage } from "./media"
+import type { NotionSyncRuntime } from "./runtime"
+import { MAX_MEDIA_FILE_SIZE_BYTES } from "./validation"
 
-vi.mock("@/db/client", () => ({ getDb: vi.fn() }))
-vi.mock("@/media/storage", () => ({ uploadMediaObject: vi.fn() }))
-vi.mock("@/media/upload", () => ({ buildMediaObjectKey: vi.fn() }))
-vi.mock("@/media/validation", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/media/validation")>()
-  return { ...actual, validateMediaFile: vi.fn() }
-})
+const bucketPut = vi.fn().mockResolvedValue(undefined)
+const runtime = {
+  bucket: { put: bucketPut },
+  databaseIds: {},
+  notion: {}
+} as unknown as NotionSyncRuntime
 
-const getDbMock = vi.mocked(getDb)
-const uploadMediaObjectMock = vi.mocked(uploadMediaObject)
-const buildMediaObjectKeyMock = vi.mocked(buildMediaObjectKey)
-const validateMediaFileMock = vi.mocked(validateMediaFile)
+const setDatabase = (db: object) => Object.assign(runtime, { db })
 
 const mockSelectExisting = (existing: { id: string }[]) => {
   const limit = vi.fn().mockResolvedValue(existing)
@@ -68,60 +57,58 @@ describe("getNotionImageSourceKey", () => {
 describe("rehostImage", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    global.fetch = vi.fn()
+    globalThis.fetch = vi.fn()
   })
 
   it("returns the existing media id without downloading when sourceKey already exists", async () => {
     const select = mockSelectExisting([{ id: "existing-id" }])
-    getDbMock.mockReturnValue({ select } as unknown as ReturnType<typeof getDb>)
+    setDatabase({ select })
 
-    const id = await rehostImage("https://example.com/image.png", "source-key")
+    const id = await rehostImage(
+      runtime,
+      "https://example.com/image.png",
+      "source-key"
+    )
 
     expect(id).toBe("existing-id")
-    expect(global.fetch).not.toHaveBeenCalled()
-    expect(uploadMediaObjectMock).not.toHaveBeenCalled()
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+    expect(bucketPut).not.toHaveBeenCalled()
   })
 
   it("downloads, validates, uploads, and inserts a new asset", async () => {
     const select = mockSelectExisting([])
     const insert = mockInsertReturning({ id: "new-id" })
-    getDbMock.mockReturnValue({
-      insert,
-      select
-    } as unknown as ReturnType<typeof getDb>)
+    setDatabase({ insert, select })
 
     const bytes = new Uint8Array([1, 2, 3])
-    global.fetch = vi.fn().mockResolvedValue(
+    globalThis.fetch = vi.fn().mockResolvedValue(
       new Response(bytes, {
         headers: { "content-type": "image/png" },
         status: 200
       })
     )
-    buildMediaObjectKeyMock.mockReturnValue("media/2024-01-01/object-key.png")
-
-    const id = await rehostImage("https://example.com/image.png", "source-key")
+    const id = await rehostImage(
+      runtime,
+      "https://example.com/image.png",
+      "source-key"
+    )
 
     expect(id).toBe("new-id")
-    expect(validateMediaFileMock).toHaveBeenCalledTimes(1)
-    expect(uploadMediaObjectMock).toHaveBeenCalledWith({
-      body: expect.any(Uint8Array),
-      contentType: "image/png",
-      objectKey: "media/2024-01-01/object-key.png"
-    })
+    expect(bucketPut).toHaveBeenCalledWith(
+      expect.stringMatching(/^media\/\d{4}-\d{2}-\d{2}\/.+\.png$/),
+      expect.any(Uint8Array),
+      { httpMetadata: { contentType: "image/png" } }
+    )
     expect(insert).toHaveBeenCalledTimes(1)
   })
 
   it("shares an in-flight rehost for the same source key", async () => {
     const select = mockSelectExisting([])
     const insert = mockInsertReturning({ id: "new-id" })
-    getDbMock.mockReturnValue({
-      insert,
-      select
-    } as unknown as ReturnType<typeof getDb>)
-    buildMediaObjectKeyMock.mockReturnValue("media/2024-01-01/object-key.png")
+    setDatabase({ insert, select })
 
     let finishDownload: (response: Response) => void = () => {}
-    global.fetch = vi.fn(
+    globalThis.fetch = vi.fn(
       () =>
         new Promise<Response>((resolve) => {
           finishDownload = resolve
@@ -129,15 +116,17 @@ describe("rehostImage", () => {
     )
 
     const first = rehostImage(
+      runtime,
       "https://example.com/image.png",
       "shared-source-key"
     )
     const second = rehostImage(
+      runtime,
       "https://example.com/image.png",
       "shared-source-key"
     )
 
-    await vi.waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1))
+    await vi.waitFor(() => expect(globalThis.fetch).toHaveBeenCalledTimes(1))
     finishDownload(
       new Response(new Uint8Array([1, 2, 3]), {
         headers: { "content-type": "image/png" },
@@ -149,26 +138,26 @@ describe("rehostImage", () => {
       "new-id",
       "new-id"
     ])
-    expect(uploadMediaObjectMock).toHaveBeenCalledTimes(1)
+    expect(bucketPut).toHaveBeenCalledTimes(1)
     expect(insert).toHaveBeenCalledTimes(1)
   })
 
   it("throws when the download fails", async () => {
     const select = mockSelectExisting([])
-    getDbMock.mockReturnValue({ select } as unknown as ReturnType<typeof getDb>)
-    global.fetch = vi
+    setDatabase({ select })
+    globalThis.fetch = vi
       .fn()
       .mockResolvedValue(new Response(null, { status: 404 }))
 
     await expect(
-      rehostImage("https://example.com/missing.png", "source-key")
+      rehostImage(runtime, "https://example.com/missing.png", "source-key")
     ).rejects.toThrow(/Failed to download Notion image/)
   })
 
   it("rejects an oversized declared length before reading the body", async () => {
     const select = mockSelectExisting([])
-    getDbMock.mockReturnValue({ select } as unknown as ReturnType<typeof getDb>)
-    global.fetch = vi.fn().mockResolvedValue(
+    setDatabase({ select })
+    globalThis.fetch = vi.fn().mockResolvedValue(
       new Response(new Uint8Array([1]), {
         headers: {
           "content-length": String(MAX_MEDIA_FILE_SIZE_BYTES + 1),
@@ -179,15 +168,14 @@ describe("rehostImage", () => {
     )
 
     await expect(
-      rehostImage("https://example.com/oversized.png", "source-key")
+      rehostImage(runtime, "https://example.com/oversized.png", "source-key")
     ).rejects.toThrow("File is too large")
-    expect(validateMediaFileMock).not.toHaveBeenCalled()
-    expect(uploadMediaObjectMock).not.toHaveBeenCalled()
+    expect(bucketPut).not.toHaveBeenCalled()
   })
 
   it("stops a chunked response when its bytes exceed the limit", async () => {
     const select = mockSelectExisting([])
-    getDbMock.mockReturnValue({ select } as unknown as ReturnType<typeof getDb>)
+    setDatabase({ select })
     const cancel = vi.fn()
     const body = new ReadableStream<Uint8Array>({
       cancel,
@@ -196,7 +184,7 @@ describe("rehostImage", () => {
         controller.enqueue(new Uint8Array(1))
       }
     })
-    global.fetch = vi.fn().mockResolvedValue(
+    globalThis.fetch = vi.fn().mockResolvedValue(
       new Response(body, {
         headers: { "content-type": "image/png" },
         status: 200
@@ -204,10 +192,9 @@ describe("rehostImage", () => {
     )
 
     await expect(
-      rehostImage("https://example.com/chunked.png", "source-key")
+      rehostImage(runtime, "https://example.com/chunked.png", "source-key")
     ).rejects.toThrow("File is too large")
     expect(cancel).toHaveBeenCalledTimes(1)
-    expect(validateMediaFileMock).not.toHaveBeenCalled()
-    expect(uploadMediaObjectMock).not.toHaveBeenCalled()
+    expect(bucketPut).not.toHaveBeenCalled()
   })
 })

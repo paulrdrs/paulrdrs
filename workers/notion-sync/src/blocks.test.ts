@@ -1,18 +1,19 @@
-vi.mock("server-only", () => ({}))
-
 import { fetchPageBlocks } from "./blocks"
-import { getNotionClient } from "./client"
 import { getNotionImageSourceKey, rehostImage } from "./media"
+import type { NotionSyncRuntime } from "./runtime"
 
-vi.mock("./client", () => ({ getNotionClient: vi.fn() }))
 vi.mock("./media", () => ({
   getNotionImageSourceKey: vi.fn(),
   rehostImage: vi.fn()
 }))
 
-const getNotionClientMock = vi.mocked(getNotionClient)
 const getNotionImageSourceKeyMock = vi.mocked(getNotionImageSourceKey)
 const rehostImageMock = vi.mocked(rehostImage)
+const runtime = {
+  bucket: {},
+  databaseIds: {},
+  db: {}
+} as unknown as NotionSyncRuntime
 
 const defaultAnnotations = {
   bold: false,
@@ -105,11 +106,13 @@ describe("fetchPageBlocks", () => {
       }
     )
 
-    getNotionClientMock.mockReturnValue({
-      blocks: { children: { list: listMock } }
-    } as unknown as ReturnType<typeof getNotionClient>)
+    Object.assign(runtime, {
+      notion: {
+        blocks: { children: { list: listMock } }
+      }
+    })
 
-    const blocks = await fetchPageBlocks("root")
+    const blocks = await fetchPageBlocks(runtime, "root")
 
     expect(blocks).toEqual([
       {
@@ -164,19 +167,22 @@ describe("fetchPageBlocks", () => {
       ]
     })
 
-    getNotionClientMock.mockReturnValue({
-      blocks: { children: { list: listMock } }
-    } as unknown as ReturnType<typeof getNotionClient>)
+    Object.assign(runtime, {
+      notion: {
+        blocks: { children: { list: listMock } }
+      }
+    })
     getNotionImageSourceKeyMock.mockReturnValue("source-key-1")
     rehostImageMock.mockResolvedValue("media-id-1")
 
-    const blocks = await fetchPageBlocks("root")
+    const blocks = await fetchPageBlocks(runtime, "root")
 
     expect(getNotionImageSourceKeyMock).toHaveBeenCalledWith({
       type: "external",
       url: "https://example.com/photo.png"
     })
     expect(rehostImageMock).toHaveBeenCalledWith(
+      runtime,
       "https://example.com/photo.png",
       "source-key-1"
     )

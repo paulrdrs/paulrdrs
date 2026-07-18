@@ -1,4 +1,3 @@
-import "server-only"
 import { collectPaginatedAPI, isFullPage } from "@notionhq/client"
 import type { ImageBlock, NotionBlockTree } from "@paulrdrs/content/blocks"
 import type { ContentStatus } from "@paulrdrs/content/content"
@@ -20,10 +19,7 @@ import {
   or,
   sql
 } from "drizzle-orm"
-import { getDb } from "@/db/client"
-import { getNotionEnvs } from "@/envs/server"
 import { fetchPageBlocks } from "./blocks"
-import { getNotionClient } from "./client"
 import {
   type MappedContent,
   type MappedPage,
@@ -37,6 +33,7 @@ import {
   type NotionPage
 } from "./mapping"
 import { getNotionImageSourceKey, rehostImage } from "./media"
+import type { NotionSyncRuntime } from "./runtime"
 
 export type NotionSyncTypeSummary = {
   readonly errors: readonly string[]
@@ -51,10 +48,12 @@ export type NotionSyncSummary = {
 }
 
 const queryDatabasePages = async (
+  runtime: NotionSyncRuntime,
   databaseId: string
 ): Promise<NotionPage[]> => {
-  const client = getNotionClient()
-  const database = await client.databases.retrieve({ database_id: databaseId })
+  const database = await runtime.notion.databases.retrieve({
+    database_id: databaseId
+  })
 
   const [dataSource] = "data_sources" in database ? database.data_sources : []
 
@@ -62,7 +61,7 @@ const queryDatabasePages = async (
     throw new Error(`Notion database ${databaseId} has no data source`)
   }
 
-  const results = await collectPaginatedAPI(client.dataSources.query, {
+  const results = await collectPaginatedAPI(runtime.notion.dataSources.query, {
     data_source_id: dataSource.id
   })
 
@@ -96,16 +95,24 @@ const resolveSlug = (
   return { slug: mappedSlug, slugHistory }
 }
 
-const rehostCover = async (mapped: MappedContent) =>
+const rehostCover = async (
+  runtime: NotionSyncRuntime,
+  mapped: MappedContent
+) =>
   mapped.coverImage
     ? rehostImage(
+        runtime,
         mapped.coverImage.url,
         getNotionImageSourceKey(mapped.coverImage)
       )
     : null
 
-const upsertPost = async (mapped: MappedPost, body: NotionBlockTree) => {
-  const db = getDb()
+const upsertPost = async (
+  runtime: NotionSyncRuntime,
+  mapped: MappedPost,
+  body: NotionBlockTree
+) => {
+  const { db } = runtime
 
   const [existing] = await db
     .select({
@@ -137,7 +144,7 @@ const upsertPost = async (mapped: MappedPost, body: NotionBlockTree) => {
     throw new Error(`Slug "${slug}" is already used by another post`)
   }
 
-  const coverMediaId = await rehostCover(mapped)
+  const coverMediaId = await rehostCover(runtime, mapped)
 
   const values = {
     body,
@@ -163,8 +170,12 @@ const upsertPost = async (mapped: MappedPost, body: NotionBlockTree) => {
     })
 }
 
-const upsertProject = async (mapped: MappedProject, body: NotionBlockTree) => {
-  const db = getDb()
+const upsertProject = async (
+  runtime: NotionSyncRuntime,
+  mapped: MappedProject,
+  body: NotionBlockTree
+) => {
+  const { db } = runtime
 
   const [existing] = await db
     .select({
@@ -199,7 +210,7 @@ const upsertProject = async (mapped: MappedProject, body: NotionBlockTree) => {
     )
   }
 
-  const coverMediaId = await rehostCover(mapped)
+  const coverMediaId = await rehostCover(runtime, mapped)
 
   const values = {
     body,
@@ -225,8 +236,12 @@ const upsertProject = async (mapped: MappedProject, body: NotionBlockTree) => {
     })
 }
 
-const upsertPage = async (mapped: MappedPage, body: NotionBlockTree) => {
-  const db = getDb()
+const upsertPage = async (
+  runtime: NotionSyncRuntime,
+  mapped: MappedPage,
+  body: NotionBlockTree
+) => {
+  const { db } = runtime
 
   const values = {
     body,
@@ -286,10 +301,11 @@ export const extractPrimaryPhoto = (
 // sync; relation targets not yet synced (or unpublished) are silently dropped
 // and heal on the next run.
 const rebuildPhotoProjectLinks = async (
+  runtime: NotionSyncRuntime,
   photoId: string,
   projectNotionPageIds: readonly string[]
 ) => {
-  const db = getDb()
+  const { db } = runtime
 
   const linkedProjects =
     projectNotionPageIds.length > 0
@@ -316,8 +332,12 @@ const rebuildPhotoProjectLinks = async (
   await db.batch([deleteLinks, insertLinks])
 }
 
-const upsertPhoto = async (mapped: MappedPhoto, rawBody: NotionBlockTree) => {
-  const db = getDb()
+const upsertPhoto = async (
+  runtime: NotionSyncRuntime,
+  mapped: MappedPhoto,
+  rawBody: NotionBlockTree
+) => {
+  const { db } = runtime
 
   const [existing] = await db
     .select({
@@ -373,7 +393,7 @@ const upsertPhoto = async (mapped: MappedPhoto, rawBody: NotionBlockTree) => {
     .returning({ id: photos.id })
 
   if (row) {
-    await rebuildPhotoProjectLinks(row.id, mapped.projectNotionPageIds)
+    await rebuildPhotoProjectLinks(runtime, row.id, mapped.projectNotionPageIds)
   }
 }
 
@@ -405,8 +425,11 @@ const missingNotionPageCondition = (
     ? sql`${notionPageIdColumn} not in (select value from json_each(${JSON.stringify(notionPageIds)}))`
     : undefined
 
-const markMissingPostsAsDraft = async (notionPageIds: readonly string[]) => {
-  await getDb()
+const markMissingPostsAsDraft = async (
+  runtime: NotionSyncRuntime,
+  notionPageIds: readonly string[]
+) => {
+  await runtime.db
     .update(posts)
     .set({ status: "draft", updatedAt: new Date() })
     .where(
@@ -418,8 +441,11 @@ const markMissingPostsAsDraft = async (notionPageIds: readonly string[]) => {
     )
 }
 
-const markMissingProjectsAsDraft = async (notionPageIds: readonly string[]) => {
-  await getDb()
+const markMissingProjectsAsDraft = async (
+  runtime: NotionSyncRuntime,
+  notionPageIds: readonly string[]
+) => {
+  await runtime.db
     .update(projects)
     .set({ status: "draft", updatedAt: new Date() })
     .where(
@@ -431,8 +457,11 @@ const markMissingProjectsAsDraft = async (notionPageIds: readonly string[]) => {
     )
 }
 
-const markMissingPagesAsDraft = async (notionPageIds: readonly string[]) => {
-  await getDb()
+const markMissingPagesAsDraft = async (
+  runtime: NotionSyncRuntime,
+  notionPageIds: readonly string[]
+) => {
+  await runtime.db
     .update(pages)
     .set({ status: "draft", updatedAt: new Date() })
     .where(
@@ -444,8 +473,11 @@ const markMissingPagesAsDraft = async (notionPageIds: readonly string[]) => {
     )
 }
 
-const markMissingPhotosAsDraft = async (notionPageIds: readonly string[]) => {
-  await getDb()
+const markMissingPhotosAsDraft = async (
+  runtime: NotionSyncRuntime,
+  notionPageIds: readonly string[]
+) => {
+  await runtime.db
     .update(photos)
     .set({ status: "draft", updatedAt: new Date() })
     .where(
@@ -458,11 +490,12 @@ const markMissingPhotosAsDraft = async (notionPageIds: readonly string[]) => {
 }
 
 const syncEntries = async (
+  runtime: NotionSyncRuntime,
   databaseId: string,
   preparePage: (page: NotionPage) => Promise<PreparedSyncEntry>,
   markMissingAsDraft: (notionPageIds: readonly string[]) => Promise<void>
 ): Promise<NotionSyncTypeSummary> => {
-  const notionPages = await queryDatabasePages(databaseId)
+  const notionPages = await queryDatabasePages(runtime, databaseId)
   const errors: string[] = []
   let synced = 0
 
@@ -507,63 +540,69 @@ const syncEntries = async (
   return { errors, synced }
 }
 
-export const syncPosts = (databaseId: string) =>
-  syncEntries(
-    databaseId,
-    async (page) => {
-      const mapped = mapPostPage(page)
-      const body = await fetchPageBlocks(page.id)
-      return { persist: () => upsertPost(mapped, body) }
-    },
-    markMissingPostsAsDraft
-  )
+export const createNotionSync = (runtime: NotionSyncRuntime) => {
+  const syncPosts = (databaseId: string) =>
+    syncEntries(
+      runtime,
+      databaseId,
+      async (page) => {
+        const mapped = mapPostPage(page)
+        const body = await fetchPageBlocks(runtime, page.id)
+        return { persist: () => upsertPost(runtime, mapped, body) }
+      },
+      (notionPageIds) => markMissingPostsAsDraft(runtime, notionPageIds)
+    )
 
-export const syncProjects = (databaseId: string) =>
-  syncEntries(
-    databaseId,
-    async (page) => {
-      const mapped = mapProjectPage(page)
-      const body = await fetchPageBlocks(page.id)
-      return { persist: () => upsertProject(mapped, body) }
-    },
-    markMissingProjectsAsDraft
-  )
+  const syncProjects = (databaseId: string) =>
+    syncEntries(
+      runtime,
+      databaseId,
+      async (page) => {
+        const mapped = mapProjectPage(page)
+        const body = await fetchPageBlocks(runtime, page.id)
+        return { persist: () => upsertProject(runtime, mapped, body) }
+      },
+      (notionPageIds) => markMissingProjectsAsDraft(runtime, notionPageIds)
+    )
 
-export const syncPages = (databaseId: string) =>
-  syncEntries(
-    databaseId,
-    async (page) => {
-      const mapped = mapPagePage(page)
-      const body = await fetchPageBlocks(page.id)
-      return { persist: () => upsertPage(mapped, body) }
-    },
-    markMissingPagesAsDraft
-  )
+  const syncPages = (databaseId: string) =>
+    syncEntries(
+      runtime,
+      databaseId,
+      async (page) => {
+        const mapped = mapPagePage(page)
+        const body = await fetchPageBlocks(runtime, page.id)
+        return { persist: () => upsertPage(runtime, mapped, body) }
+      },
+      (notionPageIds) => markMissingPagesAsDraft(runtime, notionPageIds)
+    )
 
-export const syncPhotos = (databaseId: string) =>
-  syncEntries(
-    databaseId,
-    async (page) => {
-      const mapped = mapPhotoPage(page)
-      const body = await fetchPageBlocks(page.id)
-      return { persist: () => upsertPhoto(mapped, body) }
-    },
-    markMissingPhotosAsDraft
-  )
+  const syncPhotos = (databaseId: string) =>
+    syncEntries(
+      runtime,
+      databaseId,
+      async (page) => {
+        const mapped = mapPhotoPage(page)
+        const body = await fetchPageBlocks(runtime, page.id)
+        return { persist: () => upsertPhoto(runtime, mapped, body) }
+      },
+      (notionPageIds) => markMissingPhotosAsDraft(runtime, notionPageIds)
+    )
 
-// Photos sync after projects so their "Projects" relation targets exist.
-export const runNotionSync = async (): Promise<NotionSyncSummary> => {
-  const envs = getNotionEnvs()
+  // Photos sync after projects so their "Projects" relation targets exist.
+  const runNotionSync = async (): Promise<NotionSyncSummary> => {
+    const postsSummary = await syncPosts(runtime.databaseIds.posts)
+    const projectsSummary = await syncProjects(runtime.databaseIds.projects)
+    const photosSummary = await syncPhotos(runtime.databaseIds.photos)
+    const pagesSummary = await syncPages(runtime.databaseIds.pages)
 
-  const postsSummary = await syncPosts(envs.NOTION_POSTS_DB_ID)
-  const projectsSummary = await syncProjects(envs.NOTION_PROJECTS_DB_ID)
-  const photosSummary = await syncPhotos(envs.NOTION_PHOTOS_DB_ID)
-  const pagesSummary = await syncPages(envs.NOTION_PAGES_DB_ID)
-
-  return {
-    pages: pagesSummary,
-    photos: photosSummary,
-    posts: postsSummary,
-    projects: projectsSummary
+    return {
+      pages: pagesSummary,
+      photos: photosSummary,
+      posts: postsSummary,
+      projects: projectsSummary
+    }
   }
+
+  return { runNotionSync, syncPages, syncPhotos, syncPosts, syncProjects }
 }

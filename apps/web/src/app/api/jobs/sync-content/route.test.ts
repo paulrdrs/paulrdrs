@@ -1,20 +1,28 @@
 import { NextRequest } from "next/server"
 import { getNotionEnvs } from "@/envs/server"
-import { runNotionSync, syncPhotos, syncPosts } from "@/notion/sync"
 import { POST } from "./route"
 
-vi.mock("@/notion/sync", () => ({
+const syncMocks = vi.hoisted(() => ({
   runNotionSync: vi.fn(),
   syncPages: vi.fn(),
   syncPhotos: vi.fn(),
   syncPosts: vi.fn(),
   syncProjects: vi.fn()
 }))
+vi.mock("@paulrdrs/notion-sync/sync", () => ({
+  createNotionSync: vi.fn(() => syncMocks)
+}))
+vi.mock("@paulrdrs/notion-sync/runtime", () => ({
+  createNotionSyncRuntime: vi.fn(() => ({}))
+}))
+vi.mock("@opennextjs/cloudflare", () => ({
+  getCloudflareContext: vi.fn(() => ({ env: { BUCKET: {}, DB: {} } }))
+}))
 vi.mock("@/envs/server", () => ({ getNotionEnvs: vi.fn() }))
 
-const runNotionSyncMock = vi.mocked(runNotionSync)
-const syncPhotosMock = vi.mocked(syncPhotos)
-const syncPostsMock = vi.mocked(syncPosts)
+const runNotionSyncMock = syncMocks.runNotionSync
+const syncPhotosMock = syncMocks.syncPhotos
+const syncPostsMock = syncMocks.syncPosts
 const getNotionEnvsMock = vi.mocked(getNotionEnvs)
 
 const secret = "a".repeat(32)

@@ -8,7 +8,7 @@ initOpenNextCloudflareForDev()
 // Baseline CSP. Next's App Router streams hydration data via inline <script>
 // tags, so `script-src` keeps `'unsafe-inline'`; tightening to nonce-based CSP
 // would require middleware. The high-value SVG/XSS vector is already closed by
-// disallowing SVG uploads (see src/media/validation.ts). `'unsafe-eval'` is
+// disallowing SVG uploads in @paulrdrs/notion-sync. `'unsafe-eval'` is
 // added only in development for Turbopack/HMR.
 const isProduction = process.env.NODE_ENV === "production"
 

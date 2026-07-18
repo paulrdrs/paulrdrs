@@ -1,4 +1,3 @@
-import "server-only"
 import {
   type BlockObjectResponse,
   collectPaginatedAPI,
@@ -10,9 +9,9 @@ import type {
   NotionBlockTree,
   RichText
 } from "@paulrdrs/content/blocks"
-import { getNotionClient } from "./client"
 import type { NotionImageSource } from "./imageSource"
 import { getNotionImageSourceKey, rehostImage } from "./media"
+import type { NotionSyncRuntime } from "./runtime"
 
 const toRichText = (items: readonly RichTextItemResponse[]): RichText[] =>
   items.map((item) => ({
@@ -45,11 +44,14 @@ const toImageSource = (image: RawImage): NotionImageSource =>
     ? { type: "external", url: image.external.url }
     : { type: "file", url: image.file.url }
 
-const fetchChildren = async (blockId: string): Promise<NotionBlockTree> => {
-  const client = getNotionClient()
-  const results = await collectPaginatedAPI(client.blocks.children.list, {
-    block_id: blockId
-  })
+const fetchChildren = async (
+  runtime: NotionSyncRuntime,
+  blockId: string
+): Promise<NotionBlockTree> => {
+  const results = await collectPaginatedAPI(
+    runtime.notion.blocks.children.list,
+    { block_id: blockId }
+  )
 
   const blocks: NotionBlock[] = []
 
@@ -58,7 +60,7 @@ const fetchChildren = async (blockId: string): Promise<NotionBlockTree> => {
       continue
     }
 
-    const block = await toNotionBlock(result)
+    const block = await toNotionBlock(runtime, result)
 
     if (block) {
       blocks.push(block)
@@ -69,13 +71,16 @@ const fetchChildren = async (blockId: string): Promise<NotionBlockTree> => {
 }
 
 const toNotionBlock = async (
+  runtime: NotionSyncRuntime,
   block: BlockObjectResponse
 ): Promise<NotionBlock | null> => {
   if (!supportedBlockTypes.has(block.type)) {
     return null
   }
 
-  const children = block.has_children ? await fetchChildren(block.id) : []
+  const children = block.has_children
+    ? await fetchChildren(runtime, block.id)
+    : []
 
   switch (block.type) {
     case "paragraph":
@@ -157,7 +162,7 @@ const toNotionBlock = async (
     case "image": {
       const source = toImageSource(block.image)
       const sourceKey = getNotionImageSourceKey(source)
-      const mediaId = await rehostImage(source.url, sourceKey)
+      const mediaId = await rehostImage(runtime, source.url, sourceKey)
 
       return {
         caption: toRichText(block.image.caption),
@@ -172,4 +177,5 @@ const toNotionBlock = async (
   }
 }
 
-export const fetchPageBlocks = (pageId: string) => fetchChildren(pageId)
+export const fetchPageBlocks = (runtime: NotionSyncRuntime, pageId: string) =>
+  fetchChildren(runtime, pageId)

@@ -1,13 +1,9 @@
 import { timingSafeEqual } from "node:crypto"
+import { getCloudflareContext } from "@opennextjs/cloudflare"
+import { createNotionSyncRuntime } from "@paulrdrs/notion-sync/runtime"
+import { createNotionSync } from "@paulrdrs/notion-sync/sync"
 import { type NextRequest, NextResponse } from "next/server"
 import { getNotionEnvs } from "@/envs/server"
-import {
-  runNotionSync,
-  syncPages,
-  syncPhotos,
-  syncPosts,
-  syncProjects
-} from "@/notion/sync"
 
 export const dynamic = "force-dynamic"
 
@@ -33,6 +29,19 @@ const isAuthorized = (provided: string, secret: string) => {
 // omitting it runs the full sync (manual/webhook trigger).
 const runSync = async (type: SyncType | null) => {
   const envs = getNotionEnvs()
+  const { env } = getCloudflareContext()
+  const { runNotionSync, syncPages, syncPhotos, syncPosts, syncProjects } =
+    createNotionSync(
+      createNotionSyncRuntime({
+        BUCKET: env.BUCKET,
+        DB: env.DB,
+        NOTION_PAGES_DB_ID: envs.NOTION_PAGES_DB_ID,
+        NOTION_PHOTOS_DB_ID: envs.NOTION_PHOTOS_DB_ID,
+        NOTION_POSTS_DB_ID: envs.NOTION_POSTS_DB_ID,
+        NOTION_PROJECTS_DB_ID: envs.NOTION_PROJECTS_DB_ID,
+        NOTION_TOKEN: envs.NOTION_TOKEN
+      })
+    )
 
   switch (type) {
     case "posts":

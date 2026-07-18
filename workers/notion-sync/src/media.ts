@@ -1,16 +1,21 @@
-import "server-only"
 import { createHash } from "node:crypto"
 import { mediaAssets } from "@paulrdrs/database/schema"
 import { eq } from "drizzle-orm"
-import { getDb } from "@/db/client"
-import { uploadMediaObject } from "@/media/storage"
-import { buildMediaObjectKey } from "@/media/upload"
+import type { NotionImageSource } from "./imageSource"
+import type { NotionSyncRuntime } from "./runtime"
 import {
   isAllowedMediaMimeType,
   MAX_MEDIA_FILE_SIZE_BYTES,
   validateMediaFile
-} from "@/media/validation"
-import type { NotionImageSource } from "./imageSource"
+} from "./validation"
+
+const getExtension = (filename: string) => {
+  const extension = filename.split(".").pop()
+  return extension ? `.${extension.toLowerCase()}` : ""
+}
+
+export const buildMediaObjectKey = (filename: string) =>
+  `media/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}${getExtension(filename)}`
 
 // Uploaded Notion files are served via short-lived presigned URLs that get
 // re-signed on every fetch, so the query string can't be part of the key.
@@ -92,8 +97,12 @@ const readMediaBody = async (response: Response) => {
 
 const inFlightRehosts = new Map<string, Promise<string>>()
 
-const rehostImageOnce = async (url: string, sourceKey: string) => {
-  const db = getDb()
+const rehostImageOnce = async (
+  runtime: NotionSyncRuntime,
+  url: string,
+  sourceKey: string
+) => {
+  const { bucket, db } = runtime
 
   const [existing] = await db
     .select({ id: mediaAssets.id })
@@ -125,7 +134,9 @@ const rehostImageOnce = async (url: string, sourceKey: string) => {
 
   const objectKey = buildMediaObjectKey(filename)
 
-  await uploadMediaObject({ body, contentType, objectKey })
+  await bucket.put(objectKey, body, {
+    httpMetadata: { contentType }
+  })
 
   const [asset] = await db
     .insert(mediaAssets)
@@ -141,14 +152,18 @@ const rehostImageOnce = async (url: string, sourceKey: string) => {
   return asset.id
 }
 
-export const rehostImage = (url: string, sourceKey: string) => {
+export const rehostImage = (
+  runtime: NotionSyncRuntime,
+  url: string,
+  sourceKey: string
+) => {
   const inFlight = inFlightRehosts.get(sourceKey)
 
   if (inFlight) {
     return inFlight
   }
 
-  const operation = rehostImageOnce(url, sourceKey).finally(() => {
+  const operation = rehostImageOnce(runtime, url, sourceKey).finally(() => {
     inFlightRehosts.delete(sourceKey)
   })
 

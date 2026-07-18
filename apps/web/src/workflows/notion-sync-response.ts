@@ -1,4 +1,4 @@
-import type { NotionSyncTypeSummary } from "@/notion/sync"
+import type { NotionSyncTypeSummary } from "@paulrdrs/notion-sync/sync"
 import type { NotionSyncStageType } from "./notion-sync-plan"
 
 const isSyncTypeSummary = (value: unknown): value is NotionSyncTypeSummary => {

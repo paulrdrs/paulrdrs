@@ -16,9 +16,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@notionhq/client": "5.22.0",
     "@paulrdrs/content": "workspace:*",
     "@paulrdrs/database": "workspace:*",
+    "@paulrdrs/notion-sync": "workspace:*",
     "drizzle-orm": "0.45.2",
     "next": "16.2.7",
     "react": "19.2.7",

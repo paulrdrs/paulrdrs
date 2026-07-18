@@ -5,8 +5,17 @@ import {
 } from "@paulrdrs/content/content"
 import { isPageKey, type PageKey } from "@paulrdrs/content/pages"
 import { z } from "zod"
-import { createSlug } from "@/lib/content"
 import type { NotionImageSource } from "./imageSource"
+
+const createSlug = (value: string) =>
+  value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
 
 export type NotionPage = {
   readonly id: string
