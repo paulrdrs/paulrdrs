@@ -3,7 +3,7 @@ import {
   type WorkflowEvent,
   type WorkflowStep
 } from "cloudflare:workers"
-import { createNotionSyncRuntime } from "./runtime"
+import { createNotionSyncRuntime, type NotionSyncEnvironment } from "./runtime"
 import {
   createNotionSync,
   type NotionSyncSummary,
@@ -59,7 +59,7 @@ const runStage = async (
 }
 
 export class NotionSyncWorkflow extends WorkflowEntrypoint<
-  CloudflareEnv,
+  CloudflareEnv & NotionSyncEnvironment,
   NotionSyncWorkflowParams
 > {
   async run(

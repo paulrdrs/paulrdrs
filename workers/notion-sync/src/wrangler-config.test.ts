@@ -26,6 +26,11 @@ describe("private sync Worker configuration", () => {
     expect(config.triggers).toEqual({ crons: ["*/15 * * * *"] })
   })
 
+  it("keeps only the Notion token secret and preserves external variables", () => {
+    expect(config.secrets).toEqual({ required: ["NOTION_TOKEN"] })
+    expect(config.keep_vars).toBe(true)
+  })
+
   it("contains only the sync Worker's infrastructure bindings", () => {
     expect(config).not.toHaveProperty("assets")
     expect(config).not.toHaveProperty("images")

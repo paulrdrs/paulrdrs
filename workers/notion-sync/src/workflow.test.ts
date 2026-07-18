@@ -1,3 +1,4 @@
+import type { NotionSyncEnvironment } from "./runtime"
 import type { NotionSyncTypeSummary } from "./sync"
 
 const runtime = {
@@ -55,7 +56,7 @@ const createStep = () => {
 const createWorkflow = () =>
   new NotionSyncWorkflow(
     {} as ExecutionContext,
-    {} as CloudflareEnv
+    {} as CloudflareEnv & NotionSyncEnvironment
   ) as NotionSyncWorkflow
 
 describe("NotionSyncWorkflow", () => {

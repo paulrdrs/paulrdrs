@@ -15,10 +15,12 @@ in `docs/`.
 ## Repository Shape
 - `apps/web/src/app/`: Next.js App Router routes and route tests.
 - `apps/web/src/components/`: shared React components.
-- `apps/web/src/db/`: Drizzle schema and D1 queries.
-- `apps/web/src/notion/`: Notion mapping, block fetching, media rehosting, and sync.
-- `apps/web/src/media/`: media validation and R2 storage.
+- `apps/web/src/db/`: read-only D1 clients and public content queries.
+- `apps/web/src/media/`: read-only R2 media access.
 - `apps/web/src/site/`: site-level navigation and hero configuration.
+- `packages/content/`: normalized block trees and shared content contracts.
+- `packages/database/`: shared Drizzle schema.
+- `workers/notion-sync/`: Notion mapping, synchronization, and media ingestion.
 - `docs/`: maintained architecture and operating documentation.
 - `drizzle/`: generated D1 migrations and metadata.
 
