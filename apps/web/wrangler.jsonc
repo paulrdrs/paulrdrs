@@ -1,30 +1,12 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "paulrdrs",
-  "main": "custom-worker.ts",
+  "main": ".open-next/worker.js",
   "compatibility_date": "2026-07-17",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
-  },
-  // Self-reference so the sync Workflow can call the app's own route (and thus
-  // run the sync inside a real request context).
-  "services": [
-    {
-      "binding": "WORKER_SELF_REFERENCE",
-      "service": "paulrdrs"
-    }
-  ],
-  "workflows": [
-    {
-      "name": "notion-sync",
-      "binding": "SYNC_WORKFLOW",
-      "class_name": "NotionSyncWorkflow"
-    }
-  ],
-  "triggers": {
-    "crons": ["*/15 * * * *"]
   },
   "d1_databases": [
     {
