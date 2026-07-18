@@ -6,11 +6,12 @@
     "build": "wrangler deploy --dry-run --config wrangler.jsonc",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts --config wrangler.jsonc",
     "deploy": "wrangler deploy --config wrangler.jsonc",
-    "dev": "wrangler dev --config wrangler.jsonc",
+    "dev": "wrangler dev --config wrangler.jsonc --persist-to ../../apps/web/.wrangler/state --test-scheduled",
     "instances": "wrangler workflows instances list notion-sync --config wrangler.jsonc",
     "pretypecheck": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts --config wrangler.jsonc",
     "test": "vitest run",
     "trigger": "wrangler workflows trigger notion-sync --config wrangler.jsonc",
+    "trigger:local": "wrangler workflows trigger notion-sync --local --port 8787 --config wrangler.jsonc",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

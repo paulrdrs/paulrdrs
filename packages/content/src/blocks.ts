@@ -65,6 +65,11 @@ export type ImageBlock = NotionBlockBase & {
   readonly caption: readonly RichText[]
 }
 
+export type LinkToPageBlock = NotionBlockBase & {
+  readonly type: "link_to_page"
+  readonly pageId: string
+}
+
 export type DividerBlock = NotionBlockBase & {
   readonly type: "divider"
 }
@@ -90,6 +95,7 @@ export type NotionBlock =
   | QuoteBlock
   | CodeBlock
   | ImageBlock
+  | LinkToPageBlock
   | DividerBlock
   | CalloutBlock
   | ToggleBlock

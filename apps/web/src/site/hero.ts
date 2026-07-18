@@ -1,31 +1,44 @@
-const heroKinds = ["post", "project", "photo"] as const
+const featuredKinds = ["post", "project"] as const
 
-type HeroKind = (typeof heroKinds)[number]
+type FeaturedKind = (typeof featuredKinds)[number]
 
-export type HeroSelection = {
+export type HomeFeaturedSelection = {
   id: string
-  kind: HeroKind
+  kind: FeaturedKind
 }
 
-export const getHeroSelection = (
+const isHomeFeaturedSelection = (
+  value: unknown
+): value is HomeFeaturedSelection => {
+  if (!value || typeof value !== "object") {
+    return false
+  }
+
+  const { id, kind } = value as Record<string, unknown>
+
+  return (
+    typeof id === "string" &&
+    id.length > 0 &&
+    typeof kind === "string" &&
+    featuredKinds.includes(kind as FeaturedKind)
+  )
+}
+
+export const getHomeFeaturedSelections = (
   metadata: Record<string, unknown> | null | undefined
-): HeroSelection | null => {
-  const hero = metadata?.hero
+): HomeFeaturedSelection[] => {
+  const featuredContent = metadata?.featuredContent
 
-  if (!hero || typeof hero !== "object") {
-    return null
+  if (!Array.isArray(featuredContent) || featuredContent.length > 3) {
+    return []
   }
 
-  const { id, kind } = hero as Record<string, unknown>
-
-  if (
-    typeof id !== "string" ||
-    !id ||
-    typeof kind !== "string" ||
-    !heroKinds.includes(kind as HeroKind)
-  ) {
-    return null
+  if (!featuredContent.every(isHomeFeaturedSelection)) {
+    return []
   }
 
-  return { id, kind: kind as HeroKind }
+  const selections = featuredContent as HomeFeaturedSelection[]
+  const selectionKeys = selections.map(({ id, kind }) => `${kind}:${id}`)
+
+  return new Set(selectionKeys).size === selectionKeys.length ? selections : []
 }

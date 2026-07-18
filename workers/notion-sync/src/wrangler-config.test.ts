@@ -27,8 +27,16 @@ describe("private sync Worker configuration", () => {
     expect(config.triggers).toEqual({ crons: ["*/5 * * * *"] })
   })
 
-  it("keeps only the Notion token secret and preserves external variables", () => {
-    expect(config.secrets).toEqual({ required: ["NOTION_TOKEN"] })
+  it("declares every local Notion value and preserves remote variables", () => {
+    expect(config.secrets).toEqual({
+      required: [
+        "NOTION_TOKEN",
+        "NOTION_POSTS_DB_ID",
+        "NOTION_PROJECTS_DB_ID",
+        "NOTION_PHOTOS_DB_ID",
+        "NOTION_PAGES_DB_ID"
+      ]
+    })
     expect(config.keep_vars).toBe(true)
   })
 

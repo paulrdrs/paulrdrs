@@ -85,15 +85,23 @@ authoring but is not read by the sync Worker.
 | `Status` | Status | Yes | `status` |
 | `Published` | Date | No | `publishedAt` |
 
-`Key` must be **home** or **contact**. The page body becomes `body`. The optional
-homepage hero selection is stored in D1 metadata and is not currently authored
-through a Notion property.
+`Key` must be **home** or **contact**. A Contact page body becomes `body`.
+
+The Home page body is configuration rather than public copy. Add zero to three
+Notion page links (native **Link to page** blocks or linked text) pointing to
+published Posts or Projects. Link order controls homepage order. Sync resolves
+them into the Home row's ordered
+`metadata.featuredContent` array and stores an empty Home body. Duplicate links,
+more than three links, or links to missing, draft, or unsupported pages are
+reported as a per-entry sync error; the last valid Home row is preserved.
 
 ## Supported body blocks
 
 The renderer supports `paragraph`, `heading_1`, `heading_2`, `heading_3`,
 `bulleted_list_item`, `numbered_list_item`, `quote`, `code`, `image`, `divider`,
-`callout`, and `toggle`, including supported nested children.
+`callout`, and `toggle`, including supported nested children. `link_to_page` and
+Notion-page URLs in rich text are accepted as Home feature configuration and are
+not rendered as Home body content.
 
 Unknown blocks are skipped. Columns, tables, bookmarks, embeds, and equations
 are not currently rendered.

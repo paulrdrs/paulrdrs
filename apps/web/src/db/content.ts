@@ -11,7 +11,7 @@ import {
 import { and, desc, eq, sql } from "drizzle-orm"
 import { unstable_cache } from "next/cache"
 import { cache } from "react"
-import type { HeroSelection } from "@/site/hero"
+import type { HomeFeaturedSelection } from "@/site/hero"
 import { getDb } from "./client"
 
 type PublishedPage = {
@@ -35,6 +35,7 @@ const getPublishedPostsCached = unstable_cache(
   async () => {
     const rows = await getDb()
       .select({
+        ...coverSelection,
         id: posts.id,
         title: posts.title,
         slug: posts.slug,
@@ -43,6 +44,7 @@ const getPublishedPostsCached = unstable_cache(
         createdAt: posts.createdAt
       })
       .from(posts)
+      .leftJoin(mediaAssets, eq(posts.coverMediaId, mediaAssets.id))
       .where(eq(posts.status, "published"))
       .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
 
@@ -349,8 +351,8 @@ export const getPublishedPageByKey = cache(
   }
 )
 
-export const getFeaturedHeroContent = unstable_cache(
-  async (selection: HeroSelection) => {
+export const getFeaturedHomeContentItem = unstable_cache(
+  async (selection: HomeFeaturedSelection) => {
     if (selection.kind === "post") {
       const [post] = await getDb()
         .select({
@@ -401,33 +403,11 @@ export const getFeaturedHeroContent = unstable_cache(
           }
         : undefined
     }
-
-    const [photo] = await getDb()
-      .select({
-        ...coverSelection,
-        excerpt: photos.excerpt,
-        id: photos.id,
-        slug: photos.slug,
-        title: photos.title
-      })
-      .from(photos)
-      .leftJoin(mediaAssets, eq(photos.mediaId, mediaAssets.id))
-      .where(and(eq(photos.id, selection.id), eq(photos.status, "published")))
-      .limit(1)
-
-    return photo
-      ? {
-          ...photo,
-          href: `/photo/${photo.slug}`,
-          kind: "photo" as const,
-          label: "Photograph"
-        }
-      : undefined
   },
-  ["featured-hero-content"],
+  ["featured-home-content-item"],
   { revalidate: contentCacheRevalidateSeconds }
 )
 
-export type FeaturedHero = NonNullable<
-  Awaited<ReturnType<typeof getFeaturedHeroContent>>
+export type FeaturedHomeContentItem = NonNullable<
+  Awaited<ReturnType<typeof getFeaturedHomeContentItem>>
 >

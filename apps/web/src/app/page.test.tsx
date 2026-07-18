@@ -1,79 +1,91 @@
-import type { NotionBlockTree } from "@paulrdrs/content/blocks"
 import { render, screen } from "@testing-library/react"
-import { getPublishedPageByKey } from "@/db/content"
+import { getFeaturedHomeContentItem, getPublishedPageByKey } from "@/db/content"
 import Home from "./page"
 
-const notionBody = (text: string): NotionBlockTree => [
-  {
-    id: "b1",
-    type: "heading_2",
-    richText: [
-      {
-        text,
-        href: null,
-        annotations: {
-          bold: false,
-          italic: false,
-          strikethrough: false,
-          underline: false,
-          code: false,
-          color: "default"
-        }
-      }
-    ],
-    children: []
-  }
-]
-
 vi.mock("@/db/content", () => ({
+  getFeaturedHomeContentItem: vi.fn(),
   getPublishedPageByKey: vi.fn()
 }))
 
+const getFeaturedHomeContentItemMock = vi.mocked(getFeaturedHomeContentItem)
 const getPublishedPageByKeyMock = vi.mocked(getPublishedPageByKey)
 
+beforeEach(() => {
+  vi.clearAllMocks()
+})
+
 describe("Home", () => {
-  it("renders the homepage title without a Notion body", async () => {
+  it("renders the ordered Notion selections without Home body copy", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
-      body: null,
+      body: [
+        {
+          children: [],
+          id: "body-copy",
+          richText: [],
+          type: "paragraph"
+        }
+      ],
       id: "page-id",
       key: "home",
-      metadata: null,
+      metadata: {
+        featuredContent: [
+          { id: "post-id", kind: "post" },
+          { id: "project-id", kind: "project" }
+        ]
+      },
       publishedAt: new Date("2026-01-01"),
-      title: "Home intro"
+      title: "Home copy title"
     })
+    getFeaturedHomeContentItemMock
+      .mockResolvedValueOnce({
+        coverAltText: null,
+        coverAttribution: null,
+        coverMediaId: null,
+        excerpt: "A post excerpt.",
+        href: "/blog/post-slug",
+        id: "post-id",
+        kind: "post",
+        label: "From the blog",
+        slug: "post-slug",
+        title: "Featured post"
+      })
+      .mockResolvedValueOnce({
+        category: "software",
+        coverAltText: null,
+        coverAttribution: null,
+        coverMediaId: null,
+        excerpt: "A project excerpt.",
+        href: "/projects/software/project-slug",
+        id: "project-id",
+        kind: "project",
+        label: "software",
+        slug: "project-slug",
+        title: "Featured project"
+      })
 
     render(await Home())
 
-    expect(getPublishedPageByKeyMock).toHaveBeenCalledWith("home")
     expect(
-      screen.getByRole("heading", { name: "Home intro" })
+      screen.getByRole("heading", { level: 1, name: "paulrdrs" })
     ).toBeInTheDocument()
-    expect(screen.queryByText("copy")).not.toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Featured post" })).toHaveAttribute(
+      "href",
+      "/blog/post-slug"
+    )
+    expect(
+      screen.getByRole("link", { name: "Featured project" })
+    ).toHaveAttribute("href", "/projects/software/project-slug")
+    expect(screen.queryByText("Home copy title")).not.toBeInTheDocument()
   })
 
-  it("renders Notion blocks when homepage body is present", async () => {
-    getPublishedPageByKeyMock.mockResolvedValue({
-      body: notionBody("Notion home"),
-      id: "page-id",
-      key: "home",
-      metadata: null,
-      publishedAt: new Date("2026-01-01"),
-      title: "Home intro"
-    })
+  it("renders the site title when Home has no valid selections", async () => {
+    getPublishedPageByKeyMock.mockResolvedValue(undefined)
 
     render(await Home())
 
     expect(
-      screen.getByRole("heading", { level: 2, name: "Notion home" })
+      screen.getByRole("heading", { name: "paulrdrs" })
     ).toBeInTheDocument()
-    expect(screen.queryByText("copy")).not.toBeInTheDocument()
-  })
-
-  it("renders a fallback when homepage content is missing", async () => {
-    getPublishedPageByKeyMock.mockImplementationOnce(async () => undefined)
-
-    render(await Home())
-
-    expect(screen.getByText("paulrdrs")).toBeInTheDocument()
+    expect(getFeaturedHomeContentItemMock).not.toHaveBeenCalled()
   })
 })

@@ -34,6 +34,7 @@ const supportedBlockTypes: ReadonlySet<string> = new Set<NotionBlock["type"]>([
   "quote",
   "code",
   "image",
+  "link_to_page",
   "divider",
   "callout",
   "toggle"
@@ -172,6 +173,15 @@ const toNotionBlock = async (
         type: "image"
       }
     }
+    case "link_to_page":
+      return block.link_to_page.type === "page_id"
+        ? {
+            children,
+            id: block.id,
+            pageId: block.link_to_page.page_id,
+            type: "link_to_page"
+          }
+        : null
     default:
       return null
   }

@@ -96,7 +96,8 @@ pnpm test
 Also run the checks relevant to the change:
 - Dependencies: `pnpm check:deps`
 - File types: `pnpm check:no-js`
-- Worker or deployment behavior: `pnpm build:worker`
+- Web Worker or deployment behavior: `pnpm build:web`
+- Sync Worker or deployment behavior: `pnpm build:sync`
 - D1 schema changes: `pnpm db:migrate` plus targeted schema/query tests
 
 Do not claim a check passed unless it was run successfully. If a check cannot

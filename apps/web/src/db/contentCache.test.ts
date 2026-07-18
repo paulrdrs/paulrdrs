@@ -35,6 +35,9 @@ describe("public content caching", () => {
     const orderBy = vi.fn().mockResolvedValue([
       {
         createdAt,
+        coverAltText: "Cached image",
+        coverAttribution: null,
+        coverMediaId: "cached-media",
         excerpt: "A cached post",
         id: "post-1",
         publishedAt,
@@ -43,7 +46,8 @@ describe("public content caching", () => {
       }
     ])
     const where = vi.fn(() => ({ orderBy }))
-    const from = vi.fn(() => ({ where }))
+    const leftJoin = vi.fn(() => ({ where }))
+    const from = vi.fn(() => ({ leftJoin }))
     const select = vi.fn(() => ({ from }))
 
     getDbMock.mockReturnValue({ select } as unknown as ReturnType<typeof getDb>)
@@ -54,5 +58,6 @@ describe("public content caching", () => {
     expect(post?.createdAt).toBeInstanceOf(Date)
     expect(post?.publishedAt).toEqual(publishedAt)
     expect(post?.publishedAt).toBeInstanceOf(Date)
+    expect(post?.coverMediaId).toBe("cached-media")
   })
 })

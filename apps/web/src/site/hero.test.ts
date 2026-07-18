@@ -1,15 +1,39 @@
-import { getHeroSelection } from "./hero"
+import { getHomeFeaturedSelections } from "./hero"
 
-describe("hero selection", () => {
-  it("reads a valid selection from page metadata", () => {
+describe("Home featured selections", () => {
+  it("reads valid ordered selections from page metadata", () => {
     expect(
-      getHeroSelection({ hero: { id: "project-id", kind: "project" } })
-    ).toEqual({ id: "project-id", kind: "project" })
+      getHomeFeaturedSelections({
+        featuredContent: [
+          { id: "post-id", kind: "post" },
+          { id: "project-id", kind: "project" }
+        ]
+      })
+    ).toEqual([
+      { id: "post-id", kind: "post" },
+      { id: "project-id", kind: "project" }
+    ])
   })
 
-  it("treats missing and malformed metadata as no selection", () => {
-    expect(getHeroSelection(undefined)).toBeNull()
-    expect(getHeroSelection({ hero: { id: "", kind: "post" } })).toBeNull()
-    expect(getHeroSelection({ hero: { id: "id", kind: "unknown" } })).toBeNull()
+  it("treats absent, malformed, and duplicate metadata as no selection", () => {
+    expect(getHomeFeaturedSelections(undefined)).toEqual([])
+    expect(
+      getHomeFeaturedSelections({
+        featuredContent: [{ id: "", kind: "post" }]
+      })
+    ).toEqual([])
+    expect(
+      getHomeFeaturedSelections({
+        featuredContent: [{ id: "id", kind: "unknown" }]
+      })
+    ).toEqual([])
+    expect(
+      getHomeFeaturedSelections({
+        featuredContent: [
+          { id: "id", kind: "post" },
+          { id: "id", kind: "post" }
+        ]
+      })
+    ).toEqual([])
   })
 })

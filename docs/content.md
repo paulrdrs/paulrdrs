@@ -70,12 +70,25 @@ Rendering a known set of block components is the content-safety model. The
 renderer reuses the `.markdown-content` typographic styles in
 `apps/web/src/app/styles/markdown.css`.
 
-## Homepage Hero
+## Homepage Features
 
-When the Home page has body content it becomes the typographic hero. The
-optional featured-selection (`{ kind, id }` in the Home page's JSON metadata) is
-not modeled in Notion yet; absent a selection, the published Home title and body
-render as the hero.
+The Notion Home page is a curated configuration surface, not visitor-facing
+copy. Add zero to three Notion page links—either native **Link to page** blocks
+or linked text—that target published Posts or Projects. Their Notion order
+becomes the homepage order. During sync,
+the links are resolved to an ordered `featuredContent` array in the Home row's
+JSON metadata, and the Home body is stored as an empty block tree.
+
+The homepage renders each selection as a short card using the target's preview
+image, content label, title, excerpt, and public URL. The first position is kept
+explicit in markup so it can receive a distinct highlighted presentation later.
+Duplicate links, more than three links, and links to missing, draft, or
+unsupported targets fail that Home entry's sync and preserve its last valid D1
+row. `/blog` and the project indexes remain the complete content archives.
+
+The Blog index uses the same post preview image derived from the first body
+image. Posts without a first image render as text-only entries; there is no
+separate cover field or fallback artwork.
 
 ## Navigation Visibility
 
@@ -96,3 +109,6 @@ the same R2 object. The app serves those objects through its media route.
 OpenNext fetches the dynamic R2 route rather than looking for it in the static
 asset binding. Responsive requests are then transformed by the Cloudflare
 Images binding, so each layout receives appropriately sized variants.
+For a localhost `SITE_URL`, `ContentImage` uses the relative `/media/[id]` route
+without Next.js optimization; this avoids the optimizer's private-IP protection
+while keeping local media requests inside the local web Worker.

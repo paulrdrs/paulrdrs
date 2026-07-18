@@ -48,9 +48,9 @@ binding to the sync Worker.
 Run commands from the repository root:
 
 ```sh
-pnpm build:worker    # OpenNext dry-run build of the public app Worker
+pnpm build:web       # OpenNext dry-run build of the public app Worker
 pnpm build:sync      # Wrangler dry-run build of the sync Worker
-pnpm deploy          # public app only (same as deploy:web)
+pnpm deploy:web      # public app only
 pnpm deploy:sync     # sync Worker only
 pnpm db:generate     # generate migrations in the database package
 pnpm db:migrate      # local D1 migrations

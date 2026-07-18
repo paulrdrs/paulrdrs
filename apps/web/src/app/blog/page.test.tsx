@@ -16,6 +16,9 @@ describe("BlogPage", () => {
         title: "Hello Post",
         slug: "hello-post",
         excerpt: "A published post.",
+        coverAltText: "A quiet morning desk",
+        coverAttribution: null,
+        coverMediaId: "post-media-id",
         publishedAt: new Date("2026-01-01"),
         createdAt: new Date("2026-01-01")
       }
@@ -29,6 +32,11 @@ describe("BlogPage", () => {
       "/blog/hello-post"
     )
     expect(screen.getByText("A published post.")).toBeInTheDocument()
+    expect(
+      screen
+        .getByRole("img", { name: "A quiet morning desk" })
+        .getAttribute("src")
+    ).toContain("%2Fmedia%2Fpost-media-id")
   })
 
   it("renders an empty state when no posts are published", async () => {

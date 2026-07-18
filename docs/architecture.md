@@ -76,6 +76,13 @@ on the content row, and removes the block from the normalized body to prevent a
 duplicate image on detail pages. No Notion `Cover` property or page-level cover
 participates in this flow.
 
+The Notion Home page contains up to three ordered native page links or linked
+page mentions targeting published Posts or Projects. Page sync resolves those Notion identities to D1
+content identities and stores them in `pages.metadata.featuredContent`; the Home
+body is not rendered. This keeps the homepage curated while the Blog and Project
+routes remain full archives. Invalid Home selections preserve the last valid
+page row instead of partially updating its configuration.
+
 There are no authenticated routes. Content editing happens in Notion (see
 [Auth](./auth.md)).
 

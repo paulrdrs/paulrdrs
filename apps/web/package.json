@@ -9,7 +9,6 @@
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "dev": "next dev --turbopack",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
     "pretypecheck": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",

@@ -433,12 +433,129 @@ describe("syncPages", () => {
     expect(values).toHaveBeenCalledWith({
       body: [],
       key: "home",
+      metadata: { featuredContent: [] },
       notionPageId: "page-1",
       publishedAt: null,
       status: "draft",
       title: "Home"
     })
     expect(update).toHaveBeenCalledWith(pages)
+  })
+
+  it("stores up to three ordered published post and project links for Home", async () => {
+    mockNotionClient(["page-1"])
+    fetchPageBlocksMock.mockResolvedValue([
+      {
+        children: [],
+        id: "link-1",
+        pageId: "notion-post-1",
+        type: "link_to_page"
+      },
+      {
+        children: [],
+        id: "link-2",
+        richText: [
+          {
+            annotations: {
+              bold: false,
+              code: false,
+              color: "default",
+              italic: false,
+              strikethrough: false,
+              underline: false
+            },
+            href: "https://app.notion.com/p/123456781234123412341234567890ab",
+            text: "Project"
+          }
+        ],
+        type: "paragraph"
+      }
+    ])
+    mapPagePageMock.mockReturnValue({
+      key: "home",
+      notionPageId: "page-1",
+      publishedAt: null,
+      status: "published",
+      title: "Home"
+    })
+    const { values } = setupDb([
+      [{ id: "post-row-1" }],
+      [],
+      [{ id: "project-row-1" }]
+    ])
+
+    await expect(sync.syncPages()).resolves.toEqual({ errors: [], synced: 1 })
+    expect(values).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: [],
+        metadata: {
+          featuredContent: [
+            { id: "post-row-1", kind: "post" },
+            { id: "project-row-1", kind: "project" }
+          ]
+        }
+      })
+    )
+  })
+
+  it("rejects duplicate Home links and preserves the existing row", async () => {
+    mockNotionClient(["page-1"])
+    fetchPageBlocksMock.mockResolvedValue([
+      {
+        children: [],
+        id: "link-1",
+        pageId: "notion-post-1",
+        type: "link_to_page"
+      },
+      {
+        children: [],
+        id: "link-2",
+        pageId: "notion-post-1",
+        type: "link_to_page"
+      }
+    ])
+    mapPagePageMock.mockReturnValue({
+      key: "home",
+      notionPageId: "page-1",
+      publishedAt: null,
+      status: "published",
+      title: "Home"
+    })
+    const { insert } = setupDb([])
+
+    await expect(sync.syncPages()).resolves.toEqual({
+      errors: ["Home page contains duplicate featured links"],
+      synced: 0
+    })
+    expect(insert).not.toHaveBeenCalled()
+  })
+
+  it("rejects a Home link that is not a published post or project", async () => {
+    mockNotionClient(["page-1"])
+    fetchPageBlocksMock.mockResolvedValue([
+      {
+        children: [],
+        id: "link-1",
+        pageId: "missing-page",
+        type: "link_to_page"
+      }
+    ])
+    mapPagePageMock.mockReturnValue({
+      key: "home",
+      notionPageId: "page-1",
+      publishedAt: null,
+      status: "published",
+      title: "Home"
+    })
+    const { insert } = setupDb([[], []])
+
+    await expect(sync.syncPages()).resolves.toEqual({
+      errors: [
+        "Home featured target missing-page is not a published post or project"
+      ],
+      synced: 0
+    })
+    expect(insert).not.toHaveBeenCalled()
   })
 
   it("prepares at most three pages concurrently and persists them all", async () => {

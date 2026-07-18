@@ -80,6 +80,13 @@ describe("fetchPageBlocks", () => {
                 object: "block",
                 table: {},
                 type: "table"
+              },
+              {
+                has_children: false,
+                id: "page-link-1",
+                link_to_page: { page_id: "target-page-1", type: "page_id" },
+                object: "block",
+                type: "link_to_page"
               }
             ]
           }
@@ -139,6 +146,12 @@ describe("fetchPageBlocks", () => {
           { annotations: defaultAnnotations, href: null, text: "Toggle" }
         ],
         type: "toggle"
+      },
+      {
+        children: [],
+        id: "page-link-1",
+        pageId: "target-page-1",
+        type: "link_to_page"
       }
     ])
     expect(listMock).toHaveBeenCalledTimes(3)

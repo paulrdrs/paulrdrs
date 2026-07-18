@@ -20,6 +20,11 @@ const imagePresentations = {
     sizes:
       "(min-width: 1024px) 547px, (min-width: 640px) calc(100vw - 4rem), calc(100vw - 2rem)"
   },
+  homeCard: {
+    className: "aspect-4/3",
+    sizes:
+      "(min-width: 1024px) 299px, (min-width: 640px) calc(50vw - 3rem), calc(100vw - 2rem)"
+  },
   photo: {
     className: "aspect-auto min-h-96",
     sizes:
@@ -29,6 +34,11 @@ const imagePresentations = {
     className: "aspect-4/3",
     sizes:
       "(min-width: 1024px) 299px, (min-width: 640px) calc(50vw - 3rem), calc(100vw - 2rem)"
+  },
+  postCard: {
+    className: "aspect-4/3",
+    sizes:
+      "(min-width: 1024px) 299px, (min-width: 640px) 33vw, calc(100vw - 2rem)"
   },
   projectCard: {
     className: "aspect-4/3",
@@ -53,7 +63,13 @@ export const ContentImage = ({
   const { SITE_URL: siteUrl } = siteEnvsSchema.parse({
     SITE_URL: process.env.SITE_URL
   })
-  const mediaUrl = new URL(`/media/${id}`, siteUrl).toString()
+  const siteOrigin = new URL(siteUrl)
+  const isLocalMedia = ["localhost", "127.0.0.1", "::1"].includes(
+    siteOrigin.hostname
+  )
+  const mediaUrl = isLocalMedia
+    ? `/media/${id}`
+    : new URL(`/media/${id}`, siteOrigin).toString()
 
   return (
     <figure>
@@ -65,6 +81,7 @@ export const ContentImage = ({
           priority={priority}
           sizes={sizes}
           src={mediaUrl}
+          unoptimized={isLocalMedia}
         />
       </div>
       {attribution ? (

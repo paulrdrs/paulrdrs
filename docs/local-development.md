@@ -21,7 +21,8 @@ database connection string. Its plain runtime values belong in
 - `SITE_URL`: local or production origin used for canonical and sitemap URLs.
 - `CF_BEACON_TOKEN` (optional): Cloudflare Web Analytics token.
 
-The sync Worker owns all Notion configuration. For `pnpm dev:sync`, put its
+The sync Worker owns all Notion configuration. For `pnpm dev:sync` or
+`pnpm dev:all`, put its
 local values in `workers/notion-sync/.dev.vars`:
 
 - `NOTION_TOKEN`
@@ -64,18 +65,31 @@ configuration explicitly allowlisted in `scripts/check-no-js.ts`.
 Run these from the repository root:
 
 ```sh
-pnpm dev              # public web app (same as dev:web)
-pnpm dev:sync         # local sync Worker
-pnpm build            # plain Next.js build (same as build:web)
-pnpm build:worker     # OpenNext Worker build
+pnpm dev              # public web app
+pnpm dev:sync         # local sync Worker on port 8787
+pnpm dev:all          # web and sync Worker together
+pnpm sync:local       # trigger the running local sync Workflow
+pnpm build:web        # OpenNext web Worker build
 pnpm build:sync       # sync Worker dry-run build
 pnpm test             # all four workspace packages
 pnpm typecheck        # all four workspace packages
 pnpm lint
+pnpm fix              # apply safe Biome lint and formatting fixes
+pnpm typegen          # regenerate both Workers' Cloudflare types
 pnpm check:deps
 pnpm check:no-js
-pnpm deploy           # public app only (same as deploy:web)
+pnpm preview:web      # production-like local web Worker
+pnpm deploy:web       # public app only
 pnpm deploy:sync      # sync Worker only
 pnpm sync:trigger     # parameterless full-sync recovery
 pnpm sync:instances   # inspect Workflow instances
 ```
+
+`pnpm dev` is sufficient for ordinary web development and does not require a
+live Notion connection. Run `pnpm dev:sync` only when testing ingestion or when
+you want to refresh the local content snapshot. Its Wrangler process shares the
+web app's `apps/web/.wrangler/state` directory. With that process running,
+`pnpm sync:local` creates one local Workflow instance that writes into the same
+local D1 and R2 state. `pnpm dev:all` starts both long-running processes, but the
+sync still runs only when triggered. Apply local migrations before the first
+run with `pnpm db:migrate`.

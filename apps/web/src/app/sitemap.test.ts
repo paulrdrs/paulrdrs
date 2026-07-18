@@ -27,6 +27,9 @@ describe("sitemap", () => {
         title: "Hello",
         slug: "hello",
         excerpt: null,
+        coverAltText: null,
+        coverAttribution: null,
+        coverMediaId: null,
         publishedAt: new Date("2026-01-01"),
         createdAt: new Date("2025-12-01")
       }

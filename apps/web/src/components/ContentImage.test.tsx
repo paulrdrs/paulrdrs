@@ -31,4 +31,19 @@ describe("ContentImage", () => {
       "(min-width: 1024px) 299px, (min-width: 640px) calc(50vw - 3rem), calc(100vw - 2rem)"
     )
   })
+
+  it("bypasses optimization for local media routes", () => {
+    process.env.SITE_URL = "http://localhost:3000"
+
+    try {
+      render(<ContentImage alt="Local image" id="local-media-id" />)
+
+      const image = screen.getByRole("img", { name: "Local image" })
+
+      expect(image).toHaveAttribute("src", "/media/local-media-id")
+      expect(image).not.toHaveAttribute("srcset")
+    } finally {
+      process.env.SITE_URL = "https://web.paulrdrs.workers.dev"
+    }
+  })
 })
