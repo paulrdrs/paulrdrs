@@ -5,7 +5,7 @@ Workers that share the D1 database and media R2 bucket.
 
 ## Workers And Resources
 
-- `apps/web` (`@paulrdrs/web`) deploys through OpenNext as Worker `paulrdrs`.
+- `apps/web` (`@paulrdrs/web`) deploys through OpenNext as Worker `web`.
   Its entrypoint is the generated `apps/web/.open-next/worker.js`. It reads D1
   through `DB`, reads media through `BUCKET`, uses `IMAGES` for responsive
   variants, and stores ISR data in `NEXT_INC_CACHE_R2_BUCKET`.
@@ -28,6 +28,9 @@ variables are:
 - `SITE_URL`: production origin, for example `https://paulrdrs.com`.
 - `CF_BEACON_TOKEN`: optional Cloudflare Web Analytics site token. The beacon is
   omitted when this is unset.
+
+After renaming the Worker in the Cloudflare dashboard, keep this configuration's
+`name` set to the same value before the next deployment.
 
 Sync Worker configuration lives in `workers/notion-sync/wrangler.jsonc`. Set
 these only on `notion-sync`:

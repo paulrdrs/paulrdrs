@@ -3,7 +3,7 @@
 This is a pnpm workspace with four application and shared packages:
 
 - `apps/web` (`@paulrdrs/web`) is the public Next.js/OpenNext application,
-  deployed as the Cloudflare Worker `paulrdrs`.
+  deployed as the Cloudflare Worker `web`.
 - `workers/notion-sync` (`@paulrdrs/notion-sync`) is the private scheduled
   Worker that reads Notion and writes content to Cloudflare D1 and R2.
 - `packages/content` (`@paulrdrs/content`) owns runtime-neutral normalized block
