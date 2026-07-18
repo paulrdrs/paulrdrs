@@ -6,9 +6,12 @@ import {
   mapPostPage,
   mapProjectPage
 } from "./mapping"
-import { getNotionImageSourceKey, rehostImage } from "./media"
 import type { NotionSyncRuntime } from "./runtime"
-import { createNotionSync, extractPrimaryPhoto } from "./sync"
+import {
+  createNotionSync,
+  extractPreviewImage,
+  extractPrimaryPhoto
+} from "./sync"
 
 vi.mock("./blocks", () => ({ fetchPageBlocks: vi.fn() }))
 vi.mock("./mapping", () => ({
@@ -17,18 +20,12 @@ vi.mock("./mapping", () => ({
   mapPostPage: vi.fn(),
   mapProjectPage: vi.fn()
 }))
-vi.mock("./media", () => ({
-  getNotionImageSourceKey: vi.fn(),
-  rehostImage: vi.fn()
-}))
 
 const fetchPageBlocksMock = vi.mocked(fetchPageBlocks)
 const mapPostPageMock = vi.mocked(mapPostPage)
 const mapProjectPageMock = vi.mocked(mapProjectPage)
 const mapPagePageMock = vi.mocked(mapPagePage)
 const mapPhotoPageMock = vi.mocked(mapPhotoPage)
-const getNotionImageSourceKeyMock = vi.mocked(getNotionImageSourceKey)
-const rehostImageMock = vi.mocked(rehostImage)
 
 const runtime = {
   bucket: {},
@@ -43,7 +40,6 @@ const runtime = {
 const sync = createNotionSync(runtime)
 
 const basePost = {
-  coverImage: null,
   excerpt: null,
   notionPageId: "post-1",
   publishedAt: null,
@@ -57,7 +53,6 @@ const basePost = {
 
 const baseProject = {
   category: "software" as const,
-  coverImage: null,
   excerpt: null,
   notionPageId: "project-1",
   publishedAt: null,
@@ -303,26 +298,19 @@ describe("syncPosts", () => {
     )
   })
 
-  it("re-hosts the cover image and stores the returned media id", async () => {
+  it("uses the first body image as the preview and removes it from the body", async () => {
     mockNotionClient(["post-1"])
-    fetchPageBlocksMock.mockResolvedValue([])
-    mapPostPageMock.mockReturnValue({
-      ...basePost,
-      coverImage: { type: "external", url: "https://example.com/cover.png" }
-    })
-    getNotionImageSourceKeyMock.mockReturnValue("source-key")
-    rehostImageMock.mockResolvedValue("media-id-1")
+    fetchPageBlocksMock.mockResolvedValue([imageBlock, paragraphBlock])
+    mapPostPageMock.mockReturnValue(basePost)
     const { values } = setupDb([[], []])
 
     await sync.syncPosts()
 
-    expect(rehostImageMock).toHaveBeenCalledWith(
-      runtime,
-      "https://example.com/cover.png",
-      "source-key"
-    )
     expect(values).toHaveBeenCalledWith(
-      expect.objectContaining({ coverMediaId: "media-id-1" })
+      expect.objectContaining({
+        body: [paragraphBlock],
+        coverMediaId: "media-1"
+      })
     )
   })
 
@@ -388,6 +376,40 @@ describe("syncProjects", () => {
       expect.objectContaining({ category: "software" })
     )
     expect(update).toHaveBeenCalledWith(projects)
+  })
+
+  it("uses the first body image as the project preview", async () => {
+    mockNotionClient(["project-1"])
+    fetchPageBlocksMock.mockResolvedValue([paragraphBlock, imageBlock])
+    mapProjectPageMock.mockReturnValue(baseProject)
+    const { values } = setupDb([[], []])
+
+    await sync.syncProjects()
+
+    expect(values).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: [paragraphBlock],
+        coverMediaId: "media-1"
+      })
+    )
+  })
+})
+
+describe("extractPreviewImage", () => {
+  it("finds and removes a nested first image", () => {
+    const nestedParagraph = { ...paragraphBlock, children: [imageBlock] }
+
+    expect(extractPreviewImage([nestedParagraph])).toEqual({
+      body: [{ ...nestedParagraph, children: [] }],
+      mediaId: "media-1"
+    })
+  })
+
+  it("returns the unchanged body when there is no image", () => {
+    expect(extractPreviewImage([paragraphBlock])).toEqual({
+      body: [paragraphBlock],
+      mediaId: null
+    })
   })
 })
 

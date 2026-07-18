@@ -18,6 +18,8 @@ the sync reads only database entries and their page bodies.
 - `notionPageId` is the stable internal identity used for upserts and never
   appears in a public URL.
 - Property values carry metadata; the Notion page body carries long-form content.
+- Posts and Projects do not have or use a `Cover` property. Their first image
+  block is the only preview/hero source; a Notion page-level cover is ignored.
 
 ## Posts
 
@@ -29,11 +31,14 @@ the sync reads only database entries and their page bodies.
 | `Published` | Date | No | `publishedAt` |
 | `Excerpt` | Text | No | `excerpt` |
 | `Tags` | Multi-select | No | `tags` |
-| `Cover` | Files & media | No | `coverMediaId` after rehosting |
 | `SEO Title` | Text | No | `seoTitle` |
 | `SEO Description` | Text | No | `seoDescription` |
 
-The page body becomes `body` and renders at `/blog/[slug]`.
+The page body becomes `body` and renders at `/blog/[slug]`. The first image
+block found in body order is optional; when present, it becomes the post preview
+and hero image after rehosting. The sync removes that block from the stored body
+so it renders only once. Without an image block, the post renders without a
+preview or hero image.
 
 ## Projects
 
@@ -45,7 +50,11 @@ Projects use the same properties as Posts except `Tags`, plus:
 
 `Category` must be either **photography** or **software**. External project links
 belong in the page body as normal links; there is no structured Links property.
-Projects render at `/projects/[category]/[slug]`.
+Projects render at `/projects/[category]/[slug]`. The first image block found in
+body order is optional; when present, it becomes the project preview and hero
+image after rehosting. The sync removes that block from the stored body so it
+renders only once. Without an image block, the project renders without a
+preview or hero image.
 
 ## Photos
 
@@ -91,9 +100,10 @@ are not currently rendered.
 
 ## Media
 
-Every uploaded or externally referenced Notion image, including post and project
-covers, is downloaded during sync and copied unchanged into Cloudflare R2. The
-site serves it through `/media/[id]`; Notion is never on the visitor request
+Every uploaded or externally referenced Notion body image is downloaded during
+sync and copied unchanged into Cloudflare R2. Notion database `Cover` properties
+and page-level covers are not part of the content contract. The site serves
+rehosted images through `/media/[id]`; Notion is never on the visitor request
 path. Rehosting is idempotent via `media_assets.sourceKey`.
 Concurrent syncs use the same deterministic R2 object key and recover the media
 row created by another Worker isolate.

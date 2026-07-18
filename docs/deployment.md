@@ -10,7 +10,7 @@ Workers that share the D1 database and media R2 bucket.
   through `DB`, reads media through `BUCKET`, uses `IMAGES` for responsive
   variants, and stores ISR data in `NEXT_INC_CACHE_R2_BUCKET`.
 - `workers/notion-sync` (`@paulrdrs/notion-sync`) deploys as Worker
-  `notion-sync`. It owns the `*/15 * * * *` cron, the `notion-sync`
+  `notion-sync`. It owns the `*/5 * * * *` cron, the `notion-sync`
   Workflow resource through `SYNC_WORKFLOW`, D1 writes through `DB`, and media
   uploads through `BUCKET`.
 
@@ -63,7 +63,7 @@ that depends on it.
 
 ## Notion Content Sync And Recovery
 
-Every 15 minutes the sync Worker's `scheduled` handler creates one
+Every five minutes the sync Worker's `scheduled` handler creates one
 parameterless full-sync Workflow. It runs posts, projects, photos, and pages in
 order with a two-second pause between stages. Each stage accesses Notion, D1,
 and R2 directly. Entry failures are logged with the stage summary and thrown so

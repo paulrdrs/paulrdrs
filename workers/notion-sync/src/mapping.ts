@@ -5,7 +5,6 @@ import {
 } from "@paulrdrs/content/content"
 import { isPageKey, type PageKey } from "@paulrdrs/content/pages"
 import { z } from "zod"
-import type { NotionImageSource } from "./imageSource"
 
 const createSlug = (value: string) =>
   value
@@ -23,7 +22,6 @@ export type NotionPage = {
 }
 
 export type MappedContent = {
-  readonly coverImage: NotionImageSource | null
   readonly excerpt: string | null
   readonly notionPageId: string
   readonly publishedAt: Date | null
@@ -83,16 +81,6 @@ const datePropertySchema = z.object({
   date: z.object({ start: z.string() }).nullable()
 })
 
-const fileItemSchema = z.union([
-  z.object({
-    external: z.object({ url: z.string() }),
-    type: z.literal("external")
-  }),
-  z.object({ file: z.object({ url: z.string() }), type: z.literal("file") })
-])
-
-const filesPropertySchema = z.object({ files: z.array(fileItemSchema) })
-
 const relationPropertySchema = z.object({
   relation: z.array(z.object({ id: z.string() }))
 })
@@ -139,18 +127,6 @@ const getTags = (page: NotionPage): string[] =>
     .parse(page.properties.Tags)
     .multi_select.map((option) => option.name)
 
-const getCoverImage = (page: NotionPage): NotionImageSource | null => {
-  const [file] = filesPropertySchema.parse(page.properties.Cover).files
-
-  if (!file) {
-    return null
-  }
-
-  return file.type === "external"
-    ? { type: "external", url: file.external.url }
-    : { type: "file", url: file.file.url }
-}
-
 const getCategory = (page: NotionPage): ProjectCategory => {
   const name = selectPropertySchema.parse(page.properties.Category).select?.name
 
@@ -193,7 +169,6 @@ const mapContentProperties = (page: NotionPage): MappedContent => {
   const title = getTitle(page)
 
   return {
-    coverImage: getCoverImage(page),
     excerpt: getNullableRichText(page, "Excerpt"),
     notionPageId: page.id,
     publishedAt: getPublishedAt(page),

@@ -19,6 +19,12 @@ describe("web Worker configuration", () => {
     expect(config.keep_vars).toBe(true)
   })
 
+  it("uses the temporary Workers.dev origin", () => {
+    expect(config.vars).toEqual({
+      SITE_URL: "https://web.paulrdrs.workers.dev"
+    })
+  })
+
   it("loads migrations from the database package", () => {
     expect(config.d1_databases).toEqual([
       {

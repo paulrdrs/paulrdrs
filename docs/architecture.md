@@ -60,7 +60,7 @@ The `/store` route is intentionally minimal for now.
 ## Synchronization Boundary
 
 The sync Worker has no `fetch` handler, public route, custom domain, or service
-binding to the web app. Every 15 minutes its cron handler creates one
+binding to the web app. Every five minutes its cron handler creates one
 parameterless `NotionSyncWorkflow`. The Workflow constructs its Notion, D1, and
 R2 dependencies directly from Worker bindings and runs posts, projects, photos,
 and pages in order. Wrangler's Workflow trigger provides full-sync recovery;
@@ -69,6 +69,12 @@ there is no HTTP sync endpoint or targeted public trigger.
 The two Workers deploy independently. HTTP ingress and webhooks for the sync
 Worker are out of scope. Analytics uses the external Cloudflare Web Analytics
 integration and is not part of the sync architecture.
+
+Posts and Projects derive their preview and detail hero from the first image
+block in the Notion page body. The sync rehosts that image, stores its media ID
+on the content row, and removes the block from the normalized body to prevent a
+duplicate image on detail pages. No Notion `Cover` property or page-level cover
+participates in this flow.
 
 There are no authenticated routes. Content editing happens in Notion (see
 [Auth](./auth.md)).

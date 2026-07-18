@@ -15,9 +15,15 @@ renders from D1. There is no dashboard or in-app editor.
 
 Each type maps to a Notion database (Posts, Projects, Photos, Pages). Page
 **properties** carry the metadata (title, slug, status, excerpt, SEO fields,
-cover, publish date, and — for projects — category); the Notion **page body** is
-the long-form content. See the [Notion Schema](./notion-schema.md) for the exact
+publish date, and — for projects — category); the Notion **page body** is the
+long-form content. See the [Notion Schema](./notion-schema.md) for the exact
 property contract.
+
+For Posts and Projects, the first image block becomes the preview and detail
+hero image. It is removed from the stored block tree so the detail page renders
+it only once. If the body has no image, the entry has no preview or hero image.
+There is deliberately no Notion `Cover` property, and Notion page-level covers
+are ignored.
 
 For Photos, the first image block in the Notion page body is the photograph and
 is removed from the stored story body during sync. Remaining blocks become the
@@ -29,7 +35,7 @@ photo detail pages.
 
 Editing happens in Notion. The private `@paulrdrs/notion-sync` Worker reads the
 four databases and upserts rows directly into D1, keyed by `notionPageId`, while
-re-hosting media directly into R2. Its 15-minute cron creates a Cloudflare
+re-hosting media directly into R2. Its five-minute cron creates a Cloudflare
 Workflow with one durable step per database. Content indexes remain dynamically
 rendered so builds do not require D1, but their stable D1 reads are cached for
 five minutes. Post, project, and photo detail pages use five-minute ISR. Sync
@@ -80,11 +86,13 @@ URL regardless of link visibility.
 
 ## Media
 
-Every image referenced by Notion — uploaded, external, or cover — is re-hosted
+Every image referenced by Notion — uploaded or external — is re-hosted
 into the R2 bucket during sync (never hotlinked, since Notion presigned URLs
 expire) and served through `/media/[id]`, which streams the object by media ID.
 Re-hosting is idempotent via a stable `media_assets.sourceKey`. Media metadata
 lives in D1, and deterministic object keys make concurrent syncs converge on
 the same R2 object. The app serves those objects through its media route.
-Next.js responsive image requests are transformed by the Cloudflare Images
-binding, so each layout receives appropriately sized variants.
+`ContentImage` gives Next.js an absolute `SITE_URL/media/[id]` source so
+OpenNext fetches the dynamic R2 route rather than looking for it in the static
+asset binding. Responsive requests are then transformed by the Cloudflare
+Images binding, so each layout receives appropriately sized variants.

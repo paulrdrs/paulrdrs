@@ -14,7 +14,7 @@ describe("private sync Worker configuration", () => {
     expect(config).not.toHaveProperty("custom_domain")
   })
 
-  it("retains the existing Workflow name and 15-minute cron", () => {
+  it("retains the existing Workflow name and five-minute cron", () => {
     expect(config.name).toBe("notion-sync")
     expect(config.compatibility_flags).toContain("global_fetch_strictly_public")
     expect(config.workflows).toEqual([
@@ -24,7 +24,7 @@ describe("private sync Worker configuration", () => {
         name: "notion-sync"
       }
     ])
-    expect(config.triggers).toEqual({ crons: ["*/15 * * * *"] })
+    expect(config.triggers).toEqual({ crons: ["*/5 * * * *"] })
   })
 
   it("keeps only the Notion token secret and preserves external variables", () => {

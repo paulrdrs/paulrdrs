@@ -22,12 +22,7 @@ const multiSelect = (names: string[]) => ({
   multi_select: names.map((name) => ({ name }))
 })
 const date = (start: string | null) => ({ date: start ? { start } : null })
-const externalFile = (url: string) => ({
-  files: [{ external: { url }, type: "external" }]
-})
-
 const basePostProperties = (overrides: Record<string, unknown> = {}) => ({
-  Cover: externalFile("https://example.com/cover.png"),
   Excerpt: richText("An excerpt"),
   "SEO Description": richText("SEO description"),
   "SEO Title": richText("SEO title"),
@@ -44,7 +39,6 @@ describe("mapPostPage", () => {
     const page = buildPage(basePostProperties(), "post-1")
 
     expect(mapPostPage(page)).toEqual({
-      coverImage: { type: "external", url: "https://example.com/cover.png" },
       excerpt: "An excerpt",
       notionPageId: "post-1",
       publishedAt: new Date("2024-05-01T00:00:00.000Z"),
@@ -71,7 +65,6 @@ describe("mapPostPage", () => {
   it("treats blank optional properties as absent", () => {
     const page = buildPage(
       basePostProperties({
-        Cover: { files: [] },
         Excerpt: richText("  "),
         "SEO Description": richText(""),
         "SEO Title": richText(""),
@@ -81,7 +74,6 @@ describe("mapPostPage", () => {
 
     const mapped = mapPostPage(page)
 
-    expect(mapped.coverImage).toBeNull()
     expect(mapped.excerpt).toBeNull()
     expect(mapped.seoTitle).toBeNull()
     expect(mapped.seoDescription).toBeNull()

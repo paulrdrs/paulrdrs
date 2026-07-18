@@ -141,7 +141,9 @@ describe("NotionBlocks", () => {
 
     expect(screen.getByRole("img", { name: "A cat" })).toHaveAttribute(
       "src",
-      expect.stringContaining("url=%2Fmedia%2Fmedia-123")
+      expect.stringContaining(
+        "url=https%3A%2F%2Fweb.paulrdrs.workers.dev%2Fmedia%2Fmedia-123"
+      )
     )
   })
 

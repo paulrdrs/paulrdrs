@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { siteEnvsSchema } from "@/envs/schemas"
 
 type ContentImageProps = {
   alt?: string | null
@@ -49,6 +50,10 @@ export const ContentImage = ({
   priority = false
 }: ContentImageProps) => {
   const { className, sizes } = imagePresentations[presentation]
+  const { SITE_URL: siteUrl } = siteEnvsSchema.parse({
+    SITE_URL: process.env.SITE_URL
+  })
+  const mediaUrl = new URL(`/media/${id}`, siteUrl).toString()
 
   return (
     <figure>
@@ -59,7 +64,7 @@ export const ContentImage = ({
           fill
           priority={priority}
           sizes={sizes}
-          src={`/media/${id}`}
+          src={mediaUrl}
         />
       </div>
       {attribution ? (

@@ -20,7 +20,6 @@ import {
 } from "drizzle-orm"
 import { fetchPageBlocks } from "./blocks"
 import {
-  type MappedContent,
   type MappedPage,
   type MappedPhoto,
   type MappedPost,
@@ -31,7 +30,6 @@ import {
   mapProjectPage,
   type NotionPage
 } from "./mapping"
-import { getNotionImageSourceKey, rehostImage } from "./media"
 import type { NotionSyncRuntime } from "./runtime"
 
 export type NotionSyncTypeSummary = {
@@ -91,18 +89,6 @@ const resolveSlug = (
   return { slug: mappedSlug, slugHistory }
 }
 
-const rehostCover = async (
-  runtime: NotionSyncRuntime,
-  mapped: MappedContent
-) =>
-  mapped.coverImage
-    ? rehostImage(
-        runtime,
-        mapped.coverImage.url,
-        getNotionImageSourceKey(mapped.coverImage)
-      )
-    : null
-
 const upsertPost = async (
   runtime: NotionSyncRuntime,
   mapped: MappedPost,
@@ -142,11 +128,11 @@ const upsertPost = async (
     throw new Error(`Slug "${slug}" is used or reserved by another post`)
   }
 
-  const coverMediaId = await rehostCover(runtime, mapped)
+  const preview = extractPreviewImage(body)
 
   const values = {
-    body,
-    coverMediaId,
+    body: preview.body,
+    coverMediaId: preview.mediaId,
     excerpt: mapped.excerpt,
     notionPageId: mapped.notionPageId,
     publishedAt: mapped.publishedAt,
@@ -210,12 +196,12 @@ const upsertProject = async (
     )
   }
 
-  const coverMediaId = await rehostCover(runtime, mapped)
+  const preview = extractPreviewImage(body)
 
   const values = {
-    body,
+    body: preview.body,
     category: mapped.category,
-    coverMediaId,
+    coverMediaId: preview.mediaId,
     excerpt: mapped.excerpt,
     notionPageId: mapped.notionPageId,
     publishedAt: mapped.publishedAt,
@@ -282,19 +268,29 @@ const removeBlock = (blocks: NotionBlockTree, id: string): NotionBlockTree =>
     .filter((block) => block.id !== id)
     .map((block) => ({ ...block, children: removeBlock(block.children, id) }))
 
+export const extractPreviewImage = (
+  body: NotionBlockTree
+): { readonly body: NotionBlockTree; readonly mediaId: string | null } => {
+  const image = findFirstImageBlock(body)
+
+  return image
+    ? { body: removeBlock(body, image.id), mediaId: image.mediaId }
+    : { body, mediaId: null }
+}
+
 // The photograph itself is the first image block of a Photos page body (blocks
 // arrive already re-hosted, carrying a mediaId); the rest of the body is the
 // photo's story text.
 export const extractPrimaryPhoto = (
   body: NotionBlockTree
 ): { readonly body: NotionBlockTree; readonly mediaId: string } => {
-  const image = findFirstImageBlock(body)
+  const preview = extractPreviewImage(body)
 
-  if (!image) {
+  if (!preview.mediaId) {
     throw new Error("Photo page has no image block")
   }
 
-  return { body: removeBlock(body, image.id), mediaId: image.mediaId }
+  return { body: preview.body, mediaId: preview.mediaId }
 }
 
 // Rebuild links from the Notion relation. Missing project targets are skipped

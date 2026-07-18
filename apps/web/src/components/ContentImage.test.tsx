@@ -14,7 +14,9 @@ describe("ContentImage", () => {
     )
     expect(image).toHaveAttribute(
       "src",
-      expect.stringContaining("url=%2Fmedia%2Fmedia-id")
+      expect.stringContaining(
+        "url=https%3A%2F%2Fweb.paulrdrs.workers.dev%2Fmedia%2Fmedia-id"
+      )
     )
     expect(sourceSet).toContain("/_next/image?")
     expect(sourceSet).toContain("w=640")

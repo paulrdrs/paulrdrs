@@ -40,6 +40,31 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        hostname: "localhost",
+        pathname: "/media/**",
+        port: "3000",
+        protocol: "http"
+      },
+      {
+        hostname: "web.paulrdrs.workers.dev",
+        pathname: "/media/**",
+        protocol: "https"
+      },
+      {
+        hostname: "paulrdrs.com",
+        pathname: "/media/**",
+        protocol: "https"
+      },
+      {
+        hostname: "www.paulrdrs.com",
+        pathname: "/media/**",
+        protocol: "https"
+      }
+    ]
+  },
   reactCompiler: true,
   headers: async () => [
     {
