@@ -28,6 +28,7 @@
     "@commitlint/cli": "21.0.2",
     "@commitlint/config-conventional": "21.0.2",
     "@commitlint/types": "21.0.1",
+    "@paulrdrs/database": "workspace:*",
     "commitizen": "4.3.1",
     "drizzle-kit": "0.31.10",
     "husky": "9.1.7",

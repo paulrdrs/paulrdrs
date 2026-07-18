@@ -1,3 +1,4 @@
+import { siteNavigationSettings } from "@paulrdrs/database/schema"
 import { eq } from "drizzle-orm"
 import { unstable_cache } from "next/cache"
 import {
@@ -5,7 +6,6 @@ import {
   type SiteNavigationSettings
 } from "@/site/navigation"
 import { getDb } from "./client"
-import { siteNavigationSettings } from "./schema"
 
 const siteNavigationSettingsId = "main"
 

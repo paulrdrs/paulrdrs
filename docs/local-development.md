@@ -29,7 +29,7 @@ The `DB` binding points at a local SQLite database under `.wrangler/` for
 root:
 
 ```sh
-pnpm db:generate        # regenerate from apps/web/src/db/schema.ts
+pnpm db:generate        # regenerate from packages/database/src/schema.ts
 pnpm db:migrate         # apply to local D1
 pnpm db:migrate:remote  # apply to the remote D1 (deploy)
 ```

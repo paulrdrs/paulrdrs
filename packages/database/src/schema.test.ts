@@ -1,4 +1,5 @@
 import { getTableName } from "drizzle-orm"
+import { describe, expect, it } from "vitest"
 import {
   mediaAssets,
   pages,

@@ -1,10 +1,5 @@
 import type { NotionBlockTree } from "@paulrdrs/content/blocks"
 import type { ProjectCategory } from "@paulrdrs/content/content"
-import { and, desc, eq, sql } from "drizzle-orm"
-import { unstable_cache } from "next/cache"
-import { cache } from "react"
-import type { HeroSelection } from "@/site/hero"
-import { getDb } from "./client"
 import {
   mediaAssets,
   pages,
@@ -12,7 +7,12 @@ import {
   photos,
   posts,
   projects
-} from "./schema"
+} from "@paulrdrs/database/schema"
+import { and, desc, eq, sql } from "drizzle-orm"
+import { unstable_cache } from "next/cache"
+import { cache } from "react"
+import type { HeroSelection } from "@/site/hero"
+import { getDb } from "./client"
 
 type PublishedPage = {
   body: NotionBlockTree | null

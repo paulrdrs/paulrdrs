@@ -1,9 +1,9 @@
 vi.mock("server-only", () => ({}))
 vi.mock("./client", () => ({ getDb: vi.fn() }))
 
+import { mediaAssets } from "@paulrdrs/database/schema"
 import { getDb } from "./client"
 import { getMediaAssetLocation } from "./media"
-import { mediaAssets } from "./schema"
 
 const getDbMock = vi.mocked(getDb)
 

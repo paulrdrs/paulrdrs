@@ -1,8 +1,8 @@
 import "server-only"
 import { createHash } from "node:crypto"
+import { mediaAssets } from "@paulrdrs/database/schema"
 import { eq } from "drizzle-orm"
 import { getDb } from "@/db/client"
-import { mediaAssets } from "@/db/schema"
 import { uploadMediaObject } from "@/media/storage"
 import { buildMediaObjectKey } from "@/media/upload"
 import {

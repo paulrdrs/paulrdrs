@@ -1,7 +1,7 @@
 import "server-only"
 import { getCloudflareContext } from "@opennextjs/cloudflare"
+import * as schema from "@paulrdrs/database/schema"
 import { drizzle } from "drizzle-orm/d1"
-import * as schema from "./schema"
 
 // The D1 binding lives on the Cloudflare context, populated per request by the
 // OpenNext worker (and by `initOpenNextCloudflareForDev()` during `next dev`).

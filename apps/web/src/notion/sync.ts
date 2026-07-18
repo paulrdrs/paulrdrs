@@ -3,6 +3,13 @@ import { collectPaginatedAPI, isFullPage } from "@notionhq/client"
 import type { ImageBlock, NotionBlockTree } from "@paulrdrs/content/blocks"
 import type { ContentStatus } from "@paulrdrs/content/content"
 import {
+  pages,
+  photoProjects,
+  photos,
+  posts,
+  projects
+} from "@paulrdrs/database/schema"
+import {
   type AnyColumn,
   and,
   eq,
@@ -14,7 +21,6 @@ import {
   sql
 } from "drizzle-orm"
 import { getDb } from "@/db/client"
-import { pages, photoProjects, photos, posts, projects } from "@/db/schema"
 import { getNotionEnvs } from "@/envs/server"
 import { fetchPageBlocks } from "./blocks"
 import { getNotionClient } from "./client"
