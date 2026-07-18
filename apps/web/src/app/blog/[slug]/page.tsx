@@ -70,8 +70,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <ContentImage
           alt={post.coverAltText}
           attribution={post.coverAttribution}
-          className="aspect-video"
           id={post.coverMediaId}
+          presentation="wide"
           priority
         />
       ) : null}

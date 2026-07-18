@@ -28,8 +28,8 @@ export const ProjectGrid = ({ projects }: ProjectGridProps) => (
             <Link href={href}>
               <ContentImage
                 alt={project.coverAltText}
-                className="aspect-4/3"
                 id={project.coverMediaId}
+                presentation="projectCard"
               />
             </Link>
           ) : (

@@ -25,8 +25,8 @@ export const PhotoGrid = ({ photos }: PhotoGridProps) => (
             <Link href={href}>
               <ContentImage
                 alt={photo.coverAltText ?? photo.title}
-                className="aspect-4/3"
                 id={photo.coverMediaId}
+                presentation="photoCard"
               />
             </Link>
           ) : (

@@ -92,8 +92,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <ContentImage
           alt={project.coverAltText}
           attribution={project.coverAttribution}
-          className="aspect-video"
           id={project.coverMediaId}
+          presentation="wide"
           priority
         />
       ) : null}

@@ -72,8 +72,8 @@ export default async function PhotoPage({ params }: PhotoPageProps) {
         <ContentImage
           alt={photo.coverAltText ?? photo.title}
           attribution={photo.coverAttribution}
-          className="aspect-auto min-h-96"
           id={photo.coverMediaId}
+          presentation="photo"
           priority
         />
       ) : null}

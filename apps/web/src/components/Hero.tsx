@@ -46,8 +46,8 @@ export const Hero = ({ featured, intro, title }: HeroProps) => {
           <ContentImage
             alt={featured.coverAltText}
             attribution={featured.coverAttribution}
-            className="aspect-4/3 lg:aspect-5/4"
             id={featured.coverMediaId}
+            presentation="hero"
             priority
           />
         </Link>
