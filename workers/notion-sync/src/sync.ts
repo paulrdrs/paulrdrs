@@ -1,6 +1,5 @@
 import { collectPaginatedAPI, isFullPage } from "@notionhq/client"
 import type { ImageBlock, NotionBlockTree } from "@paulrdrs/content/blocks"
-import type { ContentStatus } from "@paulrdrs/content/content"
 import {
   pages,
   photoProjects,
@@ -73,18 +72,15 @@ const queryDatabasePages = async (
 type SlugState = {
   readonly slug: string
   readonly slugHistory: readonly string[]
-  readonly status: ContentStatus
 }
 
-// Published rows keep their slug unless Notion shows a real rename; the old
-// slug then moves into history (deduped, never the new current slug) so the
-// public route can 301 it. Draft/unpublished/new rows just take the mapped
-// slug — nothing has been public yet, so there's no URL to preserve.
+// Preserve every previous slug so content renamed while draft still redirects
+// correctly if it was published before being unpublished.
 const resolveSlug = (
   existing: SlugState | undefined,
   mappedSlug: string
 ): { slug: string; slugHistory: string[] } => {
-  if (existing?.status !== "published" || existing.slug === mappedSlug) {
+  if (!existing || existing.slug === mappedSlug) {
     return { slug: mappedSlug, slugHistory: [...(existing?.slugHistory ?? [])] }
   }
 
@@ -117,8 +113,7 @@ const upsertPost = async (
   const [existing] = await db
     .select({
       slug: posts.slug,
-      slugHistory: posts.slugHistory,
-      status: posts.status
+      slugHistory: posts.slugHistory
     })
     .from(posts)
     .where(eq(posts.notionPageId, mapped.notionPageId))
@@ -180,8 +175,7 @@ const upsertProject = async (
   const [existing] = await db
     .select({
       slug: projects.slug,
-      slugHistory: projects.slugHistory,
-      status: projects.status
+      slugHistory: projects.slugHistory
     })
     .from(projects)
     .where(eq(projects.notionPageId, mapped.notionPageId))
@@ -342,8 +336,7 @@ const upsertPhoto = async (
   const [existing] = await db
     .select({
       slug: photos.slug,
-      slugHistory: photos.slugHistory,
-      status: photos.status
+      slugHistory: photos.slugHistory
     })
     .from(photos)
     .where(eq(photos.notionPageId, mapped.notionPageId))

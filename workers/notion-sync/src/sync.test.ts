@@ -227,7 +227,7 @@ describe("syncPosts", () => {
     )
   })
 
-  it("freezes a rename on a published row by moving the old slug into history", async () => {
+  it("moves a published row's old slug into history on rename", async () => {
     mockNotionClient(["post-1"])
     fetchPageBlocksMock.mockResolvedValue([])
     mapPostPageMock.mockReturnValue({
@@ -247,7 +247,7 @@ describe("syncPosts", () => {
     )
   })
 
-  it("does not grow history for an unpublished row that takes the mapped slug directly", async () => {
+  it("preserves a draft row's old slug in case it was previously published", async () => {
     mockNotionClient(["post-1"])
     fetchPageBlocksMock.mockResolvedValue([])
     mapPostPageMock.mockReturnValue({
@@ -263,7 +263,10 @@ describe("syncPosts", () => {
     await sync.syncPosts("posts-db-id")
 
     expect(values).toHaveBeenCalledWith(
-      expect.objectContaining({ slug: "draft-slug", slugHistory: [] })
+      expect.objectContaining({
+        slug: "draft-slug",
+        slugHistory: ["old-draft-slug"]
+      })
     )
   })
 
