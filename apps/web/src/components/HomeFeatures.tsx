@@ -12,7 +12,10 @@ export const HomeFeatures = ({ items }: HomeFeaturesProps) => {
   }
 
   return (
-    <ol className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+    <ol
+      className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3"
+      data-content-list="home-features"
+    >
       {items.map((item, index) => (
         <li
           className="group flex flex-col gap-4"

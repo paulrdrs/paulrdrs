@@ -43,6 +43,10 @@ The sync Workflow validates all five values plus its D1 and R2 bindings when it
 starts. The web Worker has no Notion configuration, Workflow binding, or service
 binding to the sync Worker.
 
+Both Wrangler configurations pin the `paulrdrs` Cloudflare account. Keep that
+account ID explicit: without it, Wrangler cannot safely choose among the
+authenticated accounts in a non-interactive deployment.
+
 ## Build, Migrate, And Deploy
 
 Run commands from the repository root:
@@ -79,9 +83,28 @@ pnpm sync:instances
 
 Cron is the primary trigger; the CLI trigger is for recovery and smoke tests.
 
+## Release Sequence
+
+A content-contract release is not complete when only the web Worker deploys.
+Use this order whenever web rendering depends on new sync behavior:
+
+```sh
+pnpm deploy:sync
+pnpm sync:trigger
+pnpm sync:instances  # wait for the new instance to complete successfully
+pnpm deploy:web
+pnpm check:production
+```
+
+`check:production` is read-only. It checks production D1 and the deployed HTML
+together: Home must have curated metadata, both routes must expose the current
+build markers, configured features must render, expected preview images must be
+present, and a sampled `/media/[id]` response must be an image. A 200 response
+from the site alone is not a sufficient release check.
+
 ## Production Smoke Test
 
-1. Open `/` and confirm the public homepage loads.
+1. Run `pnpm check:production` and require it to pass.
 2. Trigger one full Workflow and confirm posts, projects, photos, and pages each
    report a successful stage summary.
 3. Publish or edit a post in Notion, run another full sync, and confirm it

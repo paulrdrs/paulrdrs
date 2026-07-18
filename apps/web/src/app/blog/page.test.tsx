@@ -27,6 +27,10 @@ describe("BlogPage", () => {
     render(await BlogPage())
 
     expect(screen.getByRole("heading", { name: "Blog" })).toBeInTheDocument()
+    expect(screen.getByRole("list")).toHaveAttribute(
+      "data-content-list",
+      "blog-posts"
+    )
     expect(screen.getByRole("link", { name: "Hello Post" })).toHaveAttribute(
       "href",
       "/blog/hello-post"

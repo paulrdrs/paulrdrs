@@ -7,6 +7,7 @@
     "build:web": "pnpm --filter @paulrdrs/web build:worker",
     "check:deps": "node scripts/check-exact-deps.ts",
     "check:no-js": "node scripts/check-no-js.ts",
+    "check:production": "node scripts/check-production.ts",
     "commit": "git-cz",
     "db:generate": "pnpm --filter @paulrdrs/database db:generate",
     "db:migrate": "wrangler d1 migrations apply DB --config apps/web/wrangler.jsonc --local",

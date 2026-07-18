@@ -13,6 +13,7 @@ const config = JSON.parse(configSource.replace(/^\s*\/\/.*$/gm, "")) as Record<
 describe("web Worker configuration", () => {
   it("deploys as the web Worker", () => {
     expect(config.name).toBe("web")
+    expect(config.account_id).toBe("e590ee3208ef5a3a9e75473b8beaa344")
   })
 
   it("preserves dashboard-managed runtime variables", () => {

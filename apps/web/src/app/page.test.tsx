@@ -68,6 +68,10 @@ describe("Home", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "paulrdrs" })
     ).toBeInTheDocument()
+    expect(screen.getByRole("list")).toHaveAttribute(
+      "data-content-list",
+      "home-features"
+    )
     expect(screen.getByRole("link", { name: "Featured post" })).toHaveAttribute(
       "href",
       "/blog/post-slug"

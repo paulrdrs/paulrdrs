@@ -24,7 +24,7 @@ const formatDate = (date: Date | null) =>
     : "Undated"
 
 export const PostList = ({ posts }: PostListProps) => (
-  <ol className="flex flex-col gap-2">
+  <ol className="flex flex-col gap-2" data-content-list="blog-posts">
     {posts.map((post) => (
       <li className="group" key={post.id}>
         <Link
