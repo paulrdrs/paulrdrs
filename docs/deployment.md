@@ -53,9 +53,9 @@ pnpm db:migrate      # local D1 migrations
 pnpm db:migrate:remote
 ```
 
-Migrations remain SQLite files under `drizzle/`, generated with
-`pnpm db:generate`. Apply a required remote migration before deploying code that
-depends on it. This Worker split itself requires no migration.
+Migrations are generated under `packages/database/drizzle/` with
+`pnpm db:generate`. Apply a required remote migration before deploying code
+that depends on it. This Worker split itself requires no migration.
 
 ## Notion Content Sync And Recovery
 

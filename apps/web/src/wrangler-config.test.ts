@@ -14,4 +14,15 @@ describe("web Worker configuration", () => {
   it("preserves dashboard-managed runtime variables", () => {
     expect(config.keep_vars).toBe(true)
   })
+
+  it("loads migrations from the database package", () => {
+    expect(config.d1_databases).toEqual([
+      {
+        binding: "DB",
+        database_id: "c988153c-6cba-4302-869b-1dfae43cbb27",
+        database_name: "paulrdrs",
+        migrations_dir: "../../packages/database/drizzle"
+      }
+    ])
+  })
 })

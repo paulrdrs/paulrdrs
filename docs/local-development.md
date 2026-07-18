@@ -39,7 +39,7 @@ The `DB` binding points at local SQLite state under `.wrangler/`. Generate and
 apply migrations from the repository root:
 
 ```sh
-pnpm db:generate        # schema: packages/database/src/schema.ts
+pnpm db:generate        # config and output: packages/database/
 pnpm db:migrate         # apply to local D1
 pnpm db:migrate:remote  # explicit production operation
 ```

@@ -44,7 +44,7 @@ describe("private sync Worker configuration", () => {
         binding: "DB",
         database_id: "c988153c-6cba-4302-869b-1dfae43cbb27",
         database_name: "paulrdrs",
-        migrations_dir: "../../drizzle"
+        migrations_dir: "../../packages/database/drizzle"
       }
     ])
   })

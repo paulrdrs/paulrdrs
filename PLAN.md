@@ -33,10 +33,10 @@ scope; any future HTTP design will start from its concrete requirements.
   `apps/web` as the private `@paulrdrs/web` workspace package. Move its `src`,
   `public`, Next.js/OpenNext configuration, Wrangler configuration, environment
   typing, test configuration, and app-specific dependencies/scripts together.
-- Keep the repository root as the workspace orchestration and migration
-  boundary, named `@paulrdrs/workspace`. Root commands delegate to workspace
-  packages, while `drizzle/`, the root Drizzle configuration, repository-wide
-  checks, shared documentation, and the lockfile remain at the root.
+- Keep the repository root as the workspace orchestration boundary, named
+  `@paulrdrs/workspace`. Root commands delegate to workspace packages. The
+  database package owns its migrations and Drizzle configuration; repository-
+  wide checks, shared documentation, and the lockfile remain at the root.
 - Preserve the public app's deployed Worker script name `paulrdrs`, routes,
   bindings, compatibility settings, and build behavior during the move.
 - Move normalized Notion block-tree types, content status/category types, and
@@ -191,9 +191,10 @@ the root.
 Rename the private root package to @paulrdrs/workspace and turn it into the
 workspace orchestration boundary. Add delegated root commands for web
 development, build, preview, deploy, tests, and typechecking without creating
-recursive script calls. Keep drizzle/, the root Drizzle configuration and
-migration commands, scripts/, docs/, repository-wide lint/dependency/file-type
-checks, the lockfile, and shared tool configuration at the repository root.
+recursive script calls. Keep migration command aliases, scripts/, docs/,
+repository-wide lint/dependency/file-type checks, the lockfile, and shared tool
+configuration at the repository root. Keep database migrations and Drizzle
+configuration in @paulrdrs/database.
 
 Preserve the deployed app Worker script name paulrdrs, its routes, bindings,
 compatibility settings, environment contract, and runtime behavior. Fix all
@@ -265,11 +266,11 @@ export. The database package must depend on @paulrdrs/content for block-tree,
 content status/category, and related domain types. @paulrdrs/content must never
 depend on @paulrdrs/database.
 
-Update all app schema imports and the root drizzle.config.ts to consume
-@paulrdrs/database. Preserve existing table names, columns, indexes, relations,
-inferred types, and migration behavior. Do not edit, regenerate, delete, or move
-existing migration SQL or snapshots. Remove the old app schema source rather
-than keeping a duplicate wrapper.
+Update all app schema imports to consume @paulrdrs/database. Keep its Drizzle
+configuration and existing migration SQL and snapshots in the database package.
+Preserve existing table names, columns, indexes, relations, inferred types, and
+migration behavior. Do not edit, regenerate, or delete existing migrations.
+Remove the old app schema source rather than keeping a duplicate wrapper.
 
 Use exact dependency versions or workspace: specifications and update the
 lockfile with pnpm. Run schema/query tests, pnpm lint, pnpm typecheck, pnpm test,

@@ -8,8 +8,9 @@ This is a pnpm workspace with four runtime-focused packages:
   Worker that reads Notion and writes content to Cloudflare D1 and R2.
 - `packages/content` (`@paulrdrs/content`) owns runtime-neutral normalized block
   trees and shared content contracts.
-- `packages/database` (`@paulrdrs/database`) owns the Drizzle schema and depends
-  on `@paulrdrs/content` for persisted content types.
+- `packages/database` (`@paulrdrs/database`) owns the Drizzle schema,
+  configuration, and migrations, and depends on `@paulrdrs/content` for
+  persisted content types.
 
 The web app reads D1 and serves media directly from R2. Notion is never on the
 visitor request path, and there is no dashboard or authenticated surface.

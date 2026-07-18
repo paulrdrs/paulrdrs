@@ -22,7 +22,7 @@ in `docs/`.
 - `packages/database/`: shared Drizzle schema.
 - `workers/notion-sync/`: Notion mapping, synchronization, and media ingestion.
 - `docs/`: maintained architecture and operating documentation.
-- `drizzle/`: generated D1 migrations and metadata.
+- `packages/database/drizzle/`: generated D1 migrations and metadata.
 
 ## Engineering Conventions
 - Use strict TypeScript. Do not introduce `any`. Use `unknown` only when a

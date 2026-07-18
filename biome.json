@@ -15,7 +15,7 @@
       "!**/.open-next",
       "!dist",
       "!build",
-      "!drizzle"
+      "!packages/database/drizzle"
     ]
   },
   "formatter": {
@@ -84,7 +84,7 @@
         "apps/web/src/app/robots.ts",
         "apps/web/src/app/sitemap.ts",
         "commitlint.config.ts",
-        "drizzle.config.ts",
+        "packages/database/drizzle.config.ts",
         "apps/web/next.config.ts",
         "apps/web/open-next.config.ts",
         "apps/web/postcss.config.mjs",

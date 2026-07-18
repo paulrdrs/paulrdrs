@@ -25,7 +25,7 @@
       "binding": "DB",
       "database_name": "paulrdrs",
       "database_id": "c988153c-6cba-4302-869b-1dfae43cbb27",
-      "migrations_dir": "../../drizzle"
+      "migrations_dir": "../../packages/database/drizzle"
     }
   ],
   "r2_buckets": [
