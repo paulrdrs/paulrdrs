@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"
 export default async function StorePage() {
   return (
     <PageContainer>
-      <header className="pb-2">
+      <header>
         <h1 className="page-title">Store</h1>
       </header>
       <div className="empty-state">

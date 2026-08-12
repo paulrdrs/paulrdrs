@@ -23,10 +23,7 @@ const formatDate = (date: Date | null) =>
     : "Undated"
 
 export const PostList = ({ posts }: PostListProps) => (
-  <ol
-    className="flex flex-col gap-12 sm:flex-row sm:flex-wrap sm:gap-x-8"
-    data-content-list="blog-posts"
-  >
+  <ol className="flex flex-col gap-12" data-content-list="blog-posts">
     {posts.map((post) => (
       <ContentSnippet
         coverAltText={post.coverAltText}

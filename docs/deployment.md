@@ -90,6 +90,11 @@ pnpm run build:sync
 pnpm run deploy:sync && pnpm run sync:trigger
 ```
 
+Configure `SITE_URL` as a plaintext build variable on the web connection, using
+the same value as the web Worker's runtime variable. OpenNext evaluates metadata
+routes such as `/robots.txt` while building, before Wrangler applies runtime
+variables from `apps/web/wrangler.jsonc`.
+
 The sync connection owns sync deployment and the recovery trigger. The web
 connection owns the public application deployment. Do not deploy one Worker
 through the other Worker's connected build.

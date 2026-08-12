@@ -9,7 +9,7 @@ export default async function PhotoGalleryPage() {
 
   return (
     <PageContainer>
-      <header className="pb-2">
+      <header>
         <h1 className="page-title">Photography</h1>
       </header>
 

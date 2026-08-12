@@ -17,7 +17,7 @@ type ProjectListProps = {
 }
 
 export const ProjectList = ({ projects }: ProjectListProps) => (
-  <ul className="flex flex-col gap-12 sm:flex-row sm:flex-wrap sm:gap-x-8">
+  <ul className="flex flex-col gap-12">
     {projects.map((project) => {
       const href = `/${project.category}/${project.slug}`
 

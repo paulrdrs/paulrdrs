@@ -9,7 +9,7 @@ export default async function BlogPage() {
 
   return (
     <PageContainer>
-      <header className="pb-2">
+      <header>
         <h1 className="page-title">Blog</h1>
       </header>
 

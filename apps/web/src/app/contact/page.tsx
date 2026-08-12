@@ -26,7 +26,7 @@ export default async function ContactPage() {
 
   return (
     <PageContainer>
-      <header className="pb-2">
+      <header>
         <h1 className="page-title">{contactPage?.title ?? "Contact"}</h1>
       </header>
       {contactPage ? (

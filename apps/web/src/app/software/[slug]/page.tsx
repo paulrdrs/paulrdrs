@@ -57,7 +57,7 @@ export default async function SoftwareProjectPage({
 
   return (
     <PageContainer>
-      <header className="pb-2">
+      <header>
         <div className="flex flex-col gap-4 lg:w-5/6">
           <p className="eyebrow">Software</p>
           <h1 className="page-title">{project.title}</h1>

@@ -101,7 +101,7 @@
   }
 
   .nav-link {
-    @apply relative shrink-0 py-2 font-mono text-sm tracking-wider text-muted uppercase hover:text-ink;
+    @apply relative shrink-0 py-2 font-mono tracking-wider text-muted uppercase hover:text-ink font-semibold;
   }
 
   .button {

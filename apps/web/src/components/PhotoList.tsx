@@ -14,7 +14,7 @@ type PhotoListProps = {
 }
 
 export const PhotoList = ({ photos }: PhotoListProps) => (
-  <ul className="flex flex-col gap-12 sm:flex-row sm:flex-wrap sm:gap-x-8">
+  <ul className="flex flex-col gap-12">
     {photos.map((photo) => (
       <ContentSnippet
         coverAltText={photo.coverAltText ?? photo.title}

@@ -9,7 +9,7 @@ export default async function SoftwarePage() {
 
   return (
     <PageContainer>
-      <header className="pb-2">
+      <header>
         <h1 className="page-title">Software</h1>
       </header>
 
