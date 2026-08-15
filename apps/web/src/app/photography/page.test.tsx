@@ -27,9 +27,6 @@ describe("PhotographyPage", () => {
 
     render(await PhotographyPage())
 
-    expect(
-      screen.getByRole("heading", { name: "Photography" })
-    ).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Camera Work" })).toHaveAttribute(
       "href",
       "/photography/camera-work"

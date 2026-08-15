@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { usePathname } from "next/navigation"
-import { NavigationLinks } from "./NavigationLinks"
+import { getCurrentNavigationHref, NavigationLinks } from "./NavigationLinks"
 
 vi.mock("next/navigation", () => ({
   usePathname: vi.fn()
@@ -39,5 +39,43 @@ describe("NavigationLinks", () => {
       block: "nearest",
       inline: "center"
     })
+  })
+
+  it("marks the matching section link as the current page", () => {
+    usePathnameMock.mockReturnValue("/photography/field-notes-serra")
+
+    render(
+      <NavigationLinks
+        items={[
+          { href: "/", label: "Home" },
+          { href: "/photography", label: "Photography" }
+        ]}
+      />
+    )
+
+    expect(screen.getByRole("link", { name: "Photography" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    )
+    expect(screen.getByRole("link", { name: "Photography" })).toHaveClass(
+      "font-black",
+      "text-accent"
+    )
+    expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute(
+      "aria-current"
+    )
+  })
+
+  it("uses the most-specific matching link for nested paths", () => {
+    expect(
+      getCurrentNavigationHref(
+        [
+          { href: "/", label: "Home" },
+          { href: "/software", label: "Software" },
+          { href: "/software/tools", label: "Tools" }
+        ],
+        "/software/tools/contrast-checker"
+      )
+    ).toBe("/software/tools")
   })
 })

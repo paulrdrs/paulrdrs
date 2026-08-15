@@ -35,10 +35,16 @@ export const NavigationLinks = ({ items }: NavigationLinksProps) => {
   }
 
   return items.map((item) => {
+    const isActive = currentHref === item.href
+
     return (
       <Link
-        aria-current={currentHref === item.href ? "page" : undefined}
-        className="nav-link"
+        aria-current={isActive ? "page" : undefined}
+        className={`relative shrink-0 py-2 font-mono uppercase tracking-widest ${
+          isActive
+            ? "font-black text-accent"
+            : "font-bold text-muted hover:text-accent"
+        }`}
         href={item.href}
         key={item.href}
         onClick={centerNavigationItem}

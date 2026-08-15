@@ -1,4 +1,4 @@
-import { ContentSnippet } from "./ContentSnippet"
+import { PhotoSnippet } from "./PhotoSnippet"
 
 type PhotoListItem = {
   coverAltText?: string | null
@@ -14,9 +14,9 @@ type PhotoListProps = {
 }
 
 export const PhotoList = ({ photos }: PhotoListProps) => (
-  <ul className="flex flex-col gap-12">
+  <ul className="flex flex-col">
     {photos.map((photo) => (
-      <ContentSnippet
+      <PhotoSnippet
         coverAltText={photo.coverAltText ?? photo.title}
         coverMediaId={photo.coverMediaId}
         excerpt={photo.excerpt}

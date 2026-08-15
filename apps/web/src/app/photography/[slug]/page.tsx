@@ -61,25 +61,26 @@ export default async function PhotographyProjectPage({
 
   return (
     <PageContainer>
-      <header>
-        <div className="flex flex-col gap-4 lg:w-5/6">
-          <p className="eyebrow">Photography</p>
-          <h1 className="page-title">{project.title}</h1>
+      <header className="flex flex-col gap-2 p-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-balance font-bold text-4xl">{project.title}</h1>
           {project.excerpt ? (
-            <p className="max-w-2xl text-muted text-xl">{project.excerpt}</p>
+            <p className="text-lg text-muted leading-6">{project.excerpt}</p>
           ) : null}
         </div>
+        {project.coverMediaId ? (
+          <ContentImage
+            alt={project.coverAltText}
+            attribution={project.coverAttribution}
+            id={project.coverMediaId}
+            presentation="wide"
+            priority
+          />
+        ) : null}
       </header>
-      {project.coverMediaId ? (
-        <ContentImage
-          alt={project.coverAltText}
-          attribution={project.coverAttribution}
-          id={project.coverMediaId}
-          presentation="wide"
-          priority
-        />
-      ) : null}
-      <ContentBody body={project.body} />
+      <div className="px-4">
+        <ContentBody body={project.body} />
+      </div>
       {photos.length > 0 ? <PhotoList photos={photos} /> : null}
     </PageContainer>
   )

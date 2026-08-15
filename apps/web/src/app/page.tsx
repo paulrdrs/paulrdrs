@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { ContentSnippet } from "@/components/ContentSnippet"
+import { FeaturedSnippet } from "@/components/FeaturedSnippet"
 import { PageContainer } from "@/components/PageContainer"
 import {
   type FeaturedHomeContentItem,
@@ -42,7 +42,7 @@ export default async function Home() {
   return (
     <PageContainer>
       {featuredItems.map((item, index) => (
-        <ContentSnippet
+        <FeaturedSnippet
           {...item}
           featuredPosition={index + 1}
           priority={index === 0}

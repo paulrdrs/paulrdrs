@@ -1,4 +1,4 @@
-import { ContentSnippet } from "./ContentSnippet"
+import { PostSnippet } from "./PostSnippet"
 
 type PostListItem = {
   coverAltText?: string | null
@@ -23,18 +23,19 @@ const formatDate = (date: Date | null) =>
     : "Undated"
 
 export const PostList = ({ posts }: PostListProps) => (
-  <ol className="flex flex-col gap-12" data-content-list="blog-posts">
+  <ol data-content-list="blog-posts">
     {posts.map((post) => (
-      <ContentSnippet
-        coverAltText={post.coverAltText}
-        coverAttribution={post.coverAttribution}
-        coverMediaId={post.coverMediaId}
-        excerpt={post.excerpt}
-        href={`/blog/${post.slug}`}
-        label={formatDate(post.publishedAt)}
-        title={post.title}
-        key={post.id}
-      />
+      <li key={post.id}>
+        <PostSnippet
+          coverAltText={post.coverAltText}
+          coverAttribution={post.coverAttribution}
+          coverMediaId={post.coverMediaId}
+          excerpt={post.excerpt}
+          href={`/blog/${post.slug}`}
+          label={formatDate(post.publishedAt)}
+          title={post.title}
+        />
+      </li>
     ))}
   </ol>
 )

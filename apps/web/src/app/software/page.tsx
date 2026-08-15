@@ -9,10 +9,6 @@ export default async function SoftwarePage() {
 
   return (
     <PageContainer>
-      <header>
-        <h1 className="page-title">Software</h1>
-      </header>
-
       {projects.length > 0 ? (
         <ProjectList projects={projects} />
       ) : (

@@ -1,5 +1,5 @@
 import type { ProjectCategory } from "@paulrdrs/content/content"
-import { ContentSnippet } from "./ContentSnippet"
+import { ProjectSnippet } from "./ProjectSnippet"
 
 type ProjectListItem = {
   category: ProjectCategory
@@ -17,12 +17,12 @@ type ProjectListProps = {
 }
 
 export const ProjectList = ({ projects }: ProjectListProps) => (
-  <ul className="flex flex-col gap-12">
+  <ul className="flex flex-col">
     {projects.map((project) => {
       const href = `/${project.category}/${project.slug}`
 
       return (
-        <ContentSnippet
+        <ProjectSnippet
           coverAltText={project.coverAltText}
           coverAttribution={project.coverAttribution}
           coverMediaId={project.coverMediaId}
