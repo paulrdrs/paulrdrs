@@ -9,10 +9,6 @@ export default async function BlogPage() {
 
   return (
     <PageContainer>
-      <header>
-        <h1 className="page-title">Blog</h1>
-      </header>
-
       {posts.length > 0 ? (
         <PostList posts={posts} />
       ) : (

@@ -9,10 +9,6 @@ export default async function PhotoGalleryPage() {
 
   return (
     <PageContainer>
-      <header>
-        <h1 className="page-title">Photography</h1>
-      </header>
-
       {photos.length > 0 ? (
         <PhotoList photos={photos} />
       ) : (

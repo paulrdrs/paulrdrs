@@ -76,7 +76,29 @@ describe("BlogPostPage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Hello Post" })
     ).toBeInTheDocument()
+    expect(screen.getByText("Jan 1, 2026").closest("time")).toHaveAttribute(
+      "datetime",
+      "2026-01-01T00:00:00.000Z"
+    )
     expect(screen.queryByText("Body heading")).not.toBeInTheDocument()
+  })
+
+  it("falls back to the creation date when the published date is unavailable", async () => {
+    getPublishedPostBySlugMock.mockResolvedValue(
+      buildPost({
+        createdAt: new Date("2025-12-31"),
+        publishedAt: null
+      })
+    )
+
+    render(
+      await BlogPostPage({ params: Promise.resolve({ slug: "hello-post" }) })
+    )
+
+    expect(screen.getByText("Dec 31, 2025").closest("time")).toHaveAttribute(
+      "datetime",
+      "2025-12-31T00:00:00.000Z"
+    )
   })
 
   it("renders Notion blocks when body is present", async () => {

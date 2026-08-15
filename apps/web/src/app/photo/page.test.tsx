@@ -26,9 +26,6 @@ describe("PhotoGalleryPage", () => {
 
     render(await PhotoGalleryPage())
 
-    expect(
-      screen.getByRole("heading", { name: "Photography" })
-    ).toBeInTheDocument()
     for (const link of screen.getAllByRole("link", {
       name: "Pier at Dusk"
     })) {

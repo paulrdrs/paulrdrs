@@ -26,15 +26,17 @@ export default async function ContactPage() {
 
   return (
     <PageContainer>
-      <header>
-        <h1 className="page-title">{contactPage?.title ?? "Contact"}</h1>
+      <header className="p-4">
+        <h1 className="text-balance font-bold text-4xl">
+          {contactPage?.title ?? "Contact"}
+        </h1>
       </header>
       {contactPage ? (
-        <div>
+        <div className="px-4">
           <ContentBody body={contactPage.body} />
         </div>
       ) : (
-        <div className="empty-state">Contact details will live here.</div>
+        <div className="empty-state px-4">Contact details will live here.</div>
       )}
     </PageContainer>
   )

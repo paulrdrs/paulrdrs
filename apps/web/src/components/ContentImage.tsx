@@ -51,7 +51,7 @@ export const ContentImage = ({
   const { className, sizes } = imagePresentations[presentation]
   return (
     <figure>
-      <div className={`media-frame relative ${className}`}>
+      <div className={`relative overflow-hidden bg-surface ${className}`}>
         <Image
           alt={alt ?? ""}
           className="object-cover"

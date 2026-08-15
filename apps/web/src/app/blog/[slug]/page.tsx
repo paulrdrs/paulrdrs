@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import { ContentBody } from "@/components/ContentBody"
 import { ContentImage } from "@/components/ContentImage"
+import { Eyebrow } from "@/components/Eyebrow"
 import { PageContainer } from "@/components/PageContainer"
 import { getPostSlugByPreviousSlug, getPublishedPostBySlug } from "@/db/content"
 import { blockTreeToPlainText } from "@/lib/content"
@@ -15,6 +16,9 @@ export const revalidate = 300
 export function generateStaticParams() {
   return []
 }
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(date)
 
 type BlogPostPageProps = {
   params: Promise<{
@@ -55,27 +59,32 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound()
   }
 
+  const displayDate = post.publishedAt ?? post.createdAt
+
   return (
     <PageContainer>
-      <header>
-        <div className="flex flex-col gap-4 lg:w-5/6">
-          <p className="eyebrow">Blog</p>
-          <h1 className="page-title">{post.title}</h1>
+      <header className="flex flex-col gap-2 p-4">
+        <div className="flex flex-col gap-1">
+          <time dateTime={displayDate.toISOString()}>
+            <Eyebrow label={formatDate(displayDate)} />
+          </time>
+          <h1 className="text-balance font-bold text-4xl">{post.title}</h1>
           {post.excerpt ? (
-            <p className="max-w-2xl text-muted text-xl">{post.excerpt}</p>
+            <p className="text-lg text-muted leading-6">{post.excerpt}</p>
           ) : null}
         </div>
+
+        {post.coverMediaId ? (
+          <ContentImage
+            alt={post.coverAltText}
+            attribution={post.coverAttribution}
+            id={post.coverMediaId}
+            presentation="wide"
+            priority
+          />
+        ) : null}
       </header>
-      {post.coverMediaId ? (
-        <ContentImage
-          alt={post.coverAltText}
-          attribution={post.coverAttribution}
-          id={post.coverMediaId}
-          presentation="wide"
-          priority
-        />
-      ) : null}
-      <div>
+      <div className="px-4">
         <ContentBody body={post.body} />
       </div>
     </PageContainer>

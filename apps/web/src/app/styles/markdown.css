@@ -2,7 +2,7 @@
   .markdown-content {
     width: 100%;
     max-width: 48rem;
-    color: var(--ink);
+    color: var(--accent);
     @apply text-base;
   }
 
@@ -14,7 +14,7 @@
   .markdown-content h2,
   .markdown-content h3,
   .markdown-content h4 {
-    color: var(--ink);
+    color: var(--accent);
     font-weight: 800;
   }
 
@@ -41,19 +41,19 @@
   }
 
   .markdown-content a {
-    color: var(--ink);
+    color: var(--accent);
     font-weight: 600;
     text-decoration: underline;
-    text-decoration-color: var(--line);
+    text-decoration-color: var(--muted);
     text-decoration-thickness: 1px;
     text-underline-offset: 4px;
   }
 
   .markdown-content a:hover {
-    text-decoration-color: var(--ink);
+    text-decoration-color: var(--accent);
   }
   .markdown-content strong {
-    color: var(--ink);
+    color: var(--accent);
     font-weight: 800;
   }
   .markdown-content em {
@@ -80,14 +80,14 @@
 
   .markdown-content blockquote {
     max-width: 42rem;
-    border-left: 2px solid var(--ink);
+    border-left: 2px solid var(--accent);
     @apply py-2 pl-4;
     color: var(--muted);
     font-style: italic;
   }
 
   .markdown-content code {
-    color: var(--ink);
+    color: var(--accent);
     font-family: var(--font-mono);
     @apply text-sm;
   }
@@ -100,10 +100,10 @@
   .markdown-content pre {
     max-width: 100%;
     overflow-x: auto;
-    border: 1px solid var(--line);
+    border: 1px solid var(--muted);
     background: var(--surface);
     @apply p-4;
-    color: var(--ink);
+    color: var(--accent);
   }
 
   .markdown-content pre code {
@@ -114,26 +114,26 @@
     display: block;
     max-width: 100%;
     overflow-x: auto;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--muted);
     text-align: left;
     @apply text-sm;
   }
 
   .markdown-content th,
   .markdown-content td {
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--muted);
     @apply py-4 pr-4;
     vertical-align: top;
   }
   .markdown-content hr {
     @apply my-12;
-    border-color: var(--line);
+    border-color: var(--muted);
   }
 
   .markdown-content .callout {
     display: flex;
     max-width: 42rem;
-    border: 1px solid var(--line);
+    border: 1px solid var(--muted);
     background: var(--surface);
     @apply gap-4 p-4;
   }
@@ -148,7 +148,7 @@
 
   .markdown-content details.toggle > summary {
     cursor: pointer;
-    color: var(--ink);
+    color: var(--accent);
     font-weight: 600;
   }
 }

@@ -9,10 +9,6 @@ export default async function PhotographyPage() {
 
   return (
     <PageContainer>
-      <header>
-        <h1 className="page-title">Photography</h1>
-      </header>
-
       {projects.length > 0 ? (
         <ProjectList projects={projects} />
       ) : (
