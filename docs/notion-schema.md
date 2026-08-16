@@ -11,7 +11,7 @@ the sync reads only database entries and their page bodies.
 
 - `Status` must contain the options **Draft** and **Published**. Draft entries
 sync to PostgreSQL but are excluded from public queries.
-- `Published` is optional. Public lists sort by it, then by creation time.
+- `Published` is optional. Posts and photos sort by it, then by creation time.
 - `Slug` is normalized by the sync Worker. When empty, it falls back to a
   slugified title. Previous slugs are retained for permanent redirects and
   reserved against reuse by another entry.
@@ -45,8 +45,13 @@ preview or hero image.
 
 Photography Projects use the same properties as Posts except `Tags`. They do
 not have a `Category` property because their database defines their content
-type. External project links belong in the page body as normal links; there is
-no structured Links property.
+type. `Order` is a required Notion ID property; its auto-incrementing numeric
+value determines the public archive order. External project links belong in the
+page body as normal links; there is no structured Links property.
+
+| Property | Notion type | Required | Application field |
+| --- | --- | --- | --- |
+| `Order` | ID | Yes | `sortOrder` |
 
 Photography projects render at `/photography/[slug]`. The first image block
 found in body order is optional; when present, it becomes the project preview

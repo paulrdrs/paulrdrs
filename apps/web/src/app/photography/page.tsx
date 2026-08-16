@@ -1,5 +1,5 @@
 import { PageContainer } from "@/components/PageContainer"
-import { ProjectList } from "@/components/ProjectList"
+import { PhotographyProjectList } from "@/components/PhotographyProjectList"
 import { getPublishedProjects } from "@/db/content"
 
 export const dynamic = "force-dynamic"
@@ -10,7 +10,7 @@ export default async function PhotographyPage() {
   return (
     <PageContainer>
       {projects.length > 0 ? (
-        <ProjectList projects={projects} />
+        <PhotographyProjectList projects={projects} />
       ) : (
         <div className="empty-state">
           No photography projects published yet.

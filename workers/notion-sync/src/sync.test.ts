@@ -59,6 +59,7 @@ const baseProject = {
   publishedAt: null,
   seoDescription: null,
   seoTitle: null,
+  sortOrder: 1,
   slug: "project-slug",
   status: "draft" as const,
   title: "Title"
@@ -373,7 +374,7 @@ describe("project sync", () => {
 
     expect(summary).toEqual({ errors: [], synced: 1 })
     expect(values).toHaveBeenCalledWith(
-      expect.objectContaining({ category: "software" })
+      expect.objectContaining({ category: "software", sortOrder: 1 })
     )
     expect(update).toHaveBeenCalledWith(projects)
   })

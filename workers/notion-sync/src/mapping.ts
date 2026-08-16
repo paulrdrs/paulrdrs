@@ -34,6 +34,7 @@ export type MappedPost = MappedContent & {
 
 export type MappedProject = MappedContent & {
   readonly category: ProjectCategory
+  readonly sortOrder: number
 }
 
 export type MappedPage = {
@@ -81,6 +82,10 @@ const relationPropertySchema = z.object({
   relation: z.array(z.object({ id: z.string() }))
 })
 
+const uniqueIdPropertySchema = z.object({
+  unique_id: z.object({ number: z.number().int().positive() })
+})
+
 const getRichText = (page: NotionPage, name: string) =>
   textPropertySchema.parse(page.properties[name]).rich_text.trim()
 
@@ -117,6 +122,9 @@ const getPublishedAt = (page: NotionPage): Date | null => {
   const date = datePropertySchema.parse(page.properties.Published).date
   return date ? new Date(date.start) : null
 }
+
+const getProjectSortOrder = (page: NotionPage): number =>
+  uniqueIdPropertySchema.parse(page.properties.Order).unique_id.number
 
 const getTags = (page: NotionPage): string[] =>
   multiSelectPropertySchema
@@ -178,7 +186,8 @@ export const mapProjectPage = (
 ): MappedProject =>
   withMalformedPageError("project", page, () => ({
     ...mapContentProperties(page),
-    category
+    category,
+    sortOrder: getProjectSortOrder(page)
   }))
 
 export const mapPagePage = (page: NotionPage): MappedPage =>
