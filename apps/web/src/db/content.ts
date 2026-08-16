@@ -8,7 +8,7 @@ import {
   posts,
   projects
 } from "@paulrdrs/database/schema"
-import { and, desc, eq, sql } from "drizzle-orm"
+import { and, asc, desc, eq, sql } from "drizzle-orm"
 import { unstable_cache } from "next/cache"
 import { cache } from "react"
 import type { HomeFeaturedSelection } from "@/site/hero"
@@ -95,7 +95,11 @@ const getPublishedProjectsCached = unstable_cache(
             )
           : eq(projects.status, "published")
       )
-      .orderBy(desc(projects.publishedAt), desc(projects.createdAt))
+      .orderBy(
+        asc(projects.sortOrder),
+        desc(projects.publishedAt),
+        desc(projects.createdAt)
+      )
 
     return rows.map(({ createdAt, publishedAt, ...project }) => ({
       ...project,

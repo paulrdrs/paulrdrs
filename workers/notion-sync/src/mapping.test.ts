@@ -22,6 +22,9 @@ const multiSelect = (names: string[]) => ({
   multi_select: names.map((name) => ({ name }))
 })
 const date = (start: string | null) => ({ date: start ? { start } : null })
+const uniqueId = (number: number) => ({
+  unique_id: { number, prefix: null }
+})
 const basePostProperties = (overrides: Record<string, unknown> = {}) => ({
   Excerpt: richText("An excerpt"),
   "SEO Description": richText("SEO description"),
@@ -124,6 +127,7 @@ describe("mapPostPage", () => {
 describe("mapProjectPage", () => {
   const baseProjectProperties = (overrides: Record<string, unknown> = {}) => ({
     ...basePostProperties(),
+    Order: uniqueId(1),
     ...overrides
   })
 
@@ -132,6 +136,7 @@ describe("mapProjectPage", () => {
     const mapped = mapProjectPage(page, "software")
 
     expect(mapped.category).toBe("software")
+    expect(mapped.sortOrder).toBe(1)
     expect(mapped.status).toBe("published")
     expect(mapped).not.toHaveProperty("tags")
     expect(mapped).not.toHaveProperty("links")
@@ -141,6 +146,17 @@ describe("mapProjectPage", () => {
     const page = buildPage(baseProjectProperties(), "project-2")
 
     expect(mapProjectPage(page, "photography").category).toBe("photography")
+  })
+
+  it("requires a positive Order unique ID", () => {
+    const page = buildPage(
+      baseProjectProperties({ Order: undefined }),
+      "project-3"
+    )
+
+    expect(() => mapProjectPage(page, "software")).toThrow(
+      /Malformed Notion project page project-3/
+    )
   })
 })
 

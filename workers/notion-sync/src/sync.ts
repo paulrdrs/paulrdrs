@@ -210,6 +210,7 @@ const upsertProject = async (
     publishedAt: mapped.publishedAt,
     seoDescription: mapped.seoDescription,
     seoTitle: mapped.seoTitle,
+    sortOrder: mapped.sortOrder,
     slug,
     slugHistory,
     status: mapped.status,

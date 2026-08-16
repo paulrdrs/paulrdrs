@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Eyebrow } from "./Eyebrow"
 
-type ProjectSnippetProps = {
+type PhotographyProjectSnippetProps = {
   coverAltText?: string | null
   coverAttribution?: string | null
   coverMediaId?: string | null
@@ -12,7 +12,7 @@ type ProjectSnippetProps = {
   title: string
 }
 
-export const ProjectSnippet = ({
+export const PhotographyProjectSnippet = ({
   coverAltText,
   coverAttribution,
   coverMediaId,
@@ -20,7 +20,7 @@ export const ProjectSnippet = ({
   href,
   label,
   title
-}: ProjectSnippetProps) => (
+}: PhotographyProjectSnippetProps) => (
   <Link
     aria-label={title}
     className="group mx-4 my-2 flex flex-col gap-4 rounded border border-surface bg-surface p-4 pb-6 shadow-lift hover:border-frontier"

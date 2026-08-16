@@ -104,6 +104,7 @@ export const projects = pgTable(
     }),
     seoTitle: text("seo_title"),
     seoDescription: text("seo_description"),
+    sortOrder: integer("sort_order").notNull().default(0),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     body: jsonb("body").$type<NotionBlockTree>(),
     notionPageId: text("notion_page_id"),
@@ -116,10 +117,10 @@ export const projects = pgTable(
   (table) => [
     uniqueIndex("projects_category_slug_unique").on(table.category, table.slug),
     uniqueIndex("projects_notion_page_id_unique").on(table.notionPageId),
-    index("projects_category_status_published_at_idx").on(
+    index("projects_category_status_sort_order_idx").on(
       table.category,
       table.status,
-      table.publishedAt
+      table.sortOrder
     )
   ]
 )
