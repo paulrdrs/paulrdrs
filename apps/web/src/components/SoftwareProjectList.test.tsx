@@ -1,9 +1,9 @@
-import { render, screen } from "@testing-library/react"
+import { render } from "@testing-library/react"
 import { SoftwareProjectList } from "./SoftwareProjectList"
 
 describe("SoftwareProjectList", () => {
   it("uses two columns when more than one project is present", () => {
-    render(
+    const { container } = render(
       <SoftwareProjectList
         projects={[
           {
@@ -31,16 +31,18 @@ describe("SoftwareProjectList", () => {
       />
     )
 
-    const items = screen.getAllByRole("listitem")
+    const projectList = container.querySelector(
+      '[data-component="SoftwareProjectList"]'
+    )
 
-    expect(screen.getByRole("list")).toHaveClass("flex", "flex-wrap")
-    expect(items[0]).toHaveClass("w-full", "sm:w-1/2")
-    expect(items[1]).toHaveClass("w-full", "sm:w-1/2")
-    expect(items[2]).toHaveClass("w-full", "sm:w-1/2")
+    expect(projectList).toHaveClass("flex", "flex-wrap")
+    expect(projectList?.children[0]).toHaveClass("w-full", "sm:w-1/2")
+    expect(projectList?.children[1]).toHaveClass("w-full", "sm:w-1/2")
+    expect(projectList?.children[2]).toHaveClass("w-full", "sm:w-1/2")
   })
 
   it("keeps a single project full width", () => {
-    render(
+    const { container } = render(
       <SoftwareProjectList
         projects={[
           {
@@ -54,7 +56,11 @@ describe("SoftwareProjectList", () => {
       />
     )
 
-    expect(screen.getByRole("listitem")).toHaveClass("w-full")
-    expect(screen.getByRole("listitem")).not.toHaveClass("sm:w-1/2")
+    const projectList = container.querySelector(
+      '[data-component="SoftwareProjectList"]'
+    )
+
+    expect(projectList?.children[0]).toHaveClass("w-full")
+    expect(projectList?.children[0]).not.toHaveClass("sm:w-1/2")
   })
 })

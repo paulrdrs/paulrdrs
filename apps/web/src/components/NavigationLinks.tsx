@@ -40,10 +40,8 @@ export const NavigationLinks = ({ items }: NavigationLinksProps) => {
     return (
       <Link
         aria-current={isActive ? "page" : undefined}
-        className={`relative shrink-0 py-2 font-mono uppercase tracking-widest ${
-          isActive
-            ? "font-black text-accent"
-            : "font-bold text-muted hover:text-accent"
+        className={`relative shrink-0 p-2 font-mono uppercase tracking-widest ${
+          isActive ? "font-black" : "font-bold text-muted hover:text-ink"
         }`}
         href={item.href}
         key={item.href}

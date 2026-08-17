@@ -24,20 +24,19 @@ const formatDate = (date: Date | null) =>
     : "Undated"
 
 export const PostList = ({ posts }: PostListProps) => (
-  <ol data-content-list="blog-posts">
+  <div data-content-list="blog-posts" className="flex flex-col gap-4">
     {posts.map((post) => (
-      <li key={post.id}>
-        <PostSnippet
-          coverAltText={post.coverAltText}
-          coverAttribution={post.coverAttribution}
-          coverMediaId={post.coverMediaId}
-          excerpt={post.excerpt}
-          href={`/blog/${post.slug}`}
-          label={formatDate(post.publishedAt)}
-          tags={post.tags}
-          title={post.title}
-        />
-      </li>
+      <PostSnippet
+        key={post.id}
+        coverAltText={post.coverAltText}
+        coverAttribution={post.coverAttribution}
+        coverMediaId={post.coverMediaId}
+        excerpt={post.excerpt}
+        href={`/blog/${post.slug}`}
+        label={formatDate(post.publishedAt)}
+        tags={post.tags}
+        title={post.title}
+      />
     ))}
-  </ol>
+  </div>
 )

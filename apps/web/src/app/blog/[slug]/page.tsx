@@ -74,7 +74,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <nav aria-label="Post tags" className="flex flex-wrap gap-1">
               {post.tags.map((tag) => (
                 <Link
-                  className="rounded-sm border border-frontier bg-canvas px-2 font-medium font-mono text-muted text-xs uppercase tracking-widest hover:border-accent hover:text-accent"
+                  className="rounded-sm border border-limit bg-canvas px-2 font-medium font-mono text-muted text-xs uppercase tracking-widest"
                   href={`/blog/tag/${encodeURIComponent(tag)}`}
                   key={tag}
                 >

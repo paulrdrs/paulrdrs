@@ -15,7 +15,7 @@ beforeEach(() => {
 })
 
 describe("Home", () => {
-  it("renders the ordered Notion selections without Home body copy", async () => {
+  it("renders each Notion selection with its content-type snippet", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
       body: [
         {
@@ -30,7 +30,8 @@ describe("Home", () => {
       metadata: {
         featuredContent: [
           { id: "post-id", kind: "post" },
-          { id: "project-id", kind: "project" }
+          { id: "software-project-id", kind: "project" },
+          { id: "photography-project-id", kind: "project" }
         ]
       },
       publishedAt: new Date("2026-01-01"),
@@ -45,8 +46,9 @@ describe("Home", () => {
         href: "/blog/post-slug",
         id: "post-id",
         kind: "post",
-        label: "Blog Post",
+        publishedAt: "2026-01-02T00:00:00.000Z" as unknown as Date,
         slug: "post-slug",
+        tags: ["Design"],
         title: "Featured post"
       })
       .mockResolvedValueOnce({
@@ -56,27 +58,47 @@ describe("Home", () => {
         coverMediaId: null,
         excerpt: "A project excerpt.",
         href: "/software/project-slug",
-        id: "project-id",
+        id: "software-project-id",
         kind: "project",
-        label: "Software Project",
         slug: "project-slug",
         title: "Featured project"
       })
+      .mockResolvedValueOnce({
+        category: "photography",
+        coverAltText: null,
+        coverAttribution: null,
+        coverMediaId: null,
+        excerpt: "A photography project excerpt.",
+        href: "/photography/project-slug",
+        id: "photography-project-id",
+        kind: "project",
+        slug: "project-slug",
+        title: "Featured photography project"
+      })
 
-    const { container } = render(await Home())
+    render(await Home())
 
+    expect(screen.getByRole("link", { name: "Featured post" })).toHaveAttribute(
+      "href",
+      "/blog/post-slug"
+    )
     expect(
-      container.querySelector('[data-feature-position="1"]')
-    ).toHaveAttribute("href", "/blog/post-slug")
-    expect(
-      container.querySelector('[data-feature-position="2"]')
+      screen.getByRole("link", { name: "Featured project" })
     ).toHaveAttribute("href", "/software/project-slug")
+    expect(
+      screen.getByRole("link", { name: "Featured photography project" })
+    ).toHaveAttribute("href", "/photography/project-slug")
     expect(
       screen.getByRole("heading", { name: "Featured post" })
     ).toBeInTheDocument()
     expect(
       screen.getByRole("heading", { name: "Featured project" })
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "Featured photography project" })
+    ).toBeInTheDocument()
+    expect(screen.getAllByText("Jan 2, 2026")).toHaveLength(2)
+    expect(screen.getByText("Design")).toBeInTheDocument()
     expect(screen.queryByText("Home copy title")).not.toBeInTheDocument()
   })
 

@@ -13,7 +13,7 @@ describe("TopNavBar", () => {
     vi.clearAllMocks()
   })
 
-  it("renders fixed links and enabled section links", async () => {
+  it("renders the brand, Home link, and enabled section links", async () => {
     getSiteNavigationSettingsMock.mockResolvedValue({
       blogEnabled: true,
       photographyEnabled: true,
@@ -23,7 +23,8 @@ describe("TopNavBar", () => {
 
     render(await TopNavBar())
 
-    expect(screen.getByRole("link", { name: "paulrdrs" })).toHaveAttribute(
+    expect(screen.getByText("/paulrdrs")).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute(
       "href",
       "/"
     )

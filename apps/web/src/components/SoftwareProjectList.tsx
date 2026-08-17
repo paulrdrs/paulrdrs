@@ -15,9 +15,9 @@ type SoftwareProjectListProps = {
 }
 
 export const SoftwareProjectList = ({ projects }: SoftwareProjectListProps) => (
-  <ul className="flex flex-wrap" data-component="SoftwareProjectList">
+  <div className="flex flex-wrap" data-component="SoftwareProjectList">
     {projects.map((project) => (
-      <li
+      <div
         className={projects.length === 1 ? "w-full" : "w-full sm:w-1/2"}
         key={project.id}
       >
@@ -30,7 +30,7 @@ export const SoftwareProjectList = ({ projects }: SoftwareProjectListProps) => (
           label="software project"
           title={project.title}
         />
-      </li>
+      </div>
     ))}
-  </ul>
+  </div>
 )

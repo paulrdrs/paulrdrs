@@ -25,12 +25,11 @@ describe("BlogPage", () => {
       }
     ])
 
-    render(await BlogPage())
+    const { container } = render(await BlogPage())
 
-    expect(screen.getByRole("list")).toHaveAttribute(
-      "data-content-list",
-      "blog-posts"
-    )
+    expect(
+      container.querySelector('[data-content-list="blog-posts"]')
+    ).toHaveClass("flex", "flex-col")
     expect(screen.getByRole("link", { name: "Hello Post" })).toHaveAttribute(
       "href",
       "/blog/hello-post"
