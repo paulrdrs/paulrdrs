@@ -434,7 +434,7 @@ describe("syncPages", () => {
     expect(values).toHaveBeenCalledWith({
       body: [],
       key: "home",
-      metadata: { featuredContent: [] },
+      metadata: {},
       notionPageId: "page-1",
       publishedAt: null,
       status: "draft",
@@ -443,7 +443,7 @@ describe("syncPages", () => {
     expect(update).toHaveBeenCalledWith(pages)
   })
 
-  it("stores up to three ordered published post and project links for Home", async () => {
+  it("stores Home blocks without resolving linked pages", async () => {
     mockNotionClient(["page-1"])
     fetchPageBlocksMock.mockResolvedValue([
       {
@@ -479,27 +479,21 @@ describe("syncPages", () => {
       status: "published",
       title: "Home"
     })
-    const { values } = setupDb([
-      [{ id: "post-row-1" }],
-      [],
-      [{ id: "project-row-1" }]
-    ])
+    const { values } = setupDb([])
 
     await expect(sync.syncPages()).resolves.toEqual({ errors: [], synced: 1 })
     expect(values).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: [],
-        metadata: {
-          featuredContent: [
-            { id: "post-row-1", kind: "post" },
-            { id: "project-row-1", kind: "project" }
-          ]
-        }
+        body: expect.arrayContaining([
+          expect.objectContaining({ id: "link-1", type: "link_to_page" }),
+          expect.objectContaining({ id: "link-2", type: "paragraph" })
+        ]),
+        metadata: {}
       })
     )
   })
 
-  it("rejects duplicate Home links and preserves the existing row", async () => {
+  it("allows duplicate Home links in their authored positions", async () => {
     mockNotionClient(["page-1"])
     fetchPageBlocksMock.mockResolvedValue([
       {
@@ -522,16 +516,21 @@ describe("syncPages", () => {
       status: "published",
       title: "Home"
     })
-    const { insert } = setupDb([])
+    const { insert, values } = setupDb([])
 
-    await expect(sync.syncPages()).resolves.toEqual({
-      errors: ["Home page contains duplicate featured links"],
-      synced: 0
-    })
-    expect(insert).not.toHaveBeenCalled()
+    await expect(sync.syncPages()).resolves.toEqual({ errors: [], synced: 1 })
+    expect(insert).toHaveBeenCalledTimes(1)
+    expect(values).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.arrayContaining([
+          expect.objectContaining({ id: "link-1" }),
+          expect.objectContaining({ id: "link-2" })
+        ])
+      })
+    )
   })
 
-  it("rejects a Home link that is not a published post or project", async () => {
+  it("does not validate Home link targets during sync", async () => {
     mockNotionClient(["page-1"])
     fetchPageBlocksMock.mockResolvedValue([
       {
@@ -548,15 +547,17 @@ describe("syncPages", () => {
       status: "published",
       title: "Home"
     })
-    const { insert } = setupDb([[], []])
+    const { insert, values } = setupDb([])
 
-    await expect(sync.syncPages()).resolves.toEqual({
-      errors: [
-        "Home featured target missing-page is not a published post or project"
-      ],
-      synced: 0
-    })
-    expect(insert).not.toHaveBeenCalled()
+    await expect(sync.syncPages()).resolves.toEqual({ errors: [], synced: 1 })
+    expect(insert).toHaveBeenCalledTimes(1)
+    expect(values).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: [
+          expect.objectContaining({ id: "link-1", pageId: "missing-page" })
+        ]
+      })
+    )
   })
 
   it("prepares at most three pages concurrently and persists them all", async () => {

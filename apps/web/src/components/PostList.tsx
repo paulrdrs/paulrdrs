@@ -8,6 +8,7 @@ type PostListItem = {
   id: string
   publishedAt: Date | null
   slug: string
+  tags: string[]
   title: string
 }
 
@@ -33,6 +34,7 @@ export const PostList = ({ posts }: PostListProps) => (
           excerpt={post.excerpt}
           href={`/blog/${post.slug}`}
           label={formatDate(post.publishedAt)}
+          tags={post.tags}
           title={post.title}
         />
       </li>

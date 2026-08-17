@@ -31,6 +31,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: post.publishedAt ?? post.createdAt
   }))
 
+  const tagEntries: MetadataRoute.Sitemap = [
+    ...new Set(posts.flatMap((post) => post.tags))
+  ].map((tag) => ({
+    url: `${base}/blog/tag/${encodeURIComponent(tag)}`
+  }))
+
   const projectEntries: MetadataRoute.Sitemap = projects.map((project) => ({
     url: `${base}/${project.category}/${project.slug}`,
     lastModified: project.publishedAt ?? project.createdAt
@@ -41,5 +47,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: photo.publishedAt ?? photo.createdAt
   }))
 
-  return [...staticEntries, ...postEntries, ...projectEntries, ...photoEntries]
+  return [
+    ...staticEntries,
+    ...postEntries,
+    ...tagEntries,
+    ...projectEntries,
+    ...photoEntries
+  ]
 }

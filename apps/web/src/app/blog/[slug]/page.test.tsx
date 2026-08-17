@@ -34,6 +34,7 @@ const buildPost = (overrides: Record<string, unknown> = {}) => ({
   coverAltText: null,
   coverAttribution: null,
   coverMediaId: null,
+  tags: ["TypeScript", "Web development"],
   publishedAt: new Date("2026-01-01"),
   createdAt: new Date("2026-01-01"),
   ...overrides
@@ -80,6 +81,13 @@ describe("BlogPostPage", () => {
       "datetime",
       "2026-01-01T00:00:00.000Z"
     )
+    expect(screen.getByRole("link", { name: "TypeScript" })).toHaveAttribute(
+      "href",
+      "/blog/tag/TypeScript"
+    )
+    expect(
+      screen.getByRole("link", { name: "Web development" })
+    ).toHaveAttribute("href", "/blog/tag/Web%20development")
     expect(screen.queryByText("Body heading")).not.toBeInTheDocument()
   })
 

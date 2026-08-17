@@ -1,13 +1,18 @@
 import { render, screen } from "@testing-library/react"
-import { getFeaturedHomeContentItem, getPublishedPageByKey } from "@/db/content"
+import {
+  getPublishedHomeLinkedContentItem,
+  getPublishedPageByKey
+} from "@/db/content"
 import Home from "./page"
 
 vi.mock("@/db/content", () => ({
-  getFeaturedHomeContentItem: vi.fn(),
+  getPublishedHomeLinkedContentItem: vi.fn(),
   getPublishedPageByKey: vi.fn()
 }))
 
-const getFeaturedHomeContentItemMock = vi.mocked(getFeaturedHomeContentItem)
+const getPublishedHomeLinkedContentItemMock = vi.mocked(
+  getPublishedHomeLinkedContentItem
+)
 const getPublishedPageByKeyMock = vi.mocked(getPublishedPageByKey)
 
 beforeEach(() => {
@@ -15,53 +20,72 @@ beforeEach(() => {
 })
 
 describe("Home", () => {
-  it("renders the ordered Notion selections without Home body copy", async () => {
+  it("renders text blocks and linked content in Notion order", async () => {
     getPublishedPageByKeyMock.mockResolvedValue({
       body: [
         {
           children: [],
+          id: "heading",
+          richText: [
+            {
+              annotations: {
+                bold: false,
+                code: false,
+                color: "default",
+                italic: false,
+                strikethrough: false,
+                underline: false
+              },
+              href: null,
+              text: "Home copy title"
+            }
+          ],
+          type: "heading_1"
+        },
+        {
+          children: [],
+          id: "post-link",
+          pageId: "notion-post-id",
+          type: "link_to_page"
+        },
+        {
+          children: [],
           id: "body-copy",
-          richText: [],
+          richText: [
+            {
+              annotations: {
+                bold: false,
+                code: false,
+                color: "default",
+                italic: false,
+                strikethrough: false,
+                underline: false
+              },
+              href: null,
+              text: "Text after the featured post"
+            }
+          ],
           type: "paragraph"
         }
       ],
       id: "page-id",
       key: "home",
-      metadata: {
-        featuredContent: [
-          { id: "post-id", kind: "post" },
-          { id: "project-id", kind: "project" }
-        ]
-      },
+      metadata: {},
       publishedAt: new Date("2026-01-01"),
       title: "Home copy title"
     })
-    getFeaturedHomeContentItemMock
-      .mockResolvedValueOnce({
-        coverAltText: null,
-        coverAttribution: null,
-        coverMediaId: null,
-        excerpt: "A post excerpt.",
-        href: "/blog/post-slug",
-        id: "post-id",
-        kind: "post",
-        label: "Blog Post",
-        slug: "post-slug",
-        title: "Featured post"
-      })
-      .mockResolvedValueOnce({
-        category: "software",
-        coverAltText: null,
-        coverAttribution: null,
-        coverMediaId: null,
-        excerpt: "A project excerpt.",
-        href: "/software/project-slug",
-        id: "project-id",
-        kind: "project",
-        label: "Software Project",
-        slug: "project-slug",
-        title: "Featured project"
-      })
+    getPublishedHomeLinkedContentItemMock.mockResolvedValueOnce({
+      coverAltText: null,
+      coverAttribution: null,
+      coverMediaId: null,
+      excerpt: "A post excerpt.",
+      href: "/blog/post-slug",
+      id: "post-id",
+      kind: "post",
+      label: "Blog Post",
+      slug: "post-slug",
+      title: "Featured post"
+    })
 
     const { container } = render(await Home())
 
@@ -69,23 +93,90 @@ describe("Home", () => {
       container.querySelector('[data-feature-position="1"]')
     ).toHaveAttribute("href", "/blog/post-slug")
     expect(
-      container.querySelector('[data-feature-position="2"]')
-    ).toHaveAttribute("href", "/software/project-slug")
-    expect(
       screen.getByRole("heading", { name: "Featured post" })
     ).toBeInTheDocument()
     expect(
-      screen.getByRole("heading", { name: "Featured project" })
+      screen.getByRole("heading", { name: "Home copy title" })
     ).toBeInTheDocument()
-    expect(screen.queryByText("Home copy title")).not.toBeInTheDocument()
+    expect(screen.getByText("Text after the featured post")).toBeInTheDocument()
+    const contentBlocks = container.querySelector("article")?.children
+    expect(contentBlocks?.[0]).toHaveTextContent("Home copy title")
+    expect(contentBlocks?.[1]).toHaveAttribute("href", "/blog/post-slug")
+    expect(contentBlocks?.[2]).toHaveTextContent("Text after the featured post")
+    expect(getPublishedHomeLinkedContentItemMock).toHaveBeenCalledWith(
+      "notion-post-id"
+    )
   })
 
-  it("renders the empty state when Home has no valid selections", async () => {
+  it("keeps surrounding Home content when a page link is unavailable", async () => {
+    getPublishedPageByKeyMock.mockResolvedValue({
+      body: [
+        {
+          children: [],
+          id: "before",
+          richText: [
+            {
+              annotations: {
+                bold: false,
+                code: false,
+                color: "default",
+                italic: false,
+                strikethrough: false,
+                underline: false
+              },
+              href: null,
+              text: "Before"
+            }
+          ],
+          type: "paragraph"
+        },
+        {
+          children: [],
+          id: "missing-link",
+          pageId: "missing-page",
+          type: "link_to_page"
+        },
+        {
+          children: [],
+          id: "after",
+          richText: [
+            {
+              annotations: {
+                bold: false,
+                code: false,
+                color: "default",
+                italic: false,
+                strikethrough: false,
+                underline: false
+              },
+              href: null,
+              text: "After"
+            }
+          ],
+          type: "paragraph"
+        }
+      ],
+      id: "page-id",
+      key: "home",
+      metadata: {},
+      publishedAt: new Date("2026-01-01"),
+      title: "Home"
+    })
+    getPublishedHomeLinkedContentItemMock.mockResolvedValueOnce(undefined)
+
+    const { container } = render(await Home())
+
+    expect(screen.getByText("Before")).toBeInTheDocument()
+    expect(screen.getByText("After")).toBeInTheDocument()
+    expect(container.querySelector("[data-feature-position]")).toBeNull()
+  })
+
+  it("renders the empty state when Home has no published body", async () => {
     getPublishedPageByKeyMock.mockResolvedValue(undefined)
 
     render(await Home())
 
     expect(screen.getByText("nothing to see here")).toBeInTheDocument()
-    expect(getFeaturedHomeContentItemMock).not.toHaveBeenCalled()
+    expect(getPublishedHomeLinkedContentItemMock).not.toHaveBeenCalled()
   })
 })

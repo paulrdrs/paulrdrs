@@ -185,6 +185,28 @@ describe("NotionBlocks", () => {
     expect(screen.getByText("Hidden detail")).toBeInTheDocument()
   })
 
+  it("delegates native page links to the supplied renderer", () => {
+    const pageLink = {
+      children: [],
+      id: nextId(),
+      pageId: "page-id",
+      type: "link_to_page" as const
+    }
+
+    render(
+      <NotionBlocks
+        blocks={[paragraph("Before"), pageLink, paragraph("After")]}
+        renderLinkToPage={(block) => (
+          <a href={`/content/${block.pageId}`}>Featured content</a>
+        )}
+      />
+    )
+
+    expect(
+      screen.getByRole("link", { name: "Featured content" })
+    ).toHaveAttribute("href", "/content/page-id")
+  })
+
   it("renders nothing for an unknown block type", () => {
     const { container } = render(
       <NotionBlocks

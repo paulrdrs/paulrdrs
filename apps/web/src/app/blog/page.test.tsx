@@ -19,6 +19,7 @@ describe("BlogPage", () => {
         coverAltText: "A quiet morning desk",
         coverAttribution: null,
         coverMediaId: "post-media-id",
+        tags: ["TypeScript"],
         publishedAt: new Date("2026-01-01"),
         createdAt: new Date("2026-01-01")
       }
@@ -35,6 +36,7 @@ describe("BlogPage", () => {
       "/blog/hello-post"
     )
     expect(screen.getByText("A published post.")).toBeInTheDocument()
+    expect(screen.getByText("TypeScript")).toBeInTheDocument()
     expect(
       screen
         .getByRole("img", { name: "A quiet morning desk" })

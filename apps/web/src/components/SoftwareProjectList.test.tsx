@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { SoftwareProjectList } from "./SoftwareProjectList"
 
 describe("SoftwareProjectList", () => {
-  it("makes the first project full width and later projects two columns", () => {
+  it("uses two columns when more than one project is present", () => {
     render(
       <SoftwareProjectList
         projects={[
@@ -34,9 +34,27 @@ describe("SoftwareProjectList", () => {
     const items = screen.getAllByRole("listitem")
 
     expect(screen.getByRole("list")).toHaveClass("flex", "flex-wrap")
-    expect(items[0]).toHaveClass("w-full")
-    expect(items[0]).not.toHaveClass("sm:w-1/2")
+    expect(items[0]).toHaveClass("w-full", "sm:w-1/2")
     expect(items[1]).toHaveClass("w-full", "sm:w-1/2")
     expect(items[2]).toHaveClass("w-full", "sm:w-1/2")
+  })
+
+  it("keeps a single project full width", () => {
+    render(
+      <SoftwareProjectList
+        projects={[
+          {
+            coverMediaId: null,
+            excerpt: null,
+            id: "only-project",
+            slug: "only-project",
+            title: "Only project"
+          }
+        ]}
+      />
+    )
+
+    expect(screen.getByRole("listitem")).toHaveClass("w-full")
+    expect(screen.getByRole("listitem")).not.toHaveClass("sm:w-1/2")
   })
 })
