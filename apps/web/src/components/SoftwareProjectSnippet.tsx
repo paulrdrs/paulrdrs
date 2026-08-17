@@ -28,7 +28,7 @@ export const SoftwareProjectSnippet = ({
     data-component="SoftwareProjectSnippet"
   >
     <div
-      className="relative flex aspect-square overflow-hidden rounded bg-surface p-4 sm:aspect-2/1"
+      className="relative flex aspect-square overflow-hidden rounded bg-surface p-4"
       data-testid="content"
     >
       {coverMediaId ? (
@@ -40,18 +40,21 @@ export const SoftwareProjectSnippet = ({
             sizes="(min-width: 896px) 896px, 100vw"
             src={`/media/${coverMediaId}`}
           />
-          <div aria-hidden="true" className="absolute inset-0 bg-ink/40" />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-ink/50 transition-colors duration-300 ease-out group-hover:bg-ink/0"
+          />
         </>
       ) : null}
       <div className="relative z-10 mt-auto flex flex-col gap-1">
         <Eyebrow label={label} />
 
-        <div className="flex flex-col gap-2 rounded bg-surface px-2 py-1">
-          <h2 className="line-clamp-2 font-black font-mono text-2xl text-ink sm:text-3xl">
+        <div className="flex flex-col gap-1 rounded bg-canvas p-2">
+          <h2 className="line-clamp-2 font-bold font-mono text-2xl text-ink sm:text-3xl">
             {title}
           </h2>
           {excerpt ? (
-            <p className="line-clamp-3 max-w-xl font-medium font-mono text-muted">
+            <p className="line-clamp-3 max-w-xl font-medium font-mono text-muted leading-6">
               {excerpt}
             </p>
           ) : null}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { notFound, permanentRedirect } from "next/navigation"
 import { ContentBody } from "@/components/ContentBody"
 import { ContentImage } from "@/components/ContentImage"
@@ -69,6 +70,19 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <Eyebrow label={formatDate(displayDate)} />
           </time>
           <h1 className="text-balance font-bold text-4xl">{post.title}</h1>
+          {post.tags.length > 0 ? (
+            <nav aria-label="Post tags" className="flex flex-wrap gap-1">
+              {post.tags.map((tag) => (
+                <Link
+                  className="rounded-sm border border-frontier bg-canvas px-2 font-medium font-mono text-muted text-xs uppercase tracking-widest hover:border-accent hover:text-accent"
+                  href={`/blog/tag/${encodeURIComponent(tag)}`}
+                  key={tag}
+                >
+                  {tag}
+                </Link>
+              ))}
+            </nav>
+          ) : null}
           {post.excerpt ? (
             <p className="text-lg text-muted leading-6">{post.excerpt}</p>
           ) : null}

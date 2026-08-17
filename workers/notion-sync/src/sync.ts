@@ -232,15 +232,11 @@ const upsertPage = async (
   body: NotionBlockTree
 ) => {
   const { db } = runtime
-  const featuredContent =
-    mapped.key === "home"
-      ? await resolveHomeFeaturedContent(runtime, body)
-      : undefined
 
   const values = {
-    body: mapped.key === "home" ? [] : body,
+    body,
     key: mapped.key,
-    metadata: featuredContent === undefined ? {} : { featuredContent },
+    metadata: {},
     notionPageId: mapped.notionPageId,
     publishedAt: mapped.publishedAt,
     status: mapped.status,
@@ -254,124 +250,6 @@ const upsertPage = async (
       set: { ...values, updatedAt: new Date() },
       target: pages.key
     })
-}
-
-const toNotionPageId = (href: string | null): string | null => {
-  if (!href) {
-    return null
-  }
-
-  let url: URL
-
-  try {
-    url = new URL(href)
-  } catch {
-    return null
-  }
-
-  if (
-    url.hostname !== "app.notion.com" &&
-    !url.hostname.endsWith(".notion.so") &&
-    url.hostname !== "notion.so" &&
-    !url.hostname.endsWith(".notion.site")
-  ) {
-    return null
-  }
-
-  const compactId = url.pathname.replaceAll("-", "").match(/[0-9a-f]{32}/i)?.[0]
-
-  return compactId
-    ? [
-        compactId.slice(0, 8),
-        compactId.slice(8, 12),
-        compactId.slice(12, 16),
-        compactId.slice(16, 20),
-        compactId.slice(20)
-      ].join("-")
-    : null
-}
-
-const collectLinkedPageIds = (blocks: NotionBlockTree): string[] => {
-  const linkedPageIds: string[] = []
-
-  for (const block of blocks) {
-    if (block.type === "link_to_page") {
-      linkedPageIds.push(block.pageId)
-    } else if ("richText" in block) {
-      for (const richText of block.richText) {
-        const pageId = toNotionPageId(richText.href)
-
-        if (pageId) {
-          linkedPageIds.push(pageId)
-        }
-      }
-    }
-
-    linkedPageIds.push(...collectLinkedPageIds(block.children))
-  }
-
-  return linkedPageIds
-}
-
-type HomeFeaturedSelection = {
-  readonly id: string
-  readonly kind: "post" | "project"
-}
-
-export const resolveHomeFeaturedContent = async (
-  runtime: NotionSyncRuntime,
-  body: NotionBlockTree
-): Promise<HomeFeaturedSelection[]> => {
-  const linkedPageIds = collectLinkedPageIds(body)
-
-  if (linkedPageIds.length > 3) {
-    throw new Error("Home page can feature at most three linked pages")
-  }
-
-  const targetPageIds = linkedPageIds
-
-  if (new Set(targetPageIds).size !== targetPageIds.length) {
-    throw new Error("Home page contains duplicate featured links")
-  }
-
-  const selections: HomeFeaturedSelection[] = []
-
-  for (const targetPageId of targetPageIds) {
-    const [post] = await runtime.db
-      .select({ id: posts.id })
-      .from(posts)
-      .where(
-        and(eq(posts.notionPageId, targetPageId), eq(posts.status, "published"))
-      )
-      .limit(1)
-
-    if (post) {
-      selections.push({ id: post.id, kind: "post" })
-      continue
-    }
-
-    const [project] = await runtime.db
-      .select({ id: projects.id })
-      .from(projects)
-      .where(
-        and(
-          eq(projects.notionPageId, targetPageId),
-          eq(projects.status, "published")
-        )
-      )
-      .limit(1)
-
-    if (project) {
-      selections.push({ id: project.id, kind: "project" })
-      continue
-    }
-
-    throw new Error(
-      `Home featured target ${targetPageId} is not a published post or project`
-    )
-  }
-
-  return selections
 }
 
 const findFirstImageBlock = (blocks: NotionBlockTree): ImageBlock | null => {

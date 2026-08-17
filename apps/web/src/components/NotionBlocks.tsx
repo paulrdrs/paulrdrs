@@ -1,5 +1,6 @@
 import type {
   BulletedListItemBlock,
+  LinkToPageBlock,
   NotionBlock,
   NotionBlockTree,
   NumberedListItemBlock
@@ -10,6 +11,7 @@ import { NotionRichText } from "@/components/NotionRichText"
 import { richTextToPlainText } from "@/lib/content"
 
 type ListItemBlock = BulletedListItemBlock | NumberedListItemBlock
+type LinkToPageRenderer = (block: LinkToPageBlock) => ReactNode
 
 function isListItem(block: NotionBlock): block is ListItemBlock {
   return (
@@ -17,14 +19,31 @@ function isListItem(block: NotionBlock): block is ListItemBlock {
   )
 }
 
-function BlockChildren({ block }: { block: NotionBlock }) {
+function BlockChildren({
+  block,
+  renderLinkToPage
+}: {
+  block: NotionBlock
+  renderLinkToPage: LinkToPageRenderer | undefined
+}) {
   if (block.children.length === 0) {
     return null
   }
-  return <BlockSequence blocks={block.children} />
+  return (
+    <BlockSequence
+      blocks={block.children}
+      renderLinkToPage={renderLinkToPage}
+    />
+  )
 }
 
-function BlockItem({ block }: { block: NotionBlock }) {
+function BlockItem({
+  block,
+  renderLinkToPage
+}: {
+  block: NotionBlock
+  renderLinkToPage: LinkToPageRenderer | undefined
+}) {
   switch (block.type) {
     case "paragraph":
       return (
@@ -54,7 +73,7 @@ function BlockItem({ block }: { block: NotionBlock }) {
       return (
         <blockquote>
           <NotionRichText richText={block.richText} />
-          <BlockChildren block={block} />
+          <BlockChildren block={block} renderLinkToPage={renderLinkToPage} />
         </blockquote>
       )
     case "code":
@@ -89,7 +108,7 @@ function BlockItem({ block }: { block: NotionBlock }) {
           ) : null}
           <div>
             <NotionRichText richText={block.richText} />
-            <BlockChildren block={block} />
+            <BlockChildren block={block} renderLinkToPage={renderLinkToPage} />
           </div>
         </aside>
       )
@@ -99,9 +118,11 @@ function BlockItem({ block }: { block: NotionBlock }) {
           <summary>
             <NotionRichText richText={block.richText} />
           </summary>
-          <BlockChildren block={block} />
+          <BlockChildren block={block} renderLinkToPage={renderLinkToPage} />
         </details>
       )
+    case "link_to_page":
+      return renderLinkToPage?.(block) ?? null
     default:
       // List items are rendered by BlockSequence's grouping; unknown block
       // types render nothing.
@@ -109,7 +130,13 @@ function BlockItem({ block }: { block: NotionBlock }) {
   }
 }
 
-function BlockSequence({ blocks }: { blocks: NotionBlockTree }) {
+function BlockSequence({
+  blocks,
+  renderLinkToPage
+}: {
+  blocks: NotionBlockTree
+  renderLinkToPage: LinkToPageRenderer | undefined
+}) {
   const nodes: ReactNode[] = []
   let index = 0
 
@@ -134,7 +161,7 @@ function BlockSequence({ blocks }: { blocks: NotionBlockTree }) {
           {items.map((item) => (
             <li key={item.id}>
               <NotionRichText richText={item.richText} />
-              <BlockChildren block={item} />
+              <BlockChildren block={item} renderLinkToPage={renderLinkToPage} />
             </li>
           ))}
         </ListTag>
@@ -142,7 +169,13 @@ function BlockSequence({ blocks }: { blocks: NotionBlockTree }) {
       continue
     }
 
-    nodes.push(<BlockItem block={block} key={block.id} />)
+    nodes.push(
+      <BlockItem
+        block={block}
+        key={block.id}
+        renderLinkToPage={renderLinkToPage}
+      />
+    )
     index += 1
   }
 
@@ -151,12 +184,16 @@ function BlockSequence({ blocks }: { blocks: NotionBlockTree }) {
 
 type NotionBlocksProps = {
   blocks: NotionBlockTree
+  renderLinkToPage?: LinkToPageRenderer
 }
 
-export const NotionBlocks = ({ blocks }: NotionBlocksProps) => {
+export const NotionBlocks = ({
+  blocks,
+  renderLinkToPage
+}: NotionBlocksProps) => {
   return (
     <article className="markdown-content">
-      <BlockSequence blocks={blocks} />
+      <BlockSequence blocks={blocks} renderLinkToPage={renderLinkToPage} />
     </article>
   )
 }

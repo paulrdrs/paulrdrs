@@ -1,12 +1,12 @@
+import type { LinkToPageBlock, NotionBlockTree } from "@paulrdrs/content/blocks"
 import type { Metadata } from "next"
-import { FeaturedSnippet } from "@/components/FeaturedSnippet"
+import { HomeContent } from "@/components/HomeContent"
 import { PageContainer } from "@/components/PageContainer"
 import {
   type FeaturedHomeContentItem,
-  getFeaturedHomeContentItem,
+  getPublishedHomeLinkedContentItem,
   getPublishedPageByKey
 } from "@/db/content"
-import { getHomeFeaturedSelections } from "@/site/hero"
 
 export const dynamic = "force-dynamic"
 
@@ -20,18 +20,16 @@ export const metadata: Metadata = {
   }
 }
 
-const isFeaturedItem = (
-  item: FeaturedHomeContentItem | undefined
-): item is FeaturedHomeContentItem => item !== undefined
+const collectLinkToPageBlocks = (blocks: NotionBlockTree): LinkToPageBlock[] =>
+  blocks.flatMap((block) => [
+    ...(block.type === "link_to_page" ? [block] : []),
+    ...collectLinkToPageBlocks(block.children)
+  ])
 
 export default async function Home() {
   const homePage = await getPublishedPageByKey("home")
-  const selections = getHomeFeaturedSelections(homePage?.metadata)
-  const featuredItems = (
-    await Promise.all(selections.map(getFeaturedHomeContentItem))
-  ).filter(isFeaturedItem)
 
-  if (featuredItems.length === 0) {
+  if (!homePage?.body || homePage.body.length === 0) {
     return (
       <PageContainer>
         <span>{"nothing to see here"}</span>
@@ -39,16 +37,34 @@ export default async function Home() {
     )
   }
 
+  const linkedBlocks = collectLinkToPageBlocks(homePage.body)
+  const linkedItems = await Promise.all(
+    linkedBlocks.map(async (block, index) => ({
+      blockId: block.id,
+      item: await getPublishedHomeLinkedContentItem(block.pageId),
+      position: index + 1
+    }))
+  )
+  const featuredItems = new Map<
+    string,
+    {
+      readonly item: FeaturedHomeContentItem
+      readonly position: number
+    }
+  >()
+
+  for (const linkedItem of linkedItems) {
+    if (linkedItem.item) {
+      featuredItems.set(linkedItem.blockId, {
+        item: linkedItem.item,
+        position: linkedItem.position
+      })
+    }
+  }
+
   return (
     <PageContainer>
-      {featuredItems.map((item, index) => (
-        <FeaturedSnippet
-          {...item}
-          featuredPosition={index + 1}
-          priority={index === 0}
-          key={`${item.kind}:${item.id}`}
-        />
-      ))}
+      <HomeContent body={homePage.body} featuredItems={featuredItems} />
     </PageContainer>
   )
 }

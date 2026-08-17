@@ -11,7 +11,6 @@ import {
 import { and, asc, desc, eq, sql } from "drizzle-orm"
 import { unstable_cache } from "next/cache"
 import { cache } from "react"
-import type { HomeFeaturedSelection } from "@/site/hero"
 import { getDb } from "./client"
 
 type PublishedPage = {
@@ -36,7 +35,7 @@ const coverSelection = {
 }
 
 const getPublishedPostsCached = unstable_cache(
-  async () => {
+  async (tag?: string) => {
     const rows = await getDb()
       .select({
         ...coverSelection,
@@ -44,12 +43,20 @@ const getPublishedPostsCached = unstable_cache(
         title: posts.title,
         slug: posts.slug,
         excerpt: posts.excerpt,
+        tags: posts.tags,
         publishedAt: posts.publishedAt,
         createdAt: posts.createdAt
       })
       .from(posts)
       .leftJoin(mediaAssets, eq(posts.coverMediaId, mediaAssets.id))
-      .where(eq(posts.status, "published"))
+      .where(
+        tag === undefined
+          ? eq(posts.status, "published")
+          : and(
+              eq(posts.status, "published"),
+              sql`${posts.tags} @> ${JSON.stringify([tag])}::jsonb`
+            )
+      )
       .orderBy(desc(posts.publishedAt), desc(posts.createdAt))
 
     return rows.map(({ createdAt, publishedAt, ...post }) => ({
@@ -64,6 +71,16 @@ const getPublishedPostsCached = unstable_cache(
 
 export const getPublishedPosts = async () => {
   const rows = await getPublishedPostsCached()
+
+  return rows.map(({ createdAt, publishedAt, ...post }) => ({
+    ...post,
+    createdAt: new Date(createdAt),
+    publishedAt: publishedAt === null ? null : new Date(publishedAt)
+  }))
+}
+
+export const getPublishedPostsByTag = async (tag: string) => {
+  const rows = await getPublishedPostsCached(tag)
 
   return rows.map(({ createdAt, publishedAt, ...post }) => ({
     ...post,
@@ -167,6 +184,7 @@ export const getPublishedPostBySlug = cache(async (slug: string) => {
       title: posts.title,
       slug: posts.slug,
       excerpt: posts.excerpt,
+      tags: posts.tags,
       body: posts.body,
       seoTitle: posts.seoTitle,
       seoDescription: posts.seoDescription,
@@ -359,63 +377,64 @@ export const getPublishedPageByKey = cache(
   }
 )
 
-export const getFeaturedHomeContentItem = unstable_cache(
-  async (selection: HomeFeaturedSelection) => {
-    if (selection.kind === "post") {
-      const [post] = await getDb()
-        .select({
-          ...coverSelection,
-          excerpt: posts.excerpt,
-          id: posts.id,
-          slug: posts.slug,
-          title: posts.title
-        })
-        .from(posts)
-        .leftJoin(mediaAssets, eq(posts.coverMediaId, mediaAssets.id))
-        .where(and(eq(posts.id, selection.id), eq(posts.status, "published")))
-        .limit(1)
+export const getPublishedHomeLinkedContentItem = unstable_cache(
+  async (notionPageId: string) => {
+    const [post] = await getDb()
+      .select({
+        ...coverSelection,
+        excerpt: posts.excerpt,
+        id: posts.id,
+        slug: posts.slug,
+        title: posts.title
+      })
+      .from(posts)
+      .leftJoin(mediaAssets, eq(posts.coverMediaId, mediaAssets.id))
+      .where(
+        and(eq(posts.notionPageId, notionPageId), eq(posts.status, "published"))
+      )
+      .limit(1)
 
-      return post
-        ? {
-            ...post,
-            href: `/blog/${post.slug}`,
-            kind: "post" as const,
-            label: "Blog Post"
-          }
-        : undefined
+    if (post) {
+      return {
+        ...post,
+        href: `/blog/${post.slug}`,
+        kind: "post" as const,
+        label: "Blog Post"
+      }
     }
 
-    if (selection.kind === "project") {
-      const [project] = await getDb()
-        .select({
-          ...coverSelection,
-          category: projects.category,
-          excerpt: projects.excerpt,
-          id: projects.id,
-          slug: projects.slug,
-          title: projects.title
-        })
-        .from(projects)
-        .leftJoin(mediaAssets, eq(projects.coverMediaId, mediaAssets.id))
-        .where(
-          and(eq(projects.id, selection.id), eq(projects.status, "published"))
+    const [project] = await getDb()
+      .select({
+        ...coverSelection,
+        category: projects.category,
+        excerpt: projects.excerpt,
+        id: projects.id,
+        slug: projects.slug,
+        title: projects.title
+      })
+      .from(projects)
+      .leftJoin(mediaAssets, eq(projects.coverMediaId, mediaAssets.id))
+      .where(
+        and(
+          eq(projects.notionPageId, notionPageId),
+          eq(projects.status, "published")
         )
-        .limit(1)
+      )
+      .limit(1)
 
-      return project
-        ? {
-            ...project,
-            href: `/${project.category}/${project.slug}`,
-            kind: "project" as const,
-            label: featuredProjectLabels[project.category]
-          }
-        : undefined
-    }
+    return project
+      ? {
+          ...project,
+          href: `/${project.category}/${project.slug}`,
+          kind: "project" as const,
+          label: featuredProjectLabels[project.category]
+        }
+      : undefined
   },
-  ["featured-home-content-item"],
+  ["published-home-linked-content-item"],
   { revalidate: contentCacheRevalidateSeconds }
 )
 
 export type FeaturedHomeContentItem = NonNullable<
-  Awaited<ReturnType<typeof getFeaturedHomeContentItem>>
+  Awaited<ReturnType<typeof getPublishedHomeLinkedContentItem>>
 >

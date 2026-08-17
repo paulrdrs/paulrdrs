@@ -12,6 +12,7 @@ describe("PostList", () => {
             id: "first-post",
             publishedAt: new Date("2026-01-01"),
             slug: "first-post",
+            tags: [],
             title: "First post"
           },
           {
@@ -20,6 +21,7 @@ describe("PostList", () => {
             id: "second-post",
             publishedAt: new Date("2026-01-02"),
             slug: "second-post",
+            tags: [],
             title: "Second post"
           },
           {
@@ -28,6 +30,7 @@ describe("PostList", () => {
             id: "third-post",
             publishedAt: new Date("2026-01-03"),
             slug: "third-post",
+            tags: [],
             title: "Third post"
           },
           {
@@ -36,6 +39,7 @@ describe("PostList", () => {
             id: "fourth-post",
             publishedAt: new Date("2026-01-04"),
             slug: "fourth-post",
+            tags: [],
             title: "Fourth post"
           }
         ]}

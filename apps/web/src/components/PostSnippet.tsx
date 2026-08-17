@@ -11,6 +11,7 @@ type PostSnippetProps = {
   href: string
   label: string
   priority?: boolean
+  tags?: readonly string[]
   title: string
 }
 
@@ -23,6 +24,7 @@ export const PostSnippet = ({
   href,
   label,
   priority = false,
+  tags = [],
   title
 }: PostSnippetProps) => (
   <Link
@@ -68,7 +70,19 @@ export const PostSnippet = ({
         {title}
       </h2>
       {excerpt ? (
-        <p className="line-clamp-3 max-w-xl text-muted">{excerpt}</p>
+        <p className="line-clamp-5 max-w-xl text-muted">{excerpt}</p>
+      ) : null}
+      {tags.length > 0 ? (
+        <div className="flex flex-wrap gap-1" data-component="PostSnippetTags">
+          {tags.map((tag) => (
+            <span
+              className="rounded-sm border border-frontier bg-canvas px-2 font-medium font-mono text-muted text-xs uppercase tracking-widest"
+              key={tag}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
       ) : null}
     </div>
   </Link>

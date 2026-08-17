@@ -30,6 +30,7 @@ describe("sitemap", () => {
         coverAltText: null,
         coverAttribution: null,
         coverMediaId: null,
+        tags: ["TypeScript"],
         publishedAt: new Date("2026-01-01"),
         createdAt: new Date("2025-12-01")
       }
@@ -68,6 +69,7 @@ describe("sitemap", () => {
     expect(urls).toContain("https://paulrdrs.com/")
     expect(urls).toContain("https://paulrdrs.com/blog")
     expect(urls).toContain("https://paulrdrs.com/blog/hello")
+    expect(urls).toContain("https://paulrdrs.com/blog/tag/TypeScript")
     expect(urls).toContain("https://paulrdrs.com/photography")
     expect(urls).toContain("https://paulrdrs.com/photography/camera")
     expect(urls).toContain("https://paulrdrs.com/software")

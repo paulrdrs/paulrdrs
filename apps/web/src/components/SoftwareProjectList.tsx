@@ -16,9 +16,9 @@ type SoftwareProjectListProps = {
 
 export const SoftwareProjectList = ({ projects }: SoftwareProjectListProps) => (
   <ul className="flex flex-wrap" data-component="SoftwareProjectList">
-    {projects.map((project, index) => (
+    {projects.map((project) => (
       <li
-        className={index === 0 ? "w-full" : "w-full sm:w-1/2"}
+        className={projects.length === 1 ? "w-full" : "w-full sm:w-1/2"}
         key={project.id}
       >
         <SoftwareProjectSnippet

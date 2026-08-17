@@ -51,6 +51,7 @@ of semver ranges.
 - `/`
 - `/blog`
 - `/blog/[slug]`
+- `/blog/tag/[tag]`
 - `/photography`
 - `/photography/[slug]`
 - `/software`
@@ -84,14 +85,12 @@ on the content row, and removes the block from the normalized body to prevent a
 duplicate image on detail pages. No Notion `Cover` property or page-level cover
 participates in this flow.
 
-The Notion Home page contains up to three ordered native page links or linked
-page mentions targeting published Posts, Photography Projects, or Software
-Projects. Page sync resolves those Notion identities to PostgreSQL
-content identities and stores them in `pages.metadata.featuredContent`; the Home
-body is not rendered. This keeps the homepage curated while the Blog,
-Photography, and Software routes remain full archives. Invalid Home selections
-preserve the last valid
-page row instead of partially updating its configuration.
+The Notion Home page is a normal ordered block stream. Native **Link to page**
+blocks targeting published Posts, Photography Projects, or Software Projects
+render as featured cards in their exact Notion position; all other supported
+blocks render as normal Home content. The Blog, Photography, and Software
+routes remain the complete content archives. A link whose target is missing,
+draft, or unsupported is omitted from the public Home page.
 
 There are no authenticated routes. Content editing happens in Notion (see
 [Auth](./auth.md)).
