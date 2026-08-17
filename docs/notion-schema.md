@@ -94,23 +94,23 @@ is reported as a per-entry sync error. Photos render in `/photo` and at
 | `Status` | Status | Yes | `status` |
 | `Published` | Date | No | `publishedAt` |
 
-`Key` must be **home** or **contact**. Both page bodies become `body`.
+`Key` must be **home** or **contact**. A Contact page body becomes `body`.
 
-The Home page body renders in its authored order. A native **Link to page**
-block pointing to a published Post, Photography Project, or Software Project
-renders as a featured card in place of that block. All other supported blocks
-render normally. There is no limit on page-link blocks, and duplicate links are
-allowed. Rich-text links remain inline links. Links to missing, draft, or
-unsupported pages are stored but omitted from the public Home page.
+The Home page body is configuration rather than public copy. Add zero to three
+Notion page links (native **Link to page** blocks or linked text) pointing to
+published Posts, Photography Projects, or Software Projects. Link order controls homepage order. Sync resolves
+them into the Home row's ordered
+`metadata.featuredContent` array and stores an empty Home body. Duplicate links,
+more than three links, or links to missing, draft, or unsupported pages are
+reported as a per-entry sync error; the last valid Home row is preserved.
 
 ## Supported body blocks
 
 The renderer supports `paragraph`, `heading_1`, `heading_2`, `heading_3`,
 `bulleted_list_item`, `numbered_list_item`, `quote`, `code`, `image`, `divider`,
-`callout`, and `toggle`, including supported nested children. For Home only,
-`link_to_page` blocks can render a published Post or Project as a featured card.
-On other pages they are not rendered. Notion-page URLs in rich text remain
-normal inline links.
+`callout`, and `toggle`, including supported nested children. `link_to_page` and
+Notion-page URLs in rich text are accepted as Home feature configuration and are
+not rendered as Home body content.
 
 Unknown blocks are skipped. Columns, tables, bookmarks, embeds, and equations
 are not currently rendered.
