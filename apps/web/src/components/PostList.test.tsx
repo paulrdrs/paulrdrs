@@ -1,9 +1,9 @@
-import { render, screen } from "@testing-library/react"
+import { render } from "@testing-library/react"
 import { PostList } from "./PostList"
 
 describe("PostList", () => {
-  it("renders posts as standard list items", () => {
-    render(
+  it("renders posts in a flex column", () => {
+    const { container } = render(
       <PostList
         posts={[
           {
@@ -46,9 +46,11 @@ describe("PostList", () => {
       />
     )
 
-    expect(screen.getByRole("list")).not.toHaveClass("flex", "flex-wrap")
-    for (const item of screen.getAllByRole("listitem")) {
-      expect(item).not.toHaveClass("w-full", "lg:w-1/2")
-    }
+    const contentList = container.querySelector(
+      '[data-content-list="blog-posts"]'
+    )
+
+    expect(contentList).toHaveClass("flex", "flex-col")
+    expect(contentList?.querySelectorAll("a")).toHaveLength(4)
   })
 })

@@ -17,7 +17,7 @@ type PhotographyProjectListProps = {
 export const PhotographyProjectList = ({
   projects
 }: PhotographyProjectListProps) => (
-  <ul className="flex flex-col">
+  <div className="flex flex-col gap-4">
     {projects.map((project) => (
       <PhotographyProjectSnippet
         coverAltText={project.coverAltText}
@@ -30,5 +30,5 @@ export const PhotographyProjectList = ({
         title={project.title}
       />
     ))}
-  </ul>
+  </div>
 )

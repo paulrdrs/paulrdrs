@@ -24,10 +24,6 @@ type PublishedPage = {
 }
 
 const contentCacheRevalidateSeconds = 300
-const featuredProjectLabels = {
-  photography: "Photography Project",
-  software: "Software Project"
-} satisfies Record<ProjectCategory, string>
 
 const coverSelection = {
   coverAltText: mediaAssets.altText,
@@ -378,7 +374,7 @@ export const getPublishedPageByKey = cache(
   }
 )
 
-export const getFeaturedHomeContentItem = unstable_cache(
+const getFeaturedHomeContentItemCached = unstable_cache(
   async (selection: HomeFeaturedSelection) => {
     if (selection.kind === "post") {
       const [post] = await getDb()
@@ -386,7 +382,9 @@ export const getFeaturedHomeContentItem = unstable_cache(
           ...coverSelection,
           excerpt: posts.excerpt,
           id: posts.id,
+          publishedAt: posts.publishedAt,
           slug: posts.slug,
+          tags: posts.tags,
           title: posts.title
         })
         .from(posts)
@@ -398,8 +396,7 @@ export const getFeaturedHomeContentItem = unstable_cache(
         ? {
             ...post,
             href: `/blog/${post.slug}`,
-            kind: "post" as const,
-            label: "Blog Post"
+            kind: "post" as const
           }
         : undefined
     }
@@ -425,14 +422,37 @@ export const getFeaturedHomeContentItem = unstable_cache(
         ? {
             ...project,
             href: `/${project.category}/${project.slug}`,
-            kind: "project" as const,
-            label: featuredProjectLabels[project.category]
+            kind: "project" as const
           }
         : undefined
     }
   },
   ["featured-home-content-item"],
   { revalidate: contentCacheRevalidateSeconds }
+)
+
+const normalizeCachedDate = (value: unknown): Date | null => {
+  if (value instanceof Date) {
+    return value
+  }
+
+  if (typeof value !== "string" && typeof value !== "number") {
+    return null
+  }
+
+  const parsedDate = new Date(value)
+
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate
+}
+
+export const getFeaturedHomeContentItem = cache(
+  async (selection: HomeFeaturedSelection) => {
+    const item = await getFeaturedHomeContentItemCached(selection)
+
+    return item?.kind === "post"
+      ? { ...item, publishedAt: normalizeCachedDate(item.publishedAt) }
+      : item
+  }
 )
 
 export type FeaturedHomeContentItem = NonNullable<

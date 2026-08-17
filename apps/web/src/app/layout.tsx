@@ -48,9 +48,6 @@ export default function RootLayout({
       <body>
         <TopNavBar />
         {children}
-        <footer className="site-shell flex items-end justify-end py-8 font-mono text-muted text-xs uppercase tracking-wider">
-          <span>{"paulrdrs.com"}</span>
-        </footer>
       </body>
     </html>
   )

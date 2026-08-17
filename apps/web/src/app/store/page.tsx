@@ -11,7 +11,7 @@ export default async function StorePage() {
       </header>
       <div className="empty-state px-4">
         <Eyebrow label={"In development"} />
-        <p className="mt-4 max-w-md text-accent text-lg">
+        <p className="mt-4 max-w-md text-lg">
           A small collection will live here when it is ready.
         </p>
       </div>

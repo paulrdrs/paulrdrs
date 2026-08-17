@@ -3,33 +3,38 @@
 
 :root {
   --canvas: var(--color-neutral-100);
-  --surface: var(--color-neutral-50);
-  --frontier: var(--color-neutral-500);
-  --ink: var(--color-neutral-800);
+  --surface: var(--color-white);
+
+  --limit: var(--color-neutral-300);
+
+  --ink: var(--color-neutral-900);
   --muted: var(--color-neutral-600);
-  --accent: var(--color-neutral-950);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --canvas: var(--color-neutral-900);
-    --surface: var(--color-neutral-950);
-    --frontier: var(--color-neutral-800);
-    --ink: var(--color-neutral-200);
+    --surface: var(--color-black);
+
+    --limit: var(--color-neutral-700);
+
+    --ink: var(--color-neutral-100);
     --muted: var(--color-neutral-400);
-    --accent: var(--color-neutral-50);
   }
 }
 
 @theme inline {
   --font-sans: var(--font-geist);
   --font-mono: var(--font-inconsolata);
+
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
-  --color-frontier: var(--frontier);
+
+  --color-limit: var(--limit);
+
   --color-ink: var(--ink);
   --color-muted: var(--muted);
-  --color-accent: var(--accent);
+
   --shadow-lift: 0 0px 8px rgb(0 0 0 / 10%);
 }
 
@@ -43,17 +48,17 @@
   }
 
   body {
-    @apply min-h-screen bg-canvas font-sans text-accent antialiased flex flex-col items-center;
+    @apply min-h-screen bg-canvas font-sans text-ink antialiased flex flex-col items-center;
     -webkit-tap-highlight-color: transparent;
   }
 
   ::selection {
-    background: var(--accent);
+    background: var(--ink);
     color: var(--canvas);
   }
 
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--ink);
     outline-offset: 4px;
   }
 
@@ -77,10 +82,6 @@
 }
 
 @layer components {
-  .site-shell {
-    @apply mx-auto w-full max-w-4xl px-4 sm:px-8;
-  }
-
   .empty-state {
     @apply flex min-h-44 flex-col justify-end py-8 text-muted;
   }

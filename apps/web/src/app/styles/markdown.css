@@ -2,7 +2,7 @@
   .markdown-content {
     width: 100%;
     max-width: 48rem;
-    color: var(--accent);
+    color: var(--ink);
     @apply text-base;
   }
 
@@ -14,7 +14,7 @@
   .markdown-content h2,
   .markdown-content h3,
   .markdown-content h4 {
-    color: var(--accent);
+    color: var(--ink);
     font-weight: 800;
   }
 
@@ -41,7 +41,7 @@
   }
 
   .markdown-content a {
-    color: var(--accent);
+    color: var(--ink);
     font-weight: 600;
     text-decoration: underline;
     text-decoration-color: var(--muted);
@@ -50,10 +50,10 @@
   }
 
   .markdown-content a:hover {
-    text-decoration-color: var(--accent);
+    text-decoration-color: var(--ink);
   }
   .markdown-content strong {
-    color: var(--accent);
+    color: var(--ink);
     font-weight: 800;
   }
   .markdown-content em {
@@ -80,14 +80,14 @@
 
   .markdown-content blockquote {
     max-width: 42rem;
-    border-left: 2px solid var(--accent);
+    border-left: 2px solid var(--ink);
     @apply py-2 pl-4;
     color: var(--muted);
     font-style: italic;
   }
 
   .markdown-content code {
-    color: var(--accent);
+    color: var(--ink);
     font-family: var(--font-mono);
     @apply text-sm;
   }
@@ -103,7 +103,7 @@
     border: 1px solid var(--muted);
     background: var(--surface);
     @apply p-4;
-    color: var(--accent);
+    color: var(--ink);
   }
 
   .markdown-content pre code {
@@ -148,7 +148,7 @@
 
   .markdown-content details.toggle > summary {
     cursor: pointer;
-    color: var(--accent);
+    color: var(--ink);
     font-weight: 600;
   }
 }

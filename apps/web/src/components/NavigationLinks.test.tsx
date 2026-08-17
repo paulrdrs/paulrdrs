@@ -58,8 +58,10 @@ describe("NavigationLinks", () => {
       "page"
     )
     expect(screen.getByRole("link", { name: "Photography" })).toHaveClass(
-      "font-black",
-      "text-accent"
+      "font-black"
+    )
+    expect(screen.getByRole("link", { name: "Photography" })).not.toHaveClass(
+      "text-muted"
     )
     expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute(
       "aria-current"

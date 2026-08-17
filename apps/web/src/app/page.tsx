@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
-import { FeaturedSnippet } from "@/components/FeaturedSnippet"
 import { PageContainer } from "@/components/PageContainer"
+import { PhotographyProjectSnippet } from "@/components/PhotographyProjectSnippet"
+import { PostSnippet } from "@/components/PostSnippet"
+import { SoftwareProjectSnippet } from "@/components/SoftwareProjectSnippet"
 import {
   type FeaturedHomeContentItem,
   getFeaturedHomeContentItem,
@@ -24,6 +26,18 @@ const isFeaturedItem = (
   item: FeaturedHomeContentItem | undefined
 ): item is FeaturedHomeContentItem => item !== undefined
 
+const formatPostDate = (value: Date | string | null) => {
+  if (!value) {
+    return "Undated"
+  }
+
+  const date = value instanceof Date ? value : new Date(value)
+
+  return Number.isNaN(date.getTime())
+    ? "Undated"
+    : new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(date)
+}
+
 export default async function Home() {
   const homePage = await getPublishedPageByKey("home")
   const selections = getHomeFeaturedSelections(homePage?.metadata)
@@ -41,14 +55,27 @@ export default async function Home() {
 
   return (
     <PageContainer>
-      {featuredItems.map((item, index) => (
-        <FeaturedSnippet
-          {...item}
-          featuredPosition={index + 1}
-          priority={index === 0}
-          key={`${item.kind}:${item.id}`}
-        />
+      {featuredItems.map((item) => (
+        <HomeSnippet item={item} key={`${item.kind}:${item.id}`} />
       ))}
     </PageContainer>
+  )
+}
+
+const HomeSnippet = ({ item }: { item: FeaturedHomeContentItem }) => {
+  if (item.kind === "post") {
+    return (
+      <PostSnippet
+        {...item}
+        label={formatPostDate(item.publishedAt)}
+        tags={item.tags}
+      />
+    )
+  }
+
+  return item.category === "software" ? (
+    <SoftwareProjectSnippet {...item} label="software project" />
+  ) : (
+    <PhotographyProjectSnippet {...item} label="photography project" />
   )
 }

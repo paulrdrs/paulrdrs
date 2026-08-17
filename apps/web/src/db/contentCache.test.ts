@@ -16,7 +16,7 @@ vi.mock("next/cache", () => ({ unstable_cache: unstableCacheMock }))
 vi.mock("./client", () => ({ getDb: vi.fn() }))
 
 import { getDb } from "./client"
-import { getPublishedPosts } from "./content"
+import { getFeaturedHomeContentItem, getPublishedPosts } from "./content"
 
 const getDbMock = vi.mocked(getDb)
 
@@ -59,5 +59,46 @@ describe("public content caching", () => {
     expect(post?.publishedAt).toEqual(publishedAt)
     expect(post?.publishedAt).toBeInstanceOf(Date)
     expect(post?.coverMediaId).toBe("cached-media")
+  })
+
+  it("restores a featured post date after the cache serialization boundary", async () => {
+    const publishedAt = new Date("2026-07-02T10:00:00.000Z")
+    const limit = vi.fn().mockResolvedValue([
+      {
+        coverAltText: "Cached image",
+        coverAttribution: null,
+        coverMediaId: "cached-media",
+        excerpt: "A cached post",
+        id: "post-1",
+        publishedAt,
+        slug: "cached-post",
+        tags: ["Design"],
+        title: "Cached post"
+      }
+    ])
+    const where = vi.fn(() => ({ limit }))
+    const leftJoin = vi.fn(() => ({ where }))
+    const from = vi.fn(() => ({ leftJoin }))
+    const select = vi.fn(() => ({ from }))
+
+    getDbMock.mockReturnValue({ select } as unknown as ReturnType<typeof getDb>)
+
+    const featuredPost = await getFeaturedHomeContentItem({
+      id: "post-1",
+      kind: "post"
+    })
+
+    expect(featuredPost).toMatchObject({
+      href: "/blog/cached-post",
+      kind: "post",
+      publishedAt,
+      tags: ["Design"]
+    })
+
+    if (featuredPost?.kind !== "post") {
+      throw new Error("Expected a featured post")
+    }
+
+    expect(featuredPost.publishedAt).toBeInstanceOf(Date)
   })
 })
