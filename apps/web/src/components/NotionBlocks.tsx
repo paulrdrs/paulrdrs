@@ -1,6 +1,5 @@
 import type {
   BulletedListItemBlock,
-  LinkToPageBlock,
   NotionBlock,
   NotionBlockTree,
   NumberedListItemBlock
@@ -11,7 +10,6 @@ import { NotionRichText } from "@/components/NotionRichText"
 import { richTextToPlainText } from "@/lib/content"
 
 type ListItemBlock = BulletedListItemBlock | NumberedListItemBlock
-type LinkToPageRenderer = (block: LinkToPageBlock) => ReactNode
 
 function isListItem(block: NotionBlock): block is ListItemBlock {
   return (
@@ -19,31 +17,14 @@ function isListItem(block: NotionBlock): block is ListItemBlock {
   )
 }
 
-function BlockChildren({
-  block,
-  renderLinkToPage
-}: {
-  block: NotionBlock
-  renderLinkToPage: LinkToPageRenderer | undefined
-}) {
+function BlockChildren({ block }: { block: NotionBlock }) {
   if (block.children.length === 0) {
     return null
   }
-  return (
-    <BlockSequence
-      blocks={block.children}
-      renderLinkToPage={renderLinkToPage}
-    />
-  )
+  return <BlockSequence blocks={block.children} />
 }
 
-function BlockItem({
-  block,
-  renderLinkToPage
-}: {
-  block: NotionBlock
-  renderLinkToPage: LinkToPageRenderer | undefined
-}) {
+function BlockItem({ block }: { block: NotionBlock }) {
   switch (block.type) {
     case "paragraph":
       return (
@@ -73,7 +54,7 @@ function BlockItem({
       return (
         <blockquote>
           <NotionRichText richText={block.richText} />
-          <BlockChildren block={block} renderLinkToPage={renderLinkToPage} />
+          <BlockChildren block={block} />
         </blockquote>
       )
     case "code":
@@ -108,7 +89,7 @@ function BlockItem({
           ) : null}
           <div>
             <NotionRichText richText={block.richText} />
-            <BlockChildren block={block} renderLinkToPage={renderLinkToPage} />
+            <BlockChildren block={block} />
           </div>
         </aside>
       )
@@ -118,11 +99,9 @@ function BlockItem({
           <summary>
             <NotionRichText richText={block.richText} />
           </summary>
-          <BlockChildren block={block} renderLinkToPage={renderLinkToPage} />
+          <BlockChildren block={block} />
         </details>
       )
-    case "link_to_page":
-      return renderLinkToPage?.(block) ?? null
     default:
       // List items are rendered by BlockSequence's grouping; unknown block
       // types render nothing.
@@ -130,13 +109,7 @@ function BlockItem({
   }
 }
 
-function BlockSequence({
-  blocks,
-  renderLinkToPage
-}: {
-  blocks: NotionBlockTree
-  renderLinkToPage: LinkToPageRenderer | undefined
-}) {
+function BlockSequence({ blocks }: { blocks: NotionBlockTree }) {
   const nodes: ReactNode[] = []
   let index = 0
 
@@ -161,7 +134,7 @@ function BlockSequence({
           {items.map((item) => (
             <li key={item.id}>
               <NotionRichText richText={item.richText} />
-              <BlockChildren block={item} renderLinkToPage={renderLinkToPage} />
+              <BlockChildren block={item} />
             </li>
           ))}
         </ListTag>
@@ -169,13 +142,7 @@ function BlockSequence({
       continue
     }
 
-    nodes.push(
-      <BlockItem
-        block={block}
-        key={block.id}
-        renderLinkToPage={renderLinkToPage}
-      />
-    )
+    nodes.push(<BlockItem block={block} key={block.id} />)
     index += 1
   }
 
@@ -184,16 +151,12 @@ function BlockSequence({
 
 type NotionBlocksProps = {
   blocks: NotionBlockTree
-  renderLinkToPage?: LinkToPageRenderer
 }
 
-export const NotionBlocks = ({
-  blocks,
-  renderLinkToPage
-}: NotionBlocksProps) => {
+export const NotionBlocks = ({ blocks }: NotionBlocksProps) => {
   return (
     <article className="markdown-content">
-      <BlockSequence blocks={blocks} renderLinkToPage={renderLinkToPage} />
+      <BlockSequence blocks={blocks} />
     </article>
   )
 }

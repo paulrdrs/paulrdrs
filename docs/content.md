@@ -74,20 +74,24 @@ Rendering a known set of block components is the content-safety model. The
 renderer reuses the `.markdown-content` typographic styles in
 `apps/web/src/app/styles/markdown.css`.
 
-## Homepage Content
+## Homepage Features
 
-The Notion Home page is visitor-facing content and retains its block order. A
-native **Link to page** block targeting a published Post, Photography Project,
-or Software Project renders as a featured card at that exact point in the page.
-All other supported blocks render normally, so headings, paragraphs, images,
-and cards can be interleaved freely. Inline links in rich text remain ordinary
-links rather than cards.
+The Notion Home page is a curated configuration surface, not visitor-facing
+copy. Add zero to three Notion page links—either native **Link to page** blocks
+or linked text—that target published Posts, Photography Projects, or Software
+Projects. Their Notion order
+becomes the homepage order. During sync,
+the links are resolved to an ordered `featuredContent` array in the Home row's
+JSON metadata, and the Home body is stored as an empty block tree.
 
-The homepage card uses its target's preview image, content label, title,
-excerpt, and public URL. Duplicate page-link blocks are allowed. A page link
-whose target is missing, draft, or unsupported is omitted from the public page;
-this does not cause the Home sync to fail. `/blog`, `/photography`, and
-`/software` remain the complete content archives.
+The homepage renders each selection as a short card using the target's preview
+image, content label, title, excerpt, and public URL. The first position is kept
+explicit in markup so it can receive a distinct highlighted presentation later.
+Duplicate links, more than three links, and links to missing, draft, or
+unsupported targets fail that Home entry's sync and preserve its last valid
+PostgreSQL
+row. `/blog`, `/photography`, and `/software` remain the complete content
+archives.
 
 The Blog index uses the same post preview image derived from the first body
 image. Posts without a first image render as text-only entries; there is no
