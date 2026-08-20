@@ -17,6 +17,11 @@ describe("SoftwareProjectSnippet", () => {
 
     const content = screen.getByTestId("content")
 
+    expect(screen.getByRole("link", { name: "Project title" })).toHaveClass(
+      "flex-col",
+      "sm:flex-row"
+    )
+    expect(content).toHaveClass("aspect-video", "w-full")
     expect(
       within(content).getByRole("img", { name: "A software interface" })
     ).toHaveAttribute(

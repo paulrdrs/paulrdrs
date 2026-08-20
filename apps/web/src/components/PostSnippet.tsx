@@ -61,7 +61,7 @@ export const PostSnippet = ({
 
     {coverMediaId ? (
       <figure className="w-full sm:w-1/3 sm:shrink-0">
-        <div className={`relative aspect-4/3 overflow-hidden rounded`}>
+        <div className={`relative aspect-square overflow-hidden rounded`}>
           <Image
             alt={coverAltText ?? ""}
             className="object-cover"
